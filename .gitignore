@@ -1,0 +1,64 @@
+# Python
+# Byte-compiled / optimized files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+.env
+# if you use specific names, add them here
+# Example: myprojectenv/
+
+# Distribution / packaging
+build/
+dist/
+develop-eggs/
+sdist/
+var/
+wheels/
+*.whl
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache/
+nosetests.xml
+coverage.xml
+*,cover
+
+# Django specific
+*.log
+local_settings.py  # locale-specific settings, should not be shared
+db.sqlite3         # SQLite database file (if used, consider your production DB setup)
+media/             # User uploaded media, often managed by the server not git
+static_cdn/        # Generated static files/CDNs
+
+# Environment variables (critical for security)
+.env               # Contains environment-specific variables like secret keys
+.flaskenv
+
+# IDE-specific files (e.g., PyCharm, VS Code)
+.idea/             # PyCharm project files
+.vscode/           # VS Code settings
+*.swp              # Vim swap files
+.DS_Store          # macOS specific file
+
+# Documentation
+docs/_build/
+
+# Python specific lock files (generally recommended to include in version control, but listed here for awareness)
+# Pipfile.lock
+# poetry.lock
+# uv.lock

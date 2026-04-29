@@ -1,0 +1,1381 @@
+ingredients:
+- normalized_name: salt
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 0.0
+  protein_g: 0.0
+  fat_g: 0.0
+  carb_g: 0.0
+  micronutrients: {sodium_mg: 38758.0}
+- normalized_name: sugar
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 387.0
+  protein_g: 0.0
+  fat_g: 0.0
+  carb_g: 99.98
+  micronutrients: {sugar_g: 99.8}
+- normalized_name: water
+  source_type: manual
+  basis_unit: ml
+  basis_qty: 100
+  calories: 0.0
+  protein_g: 0.0
+  fat_g: 0.0
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: broth
+  source_type: manual_usda
+  basis_unit: ml
+  basis_qty: 100
+  calories: 7.0
+  protein_g: 1.07
+  fat_g: 0.18
+  carb_g: 0.32
+  micronutrients: {sodium_mg: 363.0}
+- normalized_name: mayonnaise
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 680.0
+  protein_g: 1.0
+  fat_g: 75.0
+  carb_g: 0.6
+  micronutrients: {sodium_mg: 635.0}
+- normalized_name: tomato_paste
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 82.0
+  protein_g: 4.32
+  fat_g: 0.47
+  carb_g: 18.91
+  micronutrients: {sodium_mg: 59.0}
+- normalized_name: black_pepper
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 251.0
+  protein_g: 10.4
+  fat_g: 3.3
+  carb_g: 64.0
+  micronutrients: {}
+- normalized_name: hot_pepper
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 40.0
+  protein_g: 1.87
+  fat_g: 0.44
+  carb_g: 8.81
+  micronutrients: {}
+- normalized_name: bay_leaf
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 313.0
+  protein_g: 7.6
+  fat_g: 8.4
+  carb_g: 75.0
+  micronutrients: {}
+- normalized_name: spice_mix
+  source_type: manual
+  basis_unit: g
+  basis_qty: 100
+  calories: 250.0
+  protein_g: 8.0
+  fat_g: 5.0
+  carb_g: 50.0
+  micronutrients: {}
+- normalized_name: green_peas
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 81.0
+  protein_g: 5.42
+  fat_g: 0.4
+  carb_g: 14.45
+  micronutrients: {fiber_g: 5.7}
+- normalized_name: hard_cheese
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 402.0
+  protein_g: 25.0
+  fat_g: 33.0
+  carb_g: 1.3
+  micronutrients: {sodium_mg: 621.0, calcium_mg: 721.0}
+- normalized_name: olive_oil
+  source_type: manual_usda
+  basis_unit: ml
+  basis_qty: 100
+  calories: 819.0
+  protein_g: 0.0
+  fat_g: 91.0
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: sunflower_oil
+  source_type: manual_usda
+  basis_unit: ml
+  basis_qty: 100
+  calories: 815.0
+  protein_g: 0.0
+  fat_g: 92.0
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: butter
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 717.0
+  protein_g: 0.85
+  fat_g: 81.11
+  carb_g: 0.06
+  micronutrients: {sodium_mg: 11.0, calcium_mg: 24.0}
+- normalized_name: rendered_fat
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 902.0
+  protein_g: 0.0
+  fat_g: 100.0
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: lamb
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 294.0
+  protein_g: 24.5
+  fat_g: 21.0
+  carb_g: 0.0
+  micronutrients: {iron_mg: 1.55}
+- normalized_name: horsemeat
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 175.0
+  protein_g: 28.0
+  fat_g: 6.0
+  carb_g: 0.0
+  micronutrients: {iron_mg: 4.45}
+- normalized_name: ground_meat
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 254.0
+  protein_g: 17.17
+  fat_g: 20.0
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: offal
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 135.0
+  protein_g: 20.36
+  fat_g: 3.63
+  carb_g: 3.89
+  micronutrients: {iron_mg: 4.9}
+- normalized_name: chicken_whole
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 215.0
+  protein_g: 18.6
+  fat_g: 15.06
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: chicken_breast
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 165.0
+  protein_g: 31.02
+  fat_g: 3.57
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: chicken_dark_meat
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 250.0
+  protein_g: 17.27
+  fat_g: 19.69
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: fresh_fish
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 130.0
+  protein_g: 20.0
+  fat_g: 5.0
+  carb_g: 0.0
+  micronutrients: {}
+- normalized_name: cream
+  source_type: manual_usda
+  basis_unit: ml
+  basis_qty: 100
+  calories: 195.0
+  protein_g: 2.84
+  fat_g: 19.1
+  carb_g: 3.66
+  micronutrients: {}
+- normalized_name: yeast
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 105.0
+  protein_g: 12.7
+  fat_g: 1.7
+  carb_g: 18.0
+  micronutrients: {}
+- normalized_name: vinegar
+  source_type: manual_usda
+  basis_unit: ml
+  basis_qty: 100
+  calories: 21.0
+  protein_g: 0.04
+  fat_g: 0.0
+  carb_g: 0.93
+  micronutrients: {}
+- normalized_name: honey
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 304.0
+  protein_g: 0.3
+  fat_g: 0.0
+  carb_g: 82.4
+  micronutrients: {sugar_g: 82.1}
+- normalized_name: walnuts
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 654.0
+  protein_g: 15.23
+  fat_g: 65.21
+  carb_g: 13.71
+  micronutrients: {fiber_g: 6.7}
+- normalized_name: dried_fruit
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 290.0
+  protein_g: 3.0
+  fat_g: 0.5
+  carb_g: 75.0
+  micronutrients: {fiber_g: 7.0, sugar_g: 60.0}
+- normalized_name: lemon
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 29.0
+  protein_g: 1.1
+  fat_g: 0.3
+  carb_g: 9.32
+  micronutrients: {}
+- normalized_name: cocoa
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 228.0
+  protein_g: 19.6
+  fat_g: 13.7
+  carb_g: 57.9
+  micronutrients: {}
+- normalized_name: starch
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 381.0
+  protein_g: 0.26
+  fat_g: 0.05
+  carb_g: 91.27
+  micronutrients: {}
+- normalized_name: pasta
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 371.0
+  protein_g: 13.0
+  fat_g: 1.51
+  carb_g: 74.7
+  micronutrients: {fiber_g: 3.2}
+- normalized_name: wheat_bread
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 265.0
+  protein_g: 9.0
+  fat_g: 3.2
+  carb_g: 49.0
+  micronutrients: {fiber_g: 2.7}
+- normalized_name: buckwheat
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 343.0
+  protein_g: 13.25
+  fat_g: 3.4
+  carb_g: 71.5
+  micronutrients: {fiber_g: 10.0}
+- normalized_name: tomato
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 18.0
+  protein_g: 0.88
+  fat_g: 0.2
+  carb_g: 3.89
+  micronutrients: {}
+- normalized_name: mushroom
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 22.0
+  protein_g: 3.09
+  fat_g: 0.34
+  carb_g: 3.26
+  micronutrients: {fiber_g: 1.0}
+- normalized_name: beet
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 43.0
+  protein_g: 1.61
+  fat_g: 0.17
+  carb_g: 9.56
+  micronutrients: {fiber_g: 2.8}
+- normalized_name: pumpkin
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 26.0
+  protein_g: 1.0
+  fat_g: 0.1
+  carb_g: 6.5
+  micronutrients: {fiber_g: 0.5}
+- normalized_name: radish
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 16.0
+  protein_g: 0.68
+  fat_g: 0.1
+  carb_g: 3.4
+  micronutrients: {fiber_g: 1.6}
+- normalized_name: garlic
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 149.0
+  protein_g: 6.36
+  fat_g: 0.5
+  carb_g: 33.06
+  micronutrients: {}
+- normalized_name: rice
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 365.0
+  protein_g: 7.13
+  fat_g: 0.66
+  carb_g: 80.0
+  micronutrients: {fiber_g: 1.3}
+- normalized_name: flour
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 364.0
+  protein_g: 10.33
+  fat_g: 0.98
+  carb_g: 76.31
+  micronutrients: {fiber_g: 2.7}
+- normalized_name: kefir
+  source_type: manual_usda
+  basis_unit: ml
+  basis_qty: 100
+  calories: 41.0
+  protein_g: 3.79
+  fat_g: 0.93
+  carb_g: 4.48
+  micronutrients: {calcium_mg: 130.0}
+- normalized_name: sour_cream
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 198.0
+  protein_g: 2.44
+  fat_g: 19.35
+  carb_g: 4.63
+  micronutrients: {calcium_mg: 101.0}
+- normalized_name: cottage_cheese
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 98.0
+  protein_g: 11.12
+  fat_g: 4.3
+  carb_g: 3.38
+  micronutrients: {calcium_mg: 83.0}
+- normalized_name: greek_yogurt
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 59.0
+  protein_g: 10.19
+  fat_g: 0.39
+  carb_g: 3.6
+  micronutrients: {calcium_mg: 110.0}
+- normalized_name: milk
+  source_type: manual_usda
+  basis_unit: ml
+  basis_qty: 100
+  calories: 61.0
+  protein_g: 3.15
+  fat_g: 3.25
+  carb_g: 4.8
+  micronutrients: {calcium_mg: 113.0}
+- normalized_name: eggs
+  source_type: manual_usda
+  basis_unit: pc
+  basis_qty: 1
+  calories: 78.0
+  protein_g: 6.27
+  fat_g: 5.3
+  carb_g: 0.56
+  micronutrients: {}
+- normalized_name: beef
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 250.0
+  protein_g: 26.0
+  fat_g: 15.0
+  carb_g: 0.0
+  micronutrients: {iron_mg: 2.6}
+- normalized_name: onion
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 40.0
+  protein_g: 1.1
+  fat_g: 0.1
+  carb_g: 9.34
+  micronutrients: {fiber_g: 1.7}
+- normalized_name: carrot
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 41.0
+  protein_g: 0.93
+  fat_g: 0.24
+  carb_g: 9.58
+  micronutrients: {fiber_g: 2.8}
+- normalized_name: potatoes
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 77.0
+  protein_g: 2.05
+  fat_g: 0.09
+  carb_g: 17.49
+  micronutrients: {fiber_g: 2.1}
+- normalized_name: cabbage
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 25.0
+  protein_g: 1.28
+  fat_g: 0.1
+  carb_g: 5.8
+  micronutrients: {fiber_g: 2.5}
+- normalized_name: cucumber
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 16.0
+  protein_g: 0.65
+  fat_g: 0.11
+  carb_g: 3.63
+  micronutrients: {fiber_g: 0.5}
+- normalized_name: bell_pepper
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 31.0
+  protein_g: 1.0
+  fat_g: 0.3
+  carb_g: 6.0
+  micronutrients: {fiber_g: 2.1}
+- normalized_name: fresh_herbs
+  source_type: manual_usda
+  basis_unit: g
+  basis_qty: 100
+  calories: 36.0
+  protein_g: 2.97
+  fat_g: 0.79
+  carb_g: 6.33
+  micronutrients: {fiber_g: 3.3}
+- normalized_name: apple
+
+  source_type: usda
+  search_query: apple with skin raw
+  fdc_id: 171689
+  description: Apples, raw, without skin
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 48.0
+  protein_g: 0.27
+  fat_g: 0.13
+  carb_g: 12.8
+  micronutrients:
+    fiber_g: 1.3
+    sugar_g: 10.1
+    sodium_mg: 0.0
+    calcium_mg: 5.0
+    iron_mg: 0.07
+- normalized_name: banana
+  source_type: usda
+  search_query: banana raw
+  fdc_id: 1105073
+  description: Bananas, overripe, raw
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 85.0
+  protein_g: 0.73
+  fat_g: 0.22
+  carb_g: 20.1
+  micronutrients:
+    fiber_g: 1.7
+- normalized_name: beef
+  source_type: usda
+  search_query: beef top sirloin raw
+  fdc_id: 168728
+  description: Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8" fat,
+    choice, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 214.0
+  protein_g: 19.9
+  fat_g: 14.3
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 51.0
+    calcium_mg: 25.0
+    iron_mg: 1.46
+- normalized_name: beef_bone_in
+  source_type: usda
+  search_query: beef top sirloin raw
+  fdc_id: 168728
+  description: Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8" fat,
+    choice, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 214.0
+  protein_g: 19.9
+  fat_g: 14.3
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 51.0
+    calcium_mg: 25.0
+    iron_mg: 1.46
+- normalized_name: bell_pepper
+  source_type: usda
+  search_query: peppers sweet green raw
+  fdc_id: 170427
+  description: Peppers, sweet, green, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 20.0
+  protein_g: 0.86
+  fat_g: 0.17
+  carb_g: 4.64
+  micronutrients:
+    fiber_g: 1.7
+    sugar_g: 2.4
+    sodium_mg: 3.0
+    calcium_mg: 10.0
+    iron_mg: 0.34
+- normalized_name: black_tea
+  source_type: usda
+  search_query: tea black dry
+  fdc_id: 2710510
+  description: Tea, iced, instant, black, unsweetened, dry
+  data_type: Survey (FNDDS)
+  basis_unit: g
+  basis_qty: 100
+  calories: 315.0
+  protein_g: 20.21
+  fat_g: 0.0
+  carb_g: 58.66
+  micronutrients:
+    fiber_g: 8.5
+    sugar_g: 5.53
+    sodium_mg: 72.0
+    calcium_mg: 118.0
+    iron_mg: 2.26
+- normalized_name: buckwheat
+  source_type: usda
+  search_query: buckwheat groats raw
+  fdc_id: 170686
+  description: Buckwheat groats, roasted, cooked
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 92.0
+  protein_g: 3.38
+  fat_g: 0.62
+  carb_g: 19.9
+  micronutrients:
+    fiber_g: 2.7
+    sugar_g: 0.9
+    sodium_mg: 4.0
+    calcium_mg: 7.0
+    iron_mg: 0.8
+- normalized_name: butter
+  source_type: usda
+  search_query: butter salted
+  fdc_id: 173410
+  description: Butter, salted
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 717.0
+  protein_g: 0.85
+  fat_g: 81.1
+  carb_g: 0.06
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.06
+    sodium_mg: 643.0
+    calcium_mg: 24.0
+    iron_mg: 0.02
+- normalized_name: cabbage
+  source_type: usda
+  search_query: cabbage raw
+  fdc_id: 169975
+  description: Cabbage, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 25.0
+  protein_g: 1.28
+  fat_g: 0.1
+  carb_g: 5.8
+  micronutrients:
+    fiber_g: 2.5
+    sugar_g: 3.2
+    sodium_mg: 18.0
+    calcium_mg: 40.0
+    iron_mg: 0.47
+- normalized_name: carrot
+  source_type: usda
+  search_query: carrots raw
+  fdc_id: 170393
+  description: Carrots, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 41.0
+  protein_g: 0.93
+  fat_g: 0.24
+  carb_g: 9.58
+  micronutrients:
+    fiber_g: 2.8
+    sugar_g: 4.74
+    sodium_mg: 69.0
+    calcium_mg: 33.0
+    iron_mg: 0.3
+- normalized_name: chicken_breast
+  source_type: usda
+  search_query: chicken breast raw
+  fdc_id: 171474
+  description: Chicken, broilers or fryers, breast, meat and skin, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 172.0
+  protein_g: 20.8
+  fat_g: 9.25
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 63.0
+    calcium_mg: 11.0
+    iron_mg: 0.74
+- normalized_name: chicken_dark_meat
+  source_type: usda
+  search_query: chicken dark meat raw
+  fdc_id: 173638
+  description: Chicken, roasting, dark meat, meat only, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 113.0
+  protein_g: 18.7
+  fat_g: 3.61
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 95.0
+    calcium_mg: 9.0
+    iron_mg: 1.15
+- normalized_name: chicken_whole
+  source_type: usda
+  search_query: chicken meat and skin raw
+  fdc_id: 173645
+  description: Chicken, capons, meat and skin, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 234.0
+  protein_g: 18.8
+  fat_g: 17.1
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 45.0
+    calcium_mg: 11.0
+    iron_mg: 1.09
+- normalized_name: cottage_cheese
+  source_type: usda
+  search_query: cottage cheese 4% milkfat
+  fdc_id: 328841
+  description: Cheese, cottage, lowfat, 2% milkfat
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 84.0
+  protein_g: 11.0
+  fat_g: 2.3
+  carb_g: 4.31
+  micronutrients:
+    sodium_mg: 321.0
+    calcium_mg: 103.0
+    iron_mg: 0.13
+- normalized_name: cucumber
+  source_type: usda
+  search_query: cucumber with peel raw
+  fdc_id: 168409
+  description: Cucumber, with peel, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 15.0
+  protein_g: 0.65
+  fat_g: 0.11
+  carb_g: 3.63
+  micronutrients:
+    fiber_g: 0.5
+    sugar_g: 1.67
+    sodium_mg: 2.0
+    calcium_mg: 16.0
+    iron_mg: 0.28
+- normalized_name: dill
+  source_type: usda
+  search_query: dill weed fresh
+  fdc_id: 172233
+  description: Dill weed, fresh
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 43.0
+  protein_g: 3.46
+  fat_g: 1.12
+  carb_g: 7.02
+  micronutrients:
+    fiber_g: 2.1
+    sodium_mg: 61.0
+    calcium_mg: 208.0
+    iron_mg: 6.59
+- normalized_name: eggs
+  source_type: usda
+  search_query: egg whole raw
+  fdc_id: 323604
+  description: Egg, whole, raw, frozen, pasteurized
+  data_type: Foundation
+  basis_unit: pc
+  basis_qty: 1
+  calories: 75.0
+  protein_g: 6.15
+  fat_g: 5.15
+  carb_g: 0.455
+  micronutrients:
+    sodium_mg: 60.5
+    calcium_mg: 27.5
+    iron_mg: 0.885
+- normalized_name: flour
+  source_type: usda
+  search_query: wheat flour all-purpose
+  fdc_id: 789890
+  description: Flour, wheat, all-purpose, enriched, bleached
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 366.0
+  protein_g: 10.9
+  fat_g: 1.48
+  carb_g: 77.3
+  micronutrients:
+    sodium_mg: 2.0
+    calcium_mg: 19.0
+    iron_mg: 5.62
+- normalized_name: garlic
+  source_type: usda
+  search_query: garlic raw
+  fdc_id: 1104647
+  description: Garlic, raw
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 143.0
+  protein_g: 6.62
+  fat_g: 0.38
+  carb_g: 28.2
+  micronutrients:
+    fiber_g: 2.7
+- normalized_name: greek_yogurt
+  source_type: usda
+  search_query: greek yogurt plain
+  fdc_id: 330137
+  description: Yogurt, Greek, plain, nonfat
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 61.0
+  protein_g: 10.3
+  fat_g: 0.37
+  carb_g: 3.64
+  micronutrients:
+    sodium_mg: 36.0
+    calcium_mg: 111.0
+    iron_mg: 0.07
+- normalized_name: ground_meat
+  source_type: usda
+  search_query: ground beef raw
+  fdc_id: 168608
+  description: Beef, grass-fed, ground, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 198.0
+  protein_g: 19.4
+  fat_g: 12.7
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 68.0
+    calcium_mg: 12.0
+    iron_mg: 1.99
+- normalized_name: hard_cheese
+  source_type: usda
+  search_query: cheddar cheese
+  fdc_id: 328637
+  description: Cheese, cheddar
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 408.0
+  protein_g: 23.3
+  fat_g: 34.0
+  carb_g: 2.44
+  micronutrients:
+    sodium_mg: 654.0
+    calcium_mg: 707.0
+    iron_mg: 0.16
+- normalized_name: horsemeat
+  source_type: usda
+  search_query: game meat horse raw
+  fdc_id: 175086
+  description: Game meat, horse, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 133.0
+  protein_g: 21.4
+  fat_g: 4.6
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sodium_mg: 53.0
+    calcium_mg: 6.0
+    iron_mg: 3.82
+- normalized_name: offal
+  source_type: usda_curated
+  search_query: beef liver raw
+  fdc_id: 169451
+  description: Beef, variety meats and by-products, liver, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 135.0
+  protein_g: 20.4
+  fat_g: 3.63
+  carb_g: 3.89
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 69.0
+    calcium_mg: 5.0
+    iron_mg: 4.9
+- normalized_name: rendered_fat
+  source_type: usda_curated
+  search_query: beef tallow
+  fdc_id: 171400
+  description: Fat, beef tallow
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 902.0
+  protein_g: 0.0
+  fat_g: 100.0
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 0.0
+    calcium_mg: 0.0
+    iron_mg: 0.0
+- normalized_name: kefir
+  source_type: usda
+  search_query: kefir plain lowfat
+  fdc_id: 170904
+  description: Kefir, lowfat, plain, LIFEWAY
+  data_type: SR Legacy
+  basis_unit: ml
+  basis_qty: 100
+  calories: 43.0
+  protein_g: 3.79
+  fat_g: 1.02
+  carb_g: 4.77
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 4.61
+    sodium_mg: 40.0
+    calcium_mg: 130.0
+    iron_mg: 0.04
+- normalized_name: lamb
+  source_type: usda
+  search_query: lamb leg raw
+  fdc_id: 174342
+  description: Lamb, New Zealand, imported, leg chop/steak, bone-in, separable lean
+    and fat, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 206.0
+  protein_g: 18.6
+  fat_g: 14.5
+  carb_g: 0.13
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 59.0
+    calcium_mg: 10.0
+    iron_mg: 1.49
+- normalized_name: lentils
+  source_type: usda
+  search_query: lentils raw
+  fdc_id: 172420
+  description: Lentils, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 352.0
+  protein_g: 24.6
+  fat_g: 1.06
+  carb_g: 63.4
+  micronutrients:
+    fiber_g: 10.7
+    sugar_g: 2.03
+    sodium_mg: 6.0
+    calcium_mg: 35.0
+    iron_mg: 6.51
+- normalized_name: mackerel
+  source_type: usda
+  search_query: mackerel raw
+  fdc_id: 175119
+  description: Fish, mackerel, Atlantic, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 205.0
+  protein_g: 18.6
+  fat_g: 13.9
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 90.0
+    calcium_mg: 12.0
+    iron_mg: 1.63
+- normalized_name: milk
+  source_type: usda
+  search_query: milk, whole, 3.25% milkfat
+  fdc_id: 746782
+  description: Milk, whole, 3.25% milkfat, with added vitamin D
+  data_type: Foundation
+  basis_unit: ml
+  basis_qty: 100
+  calories: 60.0
+  protein_g: 3.27
+  fat_g: 3.2
+  carb_g: 4.63
+  micronutrients:
+    sodium_mg: 38.0
+    calcium_mg: 123.0
+    iron_mg: 0.0
+- normalized_name: millet
+  source_type: usda
+  search_query: millet raw
+  fdc_id: 169702
+  description: Millet, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 378.0
+  protein_g: 11.0
+  fat_g: 4.22
+  carb_g: 72.8
+  micronutrients:
+    fiber_g: 8.5
+    sodium_mg: 5.0
+    calcium_mg: 8.0
+    iron_mg: 3.01
+- normalized_name: oat_flakes
+  source_type: usda
+  search_query: oats raw
+  fdc_id: 2708489
+  description: Oats, raw
+  data_type: Survey (FNDDS)
+  basis_unit: g
+  basis_qty: 100
+  calories: 379.0
+  protein_g: 13.15
+  fat_g: 6.52
+  carb_g: 67.7
+  micronutrients:
+    fiber_g: 10.1
+    sugar_g: 0.99
+    sodium_mg: 6.0
+    calcium_mg: 52.0
+    iron_mg: 4.25
+- normalized_name: olive_oil
+  source_type: usda
+  search_query: olive oil
+  fdc_id: 167737
+  description: Oil, corn, peanut, and olive
+  data_type: SR Legacy
+  basis_unit: ml
+  basis_qty: 100
+  calories: 884.0
+  protein_g: 0.0
+  fat_g: 100.0
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 0.0
+    calcium_mg: 0.0
+    iron_mg: 0.13
+- normalized_name: onion
+  source_type: usda
+  search_query: onions raw
+  fdc_id: 790577
+  description: Onions, red, raw
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 44.0
+  protein_g: 0.94
+  fat_g: 0.1
+  carb_g: 9.93
+  micronutrients:
+    fiber_g: 2.2
+    sodium_mg: 1.0
+    calcium_mg: 17.0
+    iron_mg: 0.24
+- normalized_name: parsley
+  source_type: usda
+  search_query: parsley fresh
+  fdc_id: 170416
+  description: Parsley, fresh
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 36.0
+  protein_g: 2.97
+  fat_g: 0.79
+  carb_g: 6.33
+  micronutrients:
+    fiber_g: 3.3
+    sugar_g: 0.85
+    sodium_mg: 56.0
+    calcium_mg: 138.0
+    iron_mg: 6.2
+- normalized_name: pasta
+  source_type: usda
+  search_query: pasta dry enriched
+  fdc_id: 169736
+  description: Pasta, dry, enriched
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 371.0
+  protein_g: 13.0
+  fat_g: 1.51
+  carb_g: 74.7
+  micronutrients:
+    fiber_g: 3.2
+    sugar_g: 2.67
+    sodium_mg: 6.0
+    calcium_mg: 21.0
+    iron_mg: 3.3
+- normalized_name: potatoes
+  source_type: usda
+  search_query: potatoes flesh and skin raw
+  fdc_id: 170026
+  description: Potatoes, flesh and skin, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 77.0
+  protein_g: 2.05
+  fat_g: 0.09
+  carb_g: 17.5
+  micronutrients:
+    fiber_g: 2.1
+    sugar_g: 0.82
+    sodium_mg: 6.0
+    calcium_mg: 12.0
+    iron_mg: 0.81
+- normalized_name: rice
+  source_type: usda
+  search_query: rice white long grain raw
+  fdc_id: 168877
+  description: Rice, white, long-grain, regular, raw, enriched
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 365.0
+  protein_g: 7.13
+  fat_g: 0.66
+  carb_g: 80.0
+  micronutrients:
+    fiber_g: 1.3
+    sugar_g: 0.12
+    sodium_mg: 5.0
+    calcium_mg: 28.0
+    iron_mg: 4.31
+- normalized_name: salmon
+  source_type: usda
+  search_query: salmon raw
+  fdc_id: 173688
+  description: Fish, salmon, chinook, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 179.0
+  protein_g: 19.9
+  fat_g: 10.4
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 47.0
+    calcium_mg: 26.0
+    iron_mg: 0.25
+- normalized_name: salt
+  source_type: usda
+  search_query: salt table
+  fdc_id: 173468
+  description: Salt, table
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 0.0
+  protein_g: 0.0
+  fat_g: 0.0
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 38800.0
+    calcium_mg: 24.0
+    iron_mg: 0.33
+- normalized_name: sour_cream
+  source_type: usda
+  search_query: sour cream cultured
+  fdc_id: 171257
+  description: Cream, sour, cultured
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 198.0
+  protein_g: 2.44
+  fat_g: 19.4
+  carb_g: 4.63
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 3.41
+    sodium_mg: 31.0
+    calcium_mg: 101.0
+    iron_mg: 0.07
+- normalized_name: spinach
+  source_type: usda
+  search_query: spinach raw
+  fdc_id: 168462
+  description: Spinach, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 23.0
+  protein_g: 2.86
+  fat_g: 0.39
+  carb_g: 3.63
+  micronutrients:
+    fiber_g: 2.2
+    sugar_g: 0.42
+    sodium_mg: 79.0
+    calcium_mg: 99.0
+    iron_mg: 2.71
+- normalized_name: sugar
+  source_type: usda
+  search_query: sugar granulated
+  fdc_id: 746784
+  description: Sugars, granulated
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 385.0
+  protein_g: 0.0
+  fat_g: 0.32
+  carb_g: 99.6
+  micronutrients:
+    sodium_mg: 1.0
+    calcium_mg: 1.0
+    iron_mg: 0.05
+- normalized_name: sunflower_oil
+  source_type: usda
+  search_query: sunflower oil
+  fdc_id: 172357
+  description: Oil, industrial, mid-oleic, sunflower
+  data_type: SR Legacy
+  basis_unit: ml
+  basis_qty: 100
+  calories: 884.0
+  protein_g: 0.0
+  fat_g: 100.0
+  carb_g: 0.0
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.0
+    sodium_mg: 0.0
+    calcium_mg: 0.0
+    iron_mg: 0.03
+- normalized_name: tomato
+  source_type: usda
+  search_query: tomatoes red ripe raw
+  fdc_id: 170457
+  description: Tomatoes, red, ripe, raw, year round average
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 18.0
+  protein_g: 0.88
+  fat_g: 0.2
+  carb_g: 3.89
+  micronutrients:
+    fiber_g: 1.2
+    sugar_g: 2.63
+    sodium_mg: 5.0
+    calcium_mg: 10.0
+    iron_mg: 0.27
+- normalized_name: turkey_breast
+  source_type: usda
+  search_query: Turkey breast
+  fdc_id: 172941
+  description: Turkey breast, sliced, prepackaged
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 106.0
+  protein_g: 14.8
+  fat_g: 3.77
+  carb_g: 2.2
+  micronutrients:
+    fiber_g: 0.0
+    sugar_g: 0.91
+    sodium_mg: 898.0
+    calcium_mg: 14.0
+    iron_mg: 0.42
+- normalized_name: wheat_bread
+  source_type: usda
+  search_query: bread white
+  fdc_id: 325871
+  description: Bread, white, commercially prepared
+  data_type: Foundation
+  basis_unit: g
+  basis_qty: 100
+  calories: 270.0
+  protein_g: 9.43
+  fat_g: 3.59
+  carb_g: 49.2
+  micronutrients:
+    fiber_g: 2.3
+    sodium_mg: 477.0
+    calcium_mg: 211.0
+    iron_mg: 3.36
+- normalized_name: whole_wheat_bread
+  source_type: usda
+  search_query: bread whole wheat
+  fdc_id: 174916
+  description: Bread, pita, whole-wheat
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 262.0
+  protein_g: 9.8
+  fat_g: 1.71
+  carb_g: 55.9
+  micronutrients:
+    fiber_g: 6.1
+    sugar_g: 2.87
+    sodium_mg: 421.0
+    calcium_mg: 15.0
+    iron_mg: 3.06
+- normalized_name: zucchini
+  source_type: usda
+  search_query: zucchini raw
+  fdc_id: 168565
+  description: Squash, zucchini, baby, raw
+  data_type: SR Legacy
+  basis_unit: g
+  basis_qty: 100
+  calories: 21.0
+  protein_g: 2.71
+  fat_g: 0.4
+  carb_g: 3.11
+  micronutrients:
+    fiber_g: 1.1
+    sodium_mg: 3.0
+    calcium_mg: 21.0
+    iron_mg: 0.79

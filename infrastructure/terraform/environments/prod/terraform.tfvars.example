@@ -1,0 +1,17 @@
+region = "eu-central-1"
+
+domain_name      = "mealplanner.kz"
+hosted_zone_id   = "Z0123456789ABCDEF"
+
+github_repositories = ["yourorg/diploma-work"]
+
+alert_email_endpoints = ["alerts@example.com"]
+
+# Generate a strong key, e.g. python -c "import secrets; print(secrets.token_urlsafe(48))"
+django_secret_key = "REPLACE_ME_WITH_LONG_RANDOM_STRING"
+sentry_dsn        = ""
+expo_access_token = ""
+
+backend_image_tag       = "latest"
+min_app_version_ios     = "1.0.0"
+min_app_version_android = "1.0.0"

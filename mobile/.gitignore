@@ -1,0 +1,31 @@
+node_modules/
+.expo/
+dist/
+web-build/
+ios/
+android/
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# Expo
+.expo/
+
+# secrets
+secrets/
+
+# Sentry
+.sentryclirc

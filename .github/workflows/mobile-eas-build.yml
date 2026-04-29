@@ -1,0 +1,61 @@
+name: mobile-eas-build
+
+on:
+  push:
+    tags:
+      - 'mobile-v*'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS Build profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+      platform:
+        description: 'Target platform'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+
+defaults:
+  run:
+    working-directory: mobile
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Setup Expo + EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build via EAS
+        run: |
+          PROFILE="${{ inputs.profile || 'production' }}"
+          PLATFORM="${{ inputs.platform || 'all' }}"
+          eas build --non-interactive --profile "$PROFILE" --platform "$PLATFORM"
+
+      - name: Submit to stores (production only)
+        if: inputs.profile == 'production' || startsWith(github.ref, 'refs/tags/mobile-v')
+        run: |
+          eas submit --non-interactive --platform all --latest

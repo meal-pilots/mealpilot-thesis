@@ -1,0 +1,119 @@
+name: backend-deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - prod
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-central-1
+  ECR_REPOSITORY: meal-planner-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Compute image tag
+        id: meta
+        run: |
+          GIT_SHA=$(git rev-parse --short HEAD)
+          echo "tag=${GIT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.meta.outputs.tag }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          build-args: |
+            GIT_SHA=${{ steps.meta.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run database migrations as one-off ECS task
+        env:
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          MIGRATE_TASK_DEF: ${{ vars.MIGRATE_TASK_DEF }}
+          PRIVATE_SUBNETS: ${{ vars.PRIVATE_SUBNETS }}
+          MIGRATE_SECURITY_GROUP: ${{ vars.MIGRATE_SECURITY_GROUP }}
+        run: |
+          aws ecs run-task \
+            --cluster "$ECS_CLUSTER" \
+            --task-definition "$MIGRATE_TASK_DEF" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNETS],securityGroups=[$MIGRATE_SECURITY_GROUP],assignPublicIp=DISABLED}" \
+            --overrides '{"containerOverrides":[{"name":"web","command":["migrate"]}]}' \
+            --query 'tasks[0].taskArn' \
+            --output text
+
+      - name: Deploy web service
+        env:
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_WEB_SERVICE: ${{ vars.ECS_WEB_SERVICE }}
+        run: |
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_WEB_SERVICE" \
+            --force-new-deployment \
+            --query 'service.serviceName' \
+            --output text
+
+      - name: Deploy worker service
+        env:
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_WORKER_SERVICE: ${{ vars.ECS_WORKER_SERVICE }}
+        run: |
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_WORKER_SERVICE" \
+            --force-new-deployment \
+            --query 'service.serviceName' \
+            --output text
+
+      - name: Smoke test the API
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: |
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl --fail --silent "$API_URL/api/v1/health/ready"; then
+              echo "API is healthy"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+          echo "API failed health check after rolling deployment"
+          exit 1

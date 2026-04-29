@@ -1,0 +1,83 @@
+{
+  "expo": {
+    "name": "Meal Planner",
+    "slug": "meal-planner",
+    "scheme": "mealplanner",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "icon": "./assets/icon.png",
+    "primaryColor": "#1F2937",
+    "backgroundColor": "#FFF7E6",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFF7E6"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "ios": {
+      "bundleIdentifier": "kz.mealplanner.app",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "icon": "./assets/icon.png",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Опционально: сфотографируйте холодильник, чтобы предложить рецепты из того, что уже есть.",
+        "NSPhotoLibraryUsageDescription": "Опционально: выберите фото профиля из вашей галереи.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleAllowMixedLocalizations": true
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "kz.mealplanner.app",
+      "versionCode": 1,
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFF7E6"
+      },
+      "permissions": [
+        "POST_NOTIFICATIONS",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
+    },
+    "owner": "REPLACE_WITH_EAS_OWNER",
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": { "deploymentTarget": "15.1" },
+          "android": { "compileSdkVersion": 34, "targetSdkVersion": 34, "minSdkVersion": 24 }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1F2937"
+        }
+      ],
+      "expo-secure-store"
+    ]
+  }
+}
