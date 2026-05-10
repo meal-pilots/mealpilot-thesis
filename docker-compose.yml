@@ -41,6 +41,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
     volumes:
       - ./backend:/app
     ports:
@@ -50,11 +52,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: >
-      sh -c "
-      python manage.py migrate &&
-      python manage.py runserver 0.0.0.0:8000
-      "
+    entrypoint: []
+    command:
+      - sh
+      - -c
+      - |
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000
 
   frontend:
     build:
