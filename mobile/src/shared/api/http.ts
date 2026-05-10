@@ -72,14 +72,21 @@ function extractErrorMessage(payload: unknown, fallback: string): string {
     return fallback
 }
 
-async function refreshAccessToken(): Promise<string | null> {
-    const stored = await getStoredAuthSession()
-    if (!stored) return null
-
+/**
+ * Single-flight refresh.
+ *
+ * IMPORTANT: we set `refreshPromise` *before* awaiting anything so that
+ * concurrent 401s share one in-flight refresh and don't all rotate the
+ * refresh token (which would blacklist all but one and log the user out).
+ */
+function refreshAccessToken(): Promise<string | null> {
     if (refreshPromise) return refreshPromise
 
     refreshPromise = (async () => {
         try {
+            const stored = await getStoredAuthSession()
+            if (!stored) return null
+
             const response = await fetch(buildUrl('/api/v1/auth/refresh'), {
                 method: 'POST',
                 headers: {

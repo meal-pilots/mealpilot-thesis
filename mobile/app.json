@@ -15,7 +15,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#FFF7E6"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -28,8 +30,6 @@
       "supportsTablet": true,
       "icon": "./assets/icon.png",
       "infoPlist": {
-        "NSCameraUsageDescription": "Опционально: сфотографируйте холодильник, чтобы предложить рецепты из того, что уже есть.",
-        "NSPhotoLibraryUsageDescription": "Опционально: выберите фото профиля из вашей галереи.",
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleAllowMixedLocalizations": true
       },
@@ -56,18 +56,18 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
-      }
-    },
-    "owner": "REPLACE_WITH_EAS_OWNER",
     "plugins": [
       [
         "expo-build-properties",
         {
-          "ios": { "deploymentTarget": "15.1" },
-          "android": { "compileSdkVersion": 34, "targetSdkVersion": 34, "minSdkVersion": 24 }
+          "ios": {
+            "deploymentTarget": "15.1"
+          },
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 24
+          }
         }
       ],
       [
@@ -77,7 +77,8 @@
           "color": "#1F2937"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ]
   }
 }

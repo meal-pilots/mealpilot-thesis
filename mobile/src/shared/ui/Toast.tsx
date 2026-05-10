@@ -1,8 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
-import { Animated, Pressable, Text, View } from 'react-native'
+import { Animated, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { palette, radii, shadows, spacing } from './theme'
+import { usePalette } from '@shared/lib/use-palette'
+import { Icon, type IconName } from '@shared/ui/Icon'
+import { Text } from '@shared/ui/Text'
+import { radii, shadows, spacing, type Palette } from '@shared/ui/theme'
 
 type ToastVariant = 'info' | 'success' | 'warning' | 'error'
 
@@ -23,11 +26,20 @@ type ToastContextValue = {
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-const variantStyles: Record<ToastVariant, { bg: string; fg: string; border: string }> = {
-    info: { bg: palette.infoBg, fg: palette.info, border: palette.info },
-    success: { bg: palette.successBg, fg: palette.success, border: palette.success },
-    warning: { bg: palette.warningBg, fg: palette.warning, border: palette.warning },
-    error: { bg: palette.dangerBg, fg: palette.danger, border: palette.danger },
+const VARIANT_ICONS: Record<ToastVariant, IconName> = {
+    info: 'info',
+    success: 'checkCircle',
+    warning: 'alertCircle',
+    error: 'alertCircle',
+}
+
+function variantStyles(palette: Palette): Record<ToastVariant, { bg: string; fg: string; border: string }> {
+    return {
+        info: { bg: palette.infoBg, fg: palette.info, border: palette.info },
+        success: { bg: palette.successBg, fg: palette.success, border: palette.success },
+        warning: { bg: palette.warningBg, fg: palette.warning, border: palette.warning },
+        error: { bg: palette.dangerBg, fg: palette.danger, border: palette.danger },
+    }
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -74,14 +86,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 }
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
+    const palette = usePalette()
     const opacity = useRef(new Animated.Value(0)).current
     const translateY = useRef(new Animated.Value(-20)).current
-    const v = variantStyles[toast.variant]
+    const v = variantStyles(palette)[toast.variant]
+    const iconName = VARIANT_ICONS[toast.variant]
 
     useEffect(() => {
         Animated.parallel([
-            Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
-            Animated.timing(translateY, { toValue: 0, duration: 250, useNativeDriver: true }),
+            Animated.timing(opacity, { toValue: 1, duration: 220, useNativeDriver: true }),
+            Animated.timing(translateY, { toValue: 0, duration: 260, useNativeDriver: true }),
         ]).start()
     }, [opacity, translateY])
 
@@ -96,12 +110,23 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
                     padding: spacing.md,
                     opacity,
                     transform: [{ translateY }],
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: spacing.sm,
                 },
                 shadows.raised,
             ]}
         >
-            <Pressable onPress={onDismiss}>
-                <Text style={{ color: v.fg, fontSize: 14, fontWeight: '600' }}>{toast.message}</Text>
+            <Pressable
+                onPress={onDismiss}
+                accessibilityRole="alert"
+                accessibilityLabel={toast.message}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 }}
+            >
+                <Icon name={iconName} size={20} color={v.fg} />
+                <Text variant="bodyStrong" style={{ color: v.fg, flex: 1 }}>
+                    {toast.message}
+                </Text>
             </Pressable>
         </Animated.View>
     )

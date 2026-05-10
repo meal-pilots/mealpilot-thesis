@@ -45,12 +45,12 @@ export async function listCategories(): Promise<string[]> {
     return apiRequest<string[]>('/api/v1/recipes/categories')
 }
 
-export async function listFavorites(): Promise<Array<{
+export async function listFavorites(): Promise<{
     recipe_id: string
     title: string
     image_url: string | null
     fit_score: number
-}>> {
+}[]> {
     return apiRequest('/api/v1/favorites/recipes')
 }
 

@@ -1,34 +1,40 @@
 import { useEffect, useState } from 'react'
-import { Pressable, ScrollView, Switch, Text, View } from 'react-native'
+import { Switch, View } from 'react-native'
 
 import { useUpdateProfile, useUpdateSettings, useUserProfile, useUserSettings } from '@features/settings/hooks'
+import { haptic } from '@shared/lib/haptics'
+import { usePalette } from '@shared/lib/use-palette'
 import { Card } from '@shared/ui/Card'
 import { Heading } from '@shared/ui/Heading'
+import { Icon } from '@shared/ui/Icon'
 import { Input } from '@shared/ui/Input'
 import { QueryBoundary } from '@shared/ui/QueryBoundary'
 import { Screen } from '@shared/ui/Screen'
 import { Section } from '@shared/ui/Section'
+import { Text } from '@shared/ui/Text'
 import { useToast } from '@shared/ui/Toast'
-import { palette, radii, spacing } from '@shared/ui/theme'
+import { TouchableSurface } from '@shared/ui/TouchableSurface'
+import { radii, spacing, type Palette } from '@shared/ui/theme'
 
-const LANGUAGES: Array<{ code: string; label: string }> = [
-    { code: 'ru', label: 'Русский' },
-    { code: 'kk', label: 'Қазақша' },
-    { code: 'en', label: 'English' },
+const LANGUAGES: { code: string; label: string; flag: string }[] = [
+    { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+    { code: 'kk', label: 'Қазақша', flag: '🇰🇿' },
+    { code: 'en', label: 'English', flag: '🇬🇧' },
 ]
 
-const CURRENCIES: Array<{ code: string; label: string }> = [
-    { code: 'KZT', label: '₸ Тенге' },
-    { code: 'RUB', label: '₽ Рубль' },
-    { code: 'USD', label: '$ Доллар' },
+const CURRENCIES: { code: string; label: string; symbol: string }[] = [
+    { code: 'KZT', label: 'Тенге', symbol: '₸' },
+    { code: 'RUB', label: 'Рубль', symbol: '₽' },
+    { code: 'USD', label: 'Доллар', symbol: '$' },
 ]
 
-const UNITS: Array<{ code: 'metric' | 'imperial'; label: string }> = [
-    { code: 'metric', label: 'Метрические (г, мл)' },
-    { code: 'imperial', label: 'Имперские (oz, fl oz)' },
+const UNITS: { code: 'metric' | 'imperial'; label: string; hint: string }[] = [
+    { code: 'metric', label: 'Метрические', hint: 'г, мл, кг' },
+    { code: 'imperial', label: 'Имперские', hint: 'oz, fl oz, lb' },
 ]
 
 export function SettingsScreen() {
+    const palette = usePalette()
     const settingsQuery = useUserSettings()
     const profileQuery = useUserProfile()
     const updateSettings = useUpdateSettings()
@@ -55,18 +61,22 @@ export function SettingsScreen() {
                 {settingsQuery.data && profileQuery.data ? (
                     <>
                         <Section title="Профиль">
-                            <Card>
+                            <Card elevation="card">
                                 <View style={{ gap: spacing.md }}>
                                     <Input
                                         label="Имя"
                                         value={fullName}
                                         onChangeText={setFullName}
+                                        leftAddon={<Icon name="user" size={18} color={palette.textMuted} />}
                                         onBlur={() => {
                                             if (fullName.trim() && fullName !== profileQuery.data.full_name) {
                                                 updateProfile.mutate(
                                                     { full_name: fullName.trim() },
                                                     {
-                                                        onSuccess: () => toast.success('Имя обновлено'),
+                                                        onSuccess: () => {
+                                                            haptic.success()
+                                                            toast.success('Имя обновлено')
+                                                        },
                                                         onError: () => toast.error('Не удалось обновить'),
                                                     },
                                                 )
@@ -74,19 +84,27 @@ export function SettingsScreen() {
                                         }}
                                     />
                                     <View style={{ gap: 4 }}>
-                                        <Text style={{ fontSize: 14, color: palette.textSecondary, fontWeight: '600' }}>
+                                        <Text variant="caption" tone="secondary" weight="700">
                                             Email
                                         </Text>
-                                        <Text style={{ color: palette.textMuted, fontSize: 15 }}>
-                                            {profileQuery.data.email}
-                                        </Text>
+                                        <View
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                gap: spacing.sm,
+                                                paddingVertical: spacing.sm,
+                                            }}
+                                        >
+                                            <Icon name="mail" size={18} color={palette.textMuted} />
+                                            <Text variant="body">{profileQuery.data.email}</Text>
+                                        </View>
                                     </View>
                                 </View>
                             </Card>
                         </Section>
 
                         <Section title="Уведомления">
-                            <Card>
+                            <Card elevation="card">
                                 <View
                                     style={{
                                         flexDirection: 'row',
@@ -95,82 +113,103 @@ export function SettingsScreen() {
                                     }}
                                 >
                                     <View style={{ flex: 1, marginRight: spacing.md }}>
-                                        <Text style={{ fontSize: 15, fontWeight: '600', color: palette.text }}>
-                                            Push-уведомления
-                                        </Text>
-                                        <Text style={{ color: palette.textMuted, fontSize: 13, marginTop: 2 }}>
-                                            Напоминания об истечении продуктов и обновления плана
+                                        <Text variant="bodyStrong">Push-уведомления</Text>
+                                        <Text variant="caption" tone="muted" style={{ marginTop: 2 }}>
+                                            Напоминания о продуктах и обновления плана
                                         </Text>
                                     </View>
                                     <Switch
                                         value={settingsQuery.data.notifications_enabled}
-                                        onValueChange={(value) =>
+                                        onValueChange={(value) => {
+                                            haptic.selection()
                                             updateSettings.mutate(
                                                 { notifications_enabled: value },
                                                 {
                                                     onSuccess: () =>
-                                                        toast.success(value ? 'Включены' : 'Отключены'),
+                                                        toast.success(value ? 'Уведомления включены' : 'Отключены'),
                                                     onError: () => toast.error('Не удалось обновить'),
                                                 },
                                             )
-                                        }
-                                        trackColor={{ true: palette.primary, false: palette.border }}
+                                        }}
+                                        trackColor={{ true: palette.accent, false: palette.borderStrong }}
+                                        thumbColor={palette.canvas}
                                     />
                                 </View>
                             </Card>
                         </Section>
 
                         <Section title="Язык">
-                            <Card>
-                                <PickerList
-                                    value={settingsQuery.data.preferred_language}
-                                    options={LANGUAGES}
-                                    onChange={(code) =>
-                                        updateSettings.mutate(
-                                            { preferred_language: code },
-                                            {
-                                                onSuccess: () => toast.success('Язык обновлён'),
-                                                onError: () => toast.error('Не удалось обновить'),
-                                            },
-                                        )
-                                    }
-                                />
+                            <Card elevation="card" padding={spacing.xs}>
+                                {LANGUAGES.map((lang, idx) => (
+                                    <PickerRow
+                                        key={lang.code}
+                                        palette={palette}
+                                        label={lang.label}
+                                        hint={lang.flag}
+                                        active={settingsQuery.data!.preferred_language === lang.code}
+                                        showDivider={idx > 0}
+                                        onPress={() => {
+                                            haptic.selection()
+                                            updateSettings.mutate(
+                                                { preferred_language: lang.code },
+                                                {
+                                                    onSuccess: () => toast.success('Язык обновлён'),
+                                                    onError: () => toast.error('Не удалось обновить'),
+                                                },
+                                            )
+                                        }}
+                                    />
+                                ))}
                             </Card>
                         </Section>
 
                         <Section title="Валюта">
-                            <Card>
-                                <PickerList
-                                    value={settingsQuery.data.currency_code}
-                                    options={CURRENCIES}
-                                    onChange={(code) =>
-                                        updateSettings.mutate(
-                                            { currency_code: code },
-                                            {
-                                                onSuccess: () => toast.success('Валюта обновлена'),
-                                                onError: () => toast.error('Не удалось обновить'),
-                                            },
-                                        )
-                                    }
-                                />
+                            <Card elevation="card" padding={spacing.xs}>
+                                {CURRENCIES.map((c, idx) => (
+                                    <PickerRow
+                                        key={c.code}
+                                        palette={palette}
+                                        label={c.label}
+                                        hint={c.symbol}
+                                        active={settingsQuery.data!.currency_code === c.code}
+                                        showDivider={idx > 0}
+                                        onPress={() => {
+                                            haptic.selection()
+                                            updateSettings.mutate(
+                                                { currency_code: c.code },
+                                                {
+                                                    onSuccess: () => toast.success('Валюта обновлена'),
+                                                    onError: () => toast.error('Не удалось обновить'),
+                                                },
+                                            )
+                                        }}
+                                    />
+                                ))}
                             </Card>
                         </Section>
 
                         <Section title="Система мер">
-                            <Card>
-                                <PickerList<'metric' | 'imperial'>
-                                    value={settingsQuery.data.measurement_system}
-                                    options={UNITS}
-                                    onChange={(code) =>
-                                        updateSettings.mutate(
-                                            { measurement_system: code },
-                                            {
-                                                onSuccess: () => toast.success('Обновлено'),
-                                                onError: () => toast.error('Не удалось обновить'),
-                                            },
-                                        )
-                                    }
-                                />
+                            <Card elevation="card" padding={spacing.xs}>
+                                {UNITS.map((u, idx) => (
+                                    <PickerRow
+                                        key={u.code}
+                                        palette={palette}
+                                        label={u.label}
+                                        hint={u.hint}
+                                        active={settingsQuery.data!.measurement_system === u.code}
+                                        showDivider={idx > 0}
+                                        onPress={() => {
+                                            haptic.selection()
+                                            updateSettings.mutate(
+                                                { measurement_system: u.code },
+                                                {
+                                                    onSuccess: () => toast.success('Обновлено'),
+                                                    onError: () => toast.error('Не удалось обновить'),
+                                                },
+                                            )
+                                        }}
+                                    />
+                                ))}
                             </Card>
                         </Section>
                     </>
@@ -180,38 +219,60 @@ export function SettingsScreen() {
     )
 }
 
-function PickerList<T extends string>({
-    value,
-    options,
-    onChange,
+function PickerRow({
+    palette,
+    label,
+    hint,
+    active,
+    showDivider,
+    onPress,
 }: {
-    value: T
-    options: Array<{ code: T; label: string }>
-    onChange: (code: T) => void
+    palette: Palette
+    label: string
+    hint?: string
+    active: boolean
+    showDivider: boolean
+    onPress: () => void
 }) {
     return (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
-            {options.map((opt) => {
-                const active = opt.code === value
-                return (
-                    <Pressable
-                        key={opt.code}
-                        onPress={() => onChange(opt.code)}
-                        style={{
-                            paddingHorizontal: spacing.md,
-                            paddingVertical: spacing.sm,
-                            borderRadius: radii.pill,
-                            backgroundColor: active ? palette.primary : palette.canvas,
-                            borderWidth: 1,
-                            borderColor: active ? palette.primary : palette.border,
-                        }}
-                    >
-                        <Text style={{ color: active ? palette.onPrimary : palette.text, fontWeight: '600' }}>
-                            {opt.label}
-                        </Text>
-                    </Pressable>
-                )
-            })}
-        </ScrollView>
+        <TouchableSurface
+            onPress={onPress}
+            scaleTo={0.99}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={label}
+            style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.md,
+                paddingVertical: spacing.md,
+                paddingHorizontal: spacing.md,
+                borderTopWidth: showDivider ? 1 : 0,
+                borderTopColor: palette.border,
+            }}
+        >
+            <View style={{ flex: 1 }}>
+                <Text variant="bodyStrong">{label}</Text>
+                {hint ? (
+                    <Text variant="caption" tone="muted" style={{ marginTop: 2 }}>
+                        {hint}
+                    </Text>
+                ) : null}
+            </View>
+            <View
+                style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: radii.pill,
+                    borderWidth: 2,
+                    borderColor: active ? palette.accent : palette.borderStrong,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: active ? palette.accent : 'transparent',
+                }}
+            >
+                {active ? <Icon name="check" size={14} color={palette.textOnAccent} strokeWidth={3} /> : null}
+            </View>
+        </TouchableSurface>
     )
 }

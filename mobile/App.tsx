@@ -1,10 +1,20 @@
+import {
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    useFonts,
+} from '@expo-google-fonts/inter'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
+import { useColorScheme, View } from 'react-native'
 
 import { AppProviders } from '@core/providers/AppProviders'
 import { RootNavigator } from '@core/navigation/RootNavigator'
 import { usePushRegistration } from '@features/notifications/usePushRegistration'
+import { ErrorBoundary } from '@shared/ui/ErrorBoundary'
+import { darkPalette, lightPalette } from '@shared/ui/theme'
 
 SplashScreen.preventAutoHideAsync().catch(() => {})
 
@@ -14,17 +24,40 @@ function AppShell() {
 }
 
 export default function App() {
-    useEffect(() => {
-        const timeout = setTimeout(() => {
+    const scheme = useColorScheme()
+    const palette = scheme === 'dark' ? darkPalette : lightPalette
+
+    const [fontsLoaded, fontsError] = useFonts({
+        Inter_400Regular,
+        Inter_500Medium,
+        Inter_600SemiBold,
+        Inter_700Bold,
+    })
+
+    const ready = fontsLoaded || !!fontsError
+
+    const onLayoutRootView = useCallback(() => {
+        if (ready) {
             SplashScreen.hideAsync().catch(() => {})
-        }, 250)
-        return () => clearTimeout(timeout)
-    }, [])
+        }
+    }, [ready])
+
+    useEffect(() => {
+        if (ready) {
+            SplashScreen.hideAsync().catch(() => {})
+        }
+    }, [ready])
+
+    if (!ready) return null
 
     return (
-        <AppProviders>
-            <StatusBar style="auto" />
-            <AppShell />
-        </AppProviders>
+        <View style={{ flex: 1, backgroundColor: palette.canvas }} onLayout={onLayoutRootView}>
+            <ErrorBoundary>
+                <AppProviders>
+                    <StatusBar style={scheme === 'dark' ? 'light' : 'auto'} />
+                    <AppShell />
+                </AppProviders>
+            </ErrorBoundary>
+        </View>
     )
 }

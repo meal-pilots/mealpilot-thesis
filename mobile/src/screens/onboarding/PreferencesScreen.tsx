@@ -1,84 +1,144 @@
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { Pressable, Text, View } from 'react-native'
+import { View } from 'react-native'
+import Animated, { FadeInDown } from 'react-native-reanimated'
 
 import type { OnboardingStackParamList } from '@core/navigation/types'
 import { useOnboardingDraft } from '@features/onboarding/OnboardingContext'
+import { haptic } from '@shared/lib/haptics'
+import { usePalette } from '@shared/lib/use-palette'
 import { Button } from '@shared/ui/Button'
 import { Heading } from '@shared/ui/Heading'
+import { Icon } from '@shared/ui/Icon'
 import { Screen } from '@shared/ui/Screen'
 import { Section } from '@shared/ui/Section'
+import { Text } from '@shared/ui/Text'
+import { TouchableSurface } from '@shared/ui/TouchableSurface'
+import { radii, spacing } from '@shared/ui/theme'
 
 const TIME_OPTIONS = [20, 30, 45, 60, 90]
-const VARIETY_OPTIONS: Array<{ id: 'low' | 'medium' | 'high'; label: string }> = [
-    { id: 'low', label: 'Меньше повторов' },
-    { id: 'medium', label: 'Средне' },
-    { id: 'high', label: 'Максимум разнообразия' },
+const VARIETY_OPTIONS: { id: 'low' | 'medium' | 'high'; label: string; description: string }[] = [
+    { id: 'low', label: 'Меньше повторов', description: 'Допустимо повторять рецепты' },
+    { id: 'medium', label: 'Средне', description: 'Сбалансированное меню' },
+    { id: 'high', label: 'Максимум разнообразия', description: 'Ни одного повтора' },
 ]
 
 export function PreferencesScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<OnboardingStackParamList>>()
+    const palette = usePalette()
     const { draft, setDraft } = useOnboardingDraft()
 
     return (
         <Screen scroll>
-            <Heading level={1}>Предпочтения</Heading>
-            <Text style={{ color: '#6B7280' }}>Сколько готовить и насколько разнообразно.</Text>
+            <Animated.View entering={FadeInDown.duration(380)}>
+                <Heading level={1}>Предпочтения</Heading>
+                <Text variant="body" tone="secondary" style={{ marginTop: spacing.sm }}>
+                    Сколько готовить и насколько разнообразно.
+                </Text>
+            </Animated.View>
 
-            <Section title="Максимум времени готовки">
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {TIME_OPTIONS.map((minutes) => {
-                        const active = draft.max_cooking_time_minutes === minutes
-                        return (
-                            <Pressable
-                                key={minutes}
-                                onPress={() =>
-                                    setDraft((curr) => ({ ...curr, max_cooking_time_minutes: minutes }))
-                                }
-                                style={{
-                                    paddingHorizontal: 16,
-                                    paddingVertical: 10,
-                                    borderRadius: 999,
-                                    backgroundColor: active ? '#1F2937' : '#FFFBF2',
-                                    borderWidth: 1,
-                                    borderColor: active ? '#1F2937' : '#F0E2C5',
-                                }}
-                            >
-                                <Text style={{ color: active ? '#fff' : '#111827', fontWeight: '600' }}>
-                                    {minutes} мин
-                                </Text>
-                            </Pressable>
-                        )
-                    })}
-                </View>
-            </Section>
+            <Animated.View entering={FadeInDown.delay(80).duration(380)}>
+                <Section title="Максимум времени готовки">
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                        {TIME_OPTIONS.map((minutes) => {
+                            const active = draft.max_cooking_time_minutes === minutes
+                            return (
+                                <TouchableSurface
+                                    key={minutes}
+                                    onPress={() => {
+                                        haptic.selection()
+                                        setDraft((curr) => ({ ...curr, max_cooking_time_minutes: minutes }))
+                                    }}
+                                    accessibilityRole="radio"
+                                    accessibilityState={{ selected: active }}
+                                    accessibilityLabel={`${minutes} минут`}
+                                    scaleTo={0.94}
+                                    style={{
+                                        paddingHorizontal: spacing.md,
+                                        paddingVertical: spacing.sm,
+                                        borderRadius: radii.pill,
+                                        backgroundColor: active ? palette.primary : palette.canvasElevated,
+                                        borderWidth: 1,
+                                        borderColor: active ? palette.primary : palette.border,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        gap: 6,
+                                    }}
+                                >
+                                    <Icon
+                                        name="clock"
+                                        size={14}
+                                        color={active ? palette.onPrimary : palette.textMuted}
+                                    />
+                                    <Text
+                                        variant="caption"
+                                        weight="700"
+                                        style={{ color: active ? palette.onPrimary : palette.text }}
+                                    >
+                                        {minutes} мин
+                                    </Text>
+                                </TouchableSurface>
+                            )
+                        })}
+                    </View>
+                </Section>
+            </Animated.View>
 
-            <Section title="Разнообразие">
-                <View style={{ gap: 8 }}>
-                    {VARIETY_OPTIONS.map((option) => {
-                        const active = draft.variety_preference === option.id
-                        return (
-                            <Pressable
-                                key={option.id}
-                                onPress={() =>
-                                    setDraft((curr) => ({ ...curr, variety_preference: option.id }))
-                                }
-                                style={{
-                                    padding: 14,
-                                    borderRadius: 12,
-                                    backgroundColor: active ? '#FFE4B5' : '#FFFBF2',
-                                    borderWidth: 1,
-                                    borderColor: active ? '#7A4A0A' : '#F0E2C5',
-                                }}
-                            >
-                                <Text style={{ fontWeight: '600' }}>{option.label}</Text>
-                            </Pressable>
-                        )
-                    })}
-                </View>
-            </Section>
+            <Animated.View entering={FadeInDown.delay(140).duration(380)}>
+                <Section title="Разнообразие">
+                    <View style={{ gap: spacing.sm }}>
+                        {VARIETY_OPTIONS.map((option) => {
+                            const active = draft.variety_preference === option.id
+                            return (
+                                <TouchableSurface
+                                    key={option.id}
+                                    onPress={() => {
+                                        haptic.selection()
+                                        setDraft((curr) => ({ ...curr, variety_preference: option.id }))
+                                    }}
+                                    accessibilityRole="radio"
+                                    accessibilityState={{ selected: active }}
+                                    accessibilityLabel={option.label}
+                                    scaleTo={0.985}
+                                    style={{
+                                        padding: spacing.md,
+                                        borderRadius: radii.lg,
+                                        backgroundColor: active ? palette.accentSoft : palette.canvasElevated,
+                                        borderWidth: 1.5,
+                                        borderColor: active ? palette.accent : palette.border,
+                                    }}
+                                >
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                        }}
+                                    >
+                                        <View style={{ flex: 1 }}>
+                                            <Text variant="bodyStrong">{option.label}</Text>
+                                            <Text variant="caption" tone="muted" style={{ marginTop: 2 }}>
+                                                {option.description}
+                                            </Text>
+                                        </View>
+                                        {active ? (
+                                            <Icon name="checkCircle" size={20} color={palette.accent} />
+                                        ) : null}
+                                    </View>
+                                </TouchableSurface>
+                            )
+                        })}
+                    </View>
+                </Section>
+            </Animated.View>
 
-            <Button label="Продолжить" onPress={() => navigation.navigate('Budget')} />
+            <Button
+                label="Продолжить"
+                size="lg"
+                onPress={() => navigation.navigate('Budget')}
+                iconRight={<Icon name="arrowRight" size={18} color={palette.onPrimary} />}
+                style={{ marginTop: spacing.md }}
+            />
         </Screen>
     )
 }

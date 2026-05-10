@@ -120,7 +120,7 @@ export type GeneratePlanRequest = {
     cooking_time_strictness?: 'strict' | 'medium' | 'flexible'
     variety_level?: 'low' | 'medium' | 'high'
     repetition_allowed?: number
-    optimization_focus: Array<'budget' | 'nutrition' | 'speed' | 'taste'>
+    optimization_focus: ('budget' | 'nutrition' | 'speed' | 'taste')[]
 }
 
 export type GeneratePlanAsyncResponse = {
@@ -147,7 +147,7 @@ export type ShoppingListItem = {
     category_label: string
     is_checked: boolean
     availability_status: string
-    store_prices: Array<{ store_name: string; price_amount: string; price_unit: string }>
+    store_prices: { store_name: string; price_amount: string; price_unit: string }[]
 }
 
 export type ShoppingList = {
@@ -163,21 +163,21 @@ export type BudgetAnalytics = {
     budget_limit: string
     planned_cost: string
     remaining: string
-    cost_by_day: Array<{ day_index: number; plan_date: string; cost: string }>
-    most_expensive_meals: Array<{
+    cost_by_day: { day_index: number; plan_date: string; cost: string }[]
+    most_expensive_meals: {
         meal_plan_item_id: string
         recipe_title: string
         cost: string
         meal_type: MealType
         day_index: number
-    }>
-    savings_opportunities: Array<{ meal_plan_item_id: string; suggestion: string }>
+    }[]
+    savings_opportunities: { meal_plan_item_id: string; suggestion: string }[]
 }
 
 export type NutritionAnalytics = {
     weekly_target_fit: string
     macro_balance: Record<string, number>
-    member_fit: Array<{
+    member_fit: {
         member_id: string
         display_name: string
         target_calories: number
@@ -185,7 +185,7 @@ export type NutritionAnalytics = {
         protein_ratio: number
         fat_ratio: number
         carb_ratio: number
-    }>
+    }[]
     micronutrients: Record<string, number>
 }
 

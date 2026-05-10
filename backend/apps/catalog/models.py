@@ -120,8 +120,8 @@ class Recipe(UUIDTimeStampedModel):
 
     source_name = models.CharField(max_length=120, blank=True, default='')
     source_recipe_id = models.CharField(max_length=120, blank=True, default='')
-    source_url = models.URLField(blank=True, null=True)
-    canonical_url = models.URLField(blank=True, null=True)
+    source_url = models.URLField(max_length=500, blank=True, null=True)
+    canonical_url = models.URLField(max_length=500, blank=True, null=True)
     language = models.CharField(max_length=16, blank=True, default='')
     source_metadata = models.JSONField(default=dict, blank=True)
 
@@ -147,8 +147,8 @@ class Recipe(UUIDTimeStampedModel):
         help_text='Denormalized cached cost for fast filtering and feed rendering.',
     )
     is_child_friendly = models.BooleanField(default=False)
-    image_url = models.URLField(blank=True, null=True)
-    video_url = models.URLField(blank=True, null=True)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
+    video_url = models.URLField(max_length=500, blank=True, null=True)
     chef_note = models.TextField(blank=True)
     seasonality_score = models.DecimalField(
         max_digits=4,

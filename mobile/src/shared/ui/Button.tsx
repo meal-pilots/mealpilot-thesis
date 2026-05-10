@@ -1,8 +1,11 @@
-import { ActivityIndicator, Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
+import { ActivityIndicator, View, type StyleProp, type ViewStyle } from 'react-native'
 
-import { palette, radii, shadows, spacing } from './theme'
+import { usePalette } from '@shared/lib/use-palette'
+import { Text } from '@shared/ui/Text'
+import { TouchableSurface } from '@shared/ui/TouchableSurface'
+import { radii, shadows, spacing, type Palette } from '@shared/ui/theme'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'tonal'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 type ButtonProps = {
@@ -16,19 +19,24 @@ type ButtonProps = {
     iconLeft?: React.ReactNode
     iconRight?: React.ReactNode
     style?: StyleProp<ViewStyle>
+    accessibilityLabel?: string
+    accessibilityHint?: string
 }
 
-const variantStyles: Record<ButtonVariant, { bg: string; fg: string; border?: string }> = {
-    primary: { bg: palette.primary, fg: palette.onPrimary },
-    secondary: { bg: palette.accent, fg: palette.accentText },
-    ghost: { bg: 'transparent', fg: palette.primary, border: palette.primary },
-    danger: { bg: palette.danger, fg: palette.onPrimary },
+function variantStyles(palette: Palette): Record<ButtonVariant, { bg: string; fg: string; border?: string }> {
+    return {
+        primary: { bg: palette.primary, fg: palette.onPrimary },
+        secondary: { bg: palette.accent, fg: palette.textOnAccent },
+        tonal: { bg: palette.accentSoft, fg: palette.accentText },
+        ghost: { bg: 'transparent', fg: palette.text, border: palette.borderStrong },
+        danger: { bg: palette.danger, fg: palette.dangerOn },
+    }
 }
 
 const sizeStyles: Record<ButtonSize, { paddingV: number; paddingH: number; fontSize: number; minHeight: number }> = {
-    sm: { paddingV: 8, paddingH: 14, fontSize: 14, minHeight: 36 },
+    sm: { paddingV: 8, paddingH: 14, fontSize: 14, minHeight: 40 },
     md: { paddingV: 14, paddingH: 18, fontSize: 16, minHeight: 48 },
-    lg: { paddingV: 18, paddingH: 22, fontSize: 17, minHeight: 56 },
+    lg: { paddingV: 16, paddingH: 22, fontSize: 17, minHeight: 56 },
 }
 
 export function Button({
@@ -42,18 +50,27 @@ export function Button({
     iconLeft,
     iconRight,
     style,
+    accessibilityLabel,
+    accessibilityHint,
 }: ButtonProps) {
-    const v = variantStyles[variant]
+    const palette = usePalette()
+    const v = variantStyles(palette)[variant]
     const s = sizeStyles[size]
-    const showShadow = variant !== 'ghost'
+    const showShadow = variant === 'primary' || variant === 'danger' || variant === 'secondary'
+    const isDisabled = !!disabled || !!loading
 
     return (
-        <Pressable
+        <TouchableSurface
             accessibilityRole="button"
             accessibilityState={{ disabled: !!disabled, busy: !!loading }}
-            disabled={disabled || loading}
+            accessibilityLabel={accessibilityLabel ?? label}
+            accessibilityHint={accessibilityHint}
+            disabled={isDisabled}
             onPress={onPress}
-            style={({ pressed }) => [
+            feedback={variant === 'danger' ? 'medium' : 'light'}
+            scaleTo={0.97}
+            rippleColor={variant === 'primary' ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.12)'}
+            style={[
                 {
                     backgroundColor: v.bg,
                     paddingVertical: s.paddingV,
@@ -66,9 +83,8 @@ export function Button({
                     gap: spacing.sm,
                     borderWidth: v.border ? 1.5 : 0,
                     borderColor: v.border,
-                    opacity: disabled ? 0.45 : pressed ? 0.85 : 1,
-                    transform: [{ scale: pressed && !disabled ? 0.98 : 1 }],
                     width: fullWidth ? '100%' : undefined,
+                    overflow: 'hidden',
                 },
                 showShadow ? shadows.card : null,
                 style,
@@ -80,10 +96,10 @@ export function Button({
                 <>
                     {iconLeft ? <View>{iconLeft}</View> : null}
                     <Text
+                        variant="bodyStrong"
                         style={{
                             color: v.fg,
                             fontSize: s.fontSize,
-                            fontWeight: '600',
                             letterSpacing: 0.1,
                         }}
                     >
@@ -92,6 +108,6 @@ export function Button({
                     {iconRight ? <View>{iconRight}</View> : null}
                 </>
             )}
-        </Pressable>
+        </TouchableSurface>
     )
 }

@@ -643,10 +643,34 @@ def _int_metric(value: Decimal, *, scale: int = 1) -> int:
     return int(scaled.quantize(Decimal('1'), rounding=ROUND_HALF_UP))
 
 
+_RU_MONTHS_GENITIVE = {
+    1: 'января',
+    2: 'февраля',
+    3: 'марта',
+    4: 'апреля',
+    5: 'мая',
+    6: 'июня',
+    7: 'июля',
+    8: 'августа',
+    9: 'сентября',
+    10: 'октября',
+    11: 'ноября',
+    12: 'декабря',
+}
+
+
+def _format_plan_title(start_date: date) -> str:
+    """Russian-localised default title for a generated plan."""
+    return f'План недели с {start_date.day} {_RU_MONTHS_GENITIVE[start_date.month]}'
+
+
 def _selection_reason_summary(optimizer_name: str) -> str:
     if optimizer_name == PLANNER_OPTIMIZER_CP_SAT:
-        return 'CP-SAT planner selected this recipe based on global fit, budget, nutrition, and variety.'
-    return 'Deterministic planner selected this recipe based on fit, cost, and time.'
+        return (
+            'CP-SAT планировщик подобрал этот рецепт с учётом бюджета, '
+            'нутриентов, разнообразия и предпочтений семьи.'
+        )
+    return 'Детерминистический планировщик подобрал рецепт по соответствию, стоимости и времени.'
 
 
 def _build_deterministic_selection(
@@ -935,7 +959,7 @@ def _build_member_adaptations_for_item(item: MealPlanItem, group: Group):
                     meal_plan_item=item,
                     member=member,
                     adaptation_type=AdaptationType.HIGH_PROTEIN,
-                    description='Increase lean protein portion for this member.',
+                    description='Увеличена порция нежирного белка для этого члена семьи.',
                     price_delta=Decimal('120.00'),
                     calorie_delta=Decimal('90.00'),
                     protein_delta_g=Decimal('12.00'),
@@ -1088,10 +1112,10 @@ def _build_plan_explanations(meal_plan: MealPlan):
         PlanExplanation(
             meal_plan=meal_plan,
             explanation_type=ExplanationType.BUDGET,
-            title='Stayed inside weekly budget' if remaining >= ZERO else 'Budget tradeoff detected',
+            title='Уложились в бюджет недели' if remaining >= ZERO else 'Превышение бюджета',
             explanation_text=(
-                f'The plan is {abs(remaining)} '
-                f'{"below" if remaining >= ZERO else "above"} the configured budget limit.'
+                f'План {"ниже" if remaining >= ZERO else "выше"} заданного бюджета на '
+                f'{abs(remaining)} ₸.'
             ),
             priority_order=1,
         )
@@ -1101,10 +1125,10 @@ def _build_plan_explanations(meal_plan: MealPlan):
         PlanExplanation(
             meal_plan=meal_plan,
             explanation_type=ExplanationType.NUTRITION,
-            title='Balanced for core nutrition goals',
+            title='Сбалансированные нутриенты',
             explanation_text=(
-                'The plan prioritizes recipes that align with the group nutrition goals, '
-                'including high-protein, low-carb, and healthy options where relevant.'
+                'План отдаёт приоритет рецептам, которые согласуются с целями семьи: '
+                'высокий белок, низкие углеводы и здоровое питание там, где это уместно.'
             ),
             priority_order=2,
         )
@@ -1114,9 +1138,10 @@ def _build_plan_explanations(meal_plan: MealPlan):
         PlanExplanation(
             meal_plan=meal_plan,
             explanation_type=ExplanationType.GROUP_FIT,
-            title='Works for the household composition',
+            title='Подходит составу семьи',
             explanation_text=(
-                'Recipes were filtered against member restrictions and adapted for different goals where needed.'
+                'Рецепты отфильтрованы по ограничениям членов семьи и адаптированы '
+                'под индивидуальные цели там, где это нужно.'
             ),
             priority_order=3,
         )
@@ -1126,9 +1151,10 @@ def _build_plan_explanations(meal_plan: MealPlan):
         PlanExplanation(
             meal_plan=meal_plan,
             explanation_type=ExplanationType.TRADEOFF,
-            title='Balanced cost, speed, and variety',
+            title='Баланс цены, скорости и разнообразия',
             explanation_text=(
-                'The planner selected recipes that stay practical on weekdays while preserving variety.'
+                'Планировщик выбрал рецепты, которые удобно готовить в будние дни, '
+                'сохраняя разнообразие меню.'
             ),
             priority_order=4,
         )
@@ -1287,7 +1313,7 @@ def generate_meal_plan_for_group(*, group: Group, user, validated_data: dict) ->
 
         meal_plan = MealPlan.objects.create(
             group=group,
-            title=f'Week of {start_date:%b %d}',
+            title=_format_plan_title(start_date),
             start_date=start_date,
             end_date=end_date,
             days_count=days_count,
@@ -1325,8 +1351,8 @@ def generate_meal_plan_for_group(*, group: Group, user, validated_data: dict) ->
             Notification.objects.create(
                 user=user,
                 type='plan_ready',
-                title='Your weekly plan is ready',
-                message=f'A new plan has been generated for {group.name}.',
+                title='Ваш план недели готов',
+                message=f'Сгенерирован новый план для группы «{group.name}».',
                 metadata_json={
                     'meal_plan_id': str(meal_plan.id),
                     'group_id': str(group.id),
@@ -1354,7 +1380,7 @@ def replace_meal_plan_item(*, item: MealPlanItem, replacement_recipe: Recipe) ->
     item.estimated_calories = metrics['estimated_calories']
     item.estimated_cost = metrics['estimated_cost']
     item.selection_score = Decimal('0.86')
-    item.selection_reason_summary = 'Manual replacement accepted.'
+    item.selection_reason_summary = 'Заменено вручную.'
     item.is_manually_replaced = True
     item.save(
         update_fields=[
@@ -1381,14 +1407,14 @@ def replace_meal_plan_item(*, item: MealPlanItem, replacement_recipe: Recipe) ->
 @transaction.atomic
 def create_meal_item_adaptation(*, item: MealPlanItem, member: GroupMember, adaptation_type: str) -> MealItemAdaptation:
     description_map = {
-        AdaptationType.LOW_CARB: 'Reduced grains and increased vegetables.',
-        AdaptationType.HIGH_PROTEIN: 'Increase lean protein portion for this member.',
-        AdaptationType.CHILD_FRIENDLY: 'Use milder seasoning and simpler serving style.',
-        AdaptationType.ALLERGEN_FREE: 'Remove or replace allergen-sensitive ingredients.',
-        AdaptationType.CHEAPER_VERSION: 'Switch to lower-cost ingredients for this member.',
-        AdaptationType.INGREDIENT_REMOVE: 'Remove a non-essential ingredient for this member.',
-        AdaptationType.INGREDIENT_REPLACE: 'Replace one ingredient to better fit this member.',
-        AdaptationType.PORTION_CHANGE: 'Adjust serving size for this member.',
+        AdaptationType.LOW_CARB: 'Меньше круп, больше овощей.',
+        AdaptationType.HIGH_PROTEIN: 'Увеличена порция нежирного белка.',
+        AdaptationType.CHILD_FRIENDLY: 'Менее острые специи и упрощённая подача для ребёнка.',
+        AdaptationType.ALLERGEN_FREE: 'Убраны или заменены аллергенные ингредиенты.',
+        AdaptationType.CHEAPER_VERSION: 'Заменены ингредиенты на более бюджетные.',
+        AdaptationType.INGREDIENT_REMOVE: 'Убран один из необязательных ингредиентов.',
+        AdaptationType.INGREDIENT_REPLACE: 'Заменён ингредиент на более подходящий.',
+        AdaptationType.PORTION_CHANGE: 'Размер порции скорректирован под члена семьи.',
     }
 
     delta_map = {
@@ -1491,15 +1517,20 @@ def build_budget_analytics(meal_plan: MealPlan) -> dict:
 
     items = (
         MealPlanItem.objects.filter(meal_plan_day__meal_plan=meal_plan)
-        .select_related('recipe')
+        .select_related('recipe', 'meal_plan_day')
         .prefetch_related('recipe__ingredients_map__ingredient')
     )
     most_expensive = sorted(items, key=lambda x: _to_decimal(x.estimated_cost), reverse=True)[:5]
     most_expensive_meals = [
         {
-            'meal_plan_item_id': item.id,
+            'meal_plan_item_id': str(item.id),
             'recipe_title': item.recipe.title,
+            # Mobile client expects `cost` / `meal_type` / `day_index` —
+            # keep `estimated_cost` for backwards compatibility.
+            'cost': item.estimated_cost,
             'estimated_cost': item.estimated_cost,
+            'meal_type': item.meal_type,
+            'day_index': item.meal_plan_day.day_index,
         }
         for item in most_expensive
     ]
@@ -1516,11 +1547,19 @@ def build_budget_analytics(meal_plan: MealPlan) -> dict:
                 .first()
             )
             if substitution and substitution.price_delta_estimate < 0:
+                savings = abs(substitution.price_delta_estimate)
                 savings_opportunities.append(
                     {
+                        'meal_plan_item_id': str(item.id),
+                        # Human-readable hint shown in the mobile UI.
+                        'suggestion': (
+                            f'Замените «{recipe_ingredient.ingredient.name}» на '
+                            f'«{substitution.substitute_ingredient.name}» — '
+                            f'сэкономите ~{savings} ₸ в рецепте «{item.recipe.title}».'
+                        ),
                         'ingredient_name': recipe_ingredient.ingredient.name,
                         'suggested_substitute': substitution.substitute_ingredient.name,
-                        'estimated_savings': abs(substitution.price_delta_estimate),
+                        'estimated_savings': savings,
                     }
                 )
                 if len(savings_opportunities) >= 5:
@@ -1579,16 +1618,37 @@ def build_nutrition_analytics(meal_plan: MealPlan) -> dict:
     member_fit = []
     group_members = meal_plan.group.members.all()
     members_count = max(group_members.count(), 1)
+    days_count_dec = Decimal(str(max(meal_plan.days_count, 1)))
 
-    total_calories_per_member = _to_decimal(meal_plan.estimated_total_calories) / Decimal(str(members_count))
+    # Per-day-per-member calories so we can compare with the daily target
+    # (member.daily_calorie_target is daily, not weekly).
+    total_calories_per_member_per_day = (
+        _to_decimal(meal_plan.estimated_total_calories) / Decimal(str(members_count)) / days_count_dec
+    )
+
+    # Macro ratios across the week (independent from per-member breakdown)
+    macro_grams_total = (protein_total + fat_total + carb_total) or Decimal('1')
+    protein_ratio = (protein_total / macro_grams_total).quantize(Decimal('0.01'))
+    fat_ratio = (fat_total / macro_grams_total).quantize(Decimal('0.01'))
+    carb_ratio = (carb_total / macro_grams_total).quantize(Decimal('0.01'))
 
     for member in group_members:
-        target_calories = Decimal(str(member.daily_calorie_target or 2000 * meal_plan.days_count))
-        calorie_fit = min(total_calories_per_member / target_calories, Decimal('1.00')).quantize(Decimal('0.01'))
+        target_calories = Decimal(str(member.daily_calorie_target or 2000))
+        calorie_fit = min(
+            total_calories_per_member_per_day / target_calories, Decimal('1.00')
+        ).quantize(Decimal('0.01'))
         member_fit.append(
             {
-                'member_id': member.id,
-                'member_name': member.display_name,
+                'member_id': str(member.id),
+                # Mobile expects `display_name` and the four numeric fields below;
+                # `member_name` / *_fit kept for backwards compatibility.
+                'display_name': member.display_name or 'Без имени',
+                'member_name': member.display_name or 'Без имени',
+                'target_calories': float(target_calories),
+                'actual_calories': float(total_calories_per_member_per_day.quantize(Decimal('0.01'))),
+                'protein_ratio': float(protein_ratio),
+                'fat_ratio': float(fat_ratio),
+                'carb_ratio': float(carb_ratio),
                 'calorie_fit': calorie_fit,
                 'protein_fit': Decimal('0.90'),
                 'fat_fit': Decimal('0.85'),
@@ -1598,14 +1658,21 @@ def build_nutrition_analytics(meal_plan: MealPlan) -> dict:
 
     return {
         'weekly_target_fit': meal_plan.nutrition_fit_score.quantize(Decimal('0.01')),
+        # Mobile pie chart consumes 0-1 ratios; gram totals stay in `*_g_total`
+        # for any analytics surface that needs absolute values.
         'macro_balance': {
-            'protein_g': protein_total.quantize(Decimal('0.01')),
-            'fat_g': fat_total.quantize(Decimal('0.01')),
-            'carb_g': carb_total.quantize(Decimal('0.01')),
+            'protein': float(protein_ratio),
+            'fat': float(fat_ratio),
+            'carb': float(carb_ratio),
+        },
+        'macro_grams': {
+            'protein_g': float(protein_total.quantize(Decimal('0.01'))),
+            'fat_g': float(fat_total.quantize(Decimal('0.01'))),
+            'carb_g': float(carb_total.quantize(Decimal('0.01'))),
         },
         'member_fit': member_fit,
         'micronutrients': {
-            key: value.quantize(Decimal('0.01'))
+            key: float(value.quantize(Decimal('0.01')))
             for key, value in micronutrients.items()
         },
     }
@@ -1764,7 +1831,7 @@ def clone_meal_plan(*, meal_plan: MealPlan, user, start_date=None) -> MealPlan:
 
     cloned = MealPlan.objects.create(
         group=meal_plan.group,
-        title=f'Copy of {meal_plan.title}',
+        title=f'Копия — {meal_plan.title}',
         start_date=start_date,
         end_date=end_date,
         days_count=meal_plan.days_count,

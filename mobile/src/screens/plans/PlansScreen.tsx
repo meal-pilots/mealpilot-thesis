@@ -1,19 +1,24 @@
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { FlatList, RefreshControl, Text, View } from 'react-native'
+import { FlatList, RefreshControl, View } from 'react-native'
+import Animated, { FadeInDown } from 'react-native-reanimated'
 
 import type { AppStackParamList } from '@core/navigation/types'
 import { useActiveGroup } from '@features/groups/hooks'
 import { usePlansForGroup } from '@features/plans/hooks'
 import { formatCurrency, formatDateRange, formatScore } from '@shared/lib/formatters'
+import { haptic } from '@shared/lib/haptics'
+import { usePalette } from '@shared/lib/use-palette'
 import { useRefresh } from '@shared/lib/use-refresh'
 import { Button } from '@shared/ui/Button'
 import { Card } from '@shared/ui/Card'
 import { EmptyState } from '@shared/ui/EmptyState'
 import { Heading } from '@shared/ui/Heading'
+import { Icon } from '@shared/ui/Icon'
 import { Screen } from '@shared/ui/Screen'
 import { SkeletonList } from '@shared/ui/Skeleton'
-import { palette, spacing } from '@shared/ui/theme'
+import { Text } from '@shared/ui/Text'
+import { radii, spacing, type Palette } from '@shared/ui/theme'
 
 const STATUS_LABELS: Record<string, string> = {
     draft: 'Черновик',
@@ -23,16 +28,17 @@ const STATUS_LABELS: Record<string, string> = {
     archived: 'В архиве',
 }
 
-const STATUS_COLORS: Record<string, string> = {
-    draft: palette.textMuted,
-    generated: palette.info,
-    approved: palette.success,
-    modified: palette.warning,
-    archived: palette.textMuted,
+const STATUS_COLOR = (status: string, p: Palette): string => {
+    if (status === 'draft' || status === 'archived') return p.textMuted
+    if (status === 'generated') return p.info
+    if (status === 'approved') return p.success
+    if (status === 'modified') return p.warning
+    return p.textMuted
 }
 
 export function PlansScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
+    const palette = usePalette()
     const groupQuery = useActiveGroup()
     const groupId = groupQuery.data?.id
     const plansQuery = usePlansForGroup(groupId)
@@ -41,17 +47,20 @@ export function PlansScreen() {
     })
 
     const renderHeader = () => (
-        <View style={{ paddingBottom: spacing.md, gap: spacing.md }}>
+        <Animated.View entering={FadeInDown.duration(380)} style={{ paddingBottom: spacing.md, gap: spacing.md }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Heading level={1}>Планы питания</Heading>
                 <Button
                     label="Новый"
-                    onPress={() => navigation.navigate('GeneratePlan')}
+                    onPress={() => {
+                        haptic.medium()
+                        navigation.navigate('GeneratePlan')
+                    }}
                     size="sm"
-                    iconLeft={<Text style={{ color: palette.onPrimary, fontSize: 16, fontWeight: '700' }}>＋</Text>}
+                    iconLeft={<Icon name="plus" size={16} color={palette.onPrimary} strokeWidth={2.4} />}
                 />
             </View>
-        </View>
+        </Animated.View>
     )
 
     if (plansQuery.isLoading && !plansQuery.data) {
@@ -70,12 +79,12 @@ export function PlansScreen() {
                 keyExtractor={(item) => item.id}
                 ListHeaderComponent={renderHeader}
                 contentContainerStyle={{
-                    padding: spacing.lg,
-                    paddingBottom: spacing.xxl,
+                    padding: spacing.xxl,
+                    paddingBottom: spacing.huge,
                     gap: spacing.sm,
                 }}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primary} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.accent} />
                 }
                 ListEmptyComponent={
                     <EmptyState
@@ -83,61 +92,88 @@ export function PlansScreen() {
                         description="Создайте первый план, чтобы увидеть недельный список рецептов и покупок."
                         actionLabel="Сгенерировать план"
                         onAction={() => navigation.navigate('GeneratePlan')}
-                        emoji="🗓️"
+                        icon="calendarDays"
                     />
                 }
-                renderItem={({ item: plan }) => (
-                    <Card
-                        onPress={() => navigation.navigate('PlanDetails', { mealPlanId: plan.id })}
-                        style={{ marginBottom: spacing.sm }}
-                    >
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                            }}
-                        >
-                            <View style={{ flex: 1, marginRight: spacing.md }}>
-                                <Text
+                renderItem={({ item: plan, index }) => {
+                    const statusColor = STATUS_COLOR(plan.status, palette)
+                    return (
+                        <Animated.View entering={FadeInDown.delay(index * 35).duration(360)}>
+                            <Card
+                                onPress={() => navigation.navigate('PlanDetails', { mealPlanId: plan.id })}
+                                elevation="card"
+                            >
+                                <View
                                     style={{
-                                        fontSize: 11,
-                                        color: STATUS_COLORS[plan.status] ?? palette.textMuted,
-                                        fontWeight: '700',
-                                        letterSpacing: 0.4,
-                                        textTransform: 'uppercase',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'flex-start',
                                     }}
                                 >
-                                    {STATUS_LABELS[plan.status] ?? plan.status}
-                                    {plan.is_current ? ' · Активный' : ''}
-                                </Text>
-                                <Text
-                                    style={{
-                                        marginTop: spacing.xs,
-                                        fontSize: 17,
-                                        fontWeight: '700',
-                                        color: palette.text,
-                                        letterSpacing: -0.2,
-                                    }}
-                                    numberOfLines={2}
-                                >
-                                    {plan.title}
-                                </Text>
-                                <Text style={{ marginTop: 2, color: palette.textMuted, fontSize: 13 }}>
-                                    {formatDateRange(plan.start_date, plan.end_date)}
-                                </Text>
-                            </View>
-                            <View style={{ alignItems: 'flex-end' }}>
-                                <Text style={{ fontWeight: '700', color: palette.text, fontSize: 15 }}>
-                                    {formatCurrency(plan.estimated_total_cost)}
-                                </Text>
-                                <Text style={{ color: palette.textMuted, fontSize: 12, marginTop: 2 }}>
-                                    {formatScore(plan.overall_score)} fit
-                                </Text>
-                            </View>
-                        </View>
-                    </Card>
-                )}
+                                    <View style={{ flex: 1, marginRight: spacing.md }}>
+                                        <View
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                gap: spacing.xs,
+                                            }}
+                                        >
+                                            <View
+                                                style={{
+                                                    width: 6,
+                                                    height: 6,
+                                                    borderRadius: 3,
+                                                    backgroundColor: statusColor,
+                                                }}
+                                            />
+                                            <Text variant="overline" style={{ color: statusColor }}>
+                                                {STATUS_LABELS[plan.status] ?? plan.status}
+                                                {plan.is_current ? ' · Активный' : ''}
+                                            </Text>
+                                        </View>
+                                        <Text
+                                            variant="h3"
+                                            numberOfLines={2}
+                                            style={{ marginTop: spacing.xs }}
+                                        >
+                                            {plan.title}
+                                        </Text>
+                                        <View
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                gap: spacing.xs,
+                                                marginTop: 4,
+                                            }}
+                                        >
+                                            <Icon name="calendar" size={12} color={palette.textMuted} />
+                                            <Text variant="caption" tone="muted">
+                                                {formatDateRange(plan.start_date, plan.end_date)}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                                        <Text variant="bodyStrong">
+                                            {formatCurrency(plan.estimated_total_cost)}
+                                        </Text>
+                                        <View
+                                            style={{
+                                                paddingHorizontal: spacing.sm,
+                                                paddingVertical: 2,
+                                                borderRadius: radii.pill,
+                                                backgroundColor: palette.accentSoft,
+                                            }}
+                                        >
+                                            <Text variant="caption" weight="700" tone="accent">
+                                                {formatScore(plan.overall_score)}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </Card>
+                        </Animated.View>
+                    )
+                }}
             />
         </Screen>
     )

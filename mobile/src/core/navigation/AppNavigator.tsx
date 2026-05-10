@@ -1,6 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { Text } from 'react-native'
 
 import { BudgetAnalyticsScreen } from '@screens/plans/BudgetAnalyticsScreen'
 import { DayDetailsScreen } from '@screens/plans/DayDetailsScreen'
@@ -21,18 +20,21 @@ import { SettingsScreen } from '@screens/profile/SettingsScreen'
 import { ShoppingListScreen } from '@screens/plans/ShoppingListScreen'
 import { WhyThisPlanScreen } from '@screens/plans/WhyThisPlanScreen'
 
-import { palette } from '@shared/ui/theme'
+import { haptic } from '@shared/lib/haptics'
+import { usePalette } from '@shared/lib/use-palette'
+import { Icon, type IconName } from '@shared/ui/Icon'
+import { fonts } from '@shared/ui/theme'
 
 import type { AppStackParamList, AppTabParamList } from './types'
 
 const Tabs = createBottomTabNavigator<AppTabParamList>()
 const Stack = createNativeStackNavigator<AppStackParamList>()
 
-const TAB_ICONS: Record<keyof AppTabParamList, string> = {
-    Home: '🏠',
-    Plans: '🗓️',
-    Recipes: '🍽️',
-    Profile: '👤',
+const TAB_ICONS: Record<keyof AppTabParamList, IconName> = {
+    Home: 'home',
+    Plans: 'calendarDays',
+    Recipes: 'chefHat',
+    Profile: 'user',
 }
 
 const TAB_LABELS: Record<keyof AppTabParamList, string> = {
@@ -43,28 +45,35 @@ const TAB_LABELS: Record<keyof AppTabParamList, string> = {
 }
 
 function AppTabs() {
+    const palette = usePalette()
     return (
         <Tabs.Navigator
             screenOptions={({ route }) => ({
                 headerShown: false,
-                tabBarActiveTintColor: palette.primary,
+                tabBarActiveTintColor: palette.accent,
                 tabBarInactiveTintColor: palette.textMuted,
                 tabBarStyle: {
-                    backgroundColor: palette.canvasMuted,
+                    backgroundColor: palette.canvasElevated,
                     borderTopColor: palette.border,
                     borderTopWidth: 1,
-                    paddingTop: 6,
-                    paddingBottom: 6,
-                    height: 64,
+                    paddingTop: 8,
+                    paddingBottom: 8,
+                    height: 72,
                 },
-                tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-                tabBarIcon: ({ focused }) => (
-                    <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>
-                        {TAB_ICONS[route.name]}
-                    </Text>
+                tabBarLabelStyle: { fontSize: 11, fontFamily: fonts.semibold, marginTop: 2 },
+                tabBarIcon: ({ focused, color }) => (
+                    <Icon
+                        name={TAB_ICONS[route.name]}
+                        size={focused ? 24 : 22}
+                        color={color}
+                        strokeWidth={focused ? 2.4 : 1.8}
+                    />
                 ),
                 tabBarLabel: TAB_LABELS[route.name],
             })}
+            screenListeners={{
+                tabPress: () => haptic.selection(),
+            }}
         >
             <Tabs.Screen name="Home" component={HomeScreen} />
             <Tabs.Screen name="Plans" component={PlansScreen} />
@@ -74,14 +83,16 @@ function AppTabs() {
     )
 }
 
-const sharedHeader = {
-    headerStyle: { backgroundColor: palette.canvas },
-    headerTitleStyle: { color: palette.text, fontWeight: '700' as const },
-    headerTintColor: palette.primary,
-    contentStyle: { backgroundColor: palette.canvas },
-}
-
 export function AppNavigator() {
+    const palette = usePalette()
+    const sharedHeader = {
+        headerStyle: { backgroundColor: palette.canvas },
+        headerTitleStyle: { color: palette.text, fontFamily: fonts.semibold, fontSize: 17 },
+        headerTintColor: palette.accent,
+        contentStyle: { backgroundColor: palette.canvas },
+        headerShadowVisible: false,
+    }
+
     return (
         <Stack.Navigator screenOptions={sharedHeader}>
             <Stack.Screen name="Tabs" component={AppTabs} options={{ headerShown: false }} />
@@ -98,7 +109,11 @@ export function AppNavigator() {
             <Stack.Screen name="WhyThisPlan" component={WhyThisPlanScreen} options={{ title: 'Почему этот план' }} />
             <Stack.Screen name="MealAdaptation" component={MealAdaptationScreen} options={{ title: 'Адаптация' }} />
             <Stack.Screen name="ReplaceMeal" component={ReplaceMealScreen} options={{ title: 'Заменить блюдо' }} />
-            <Stack.Screen name="RecipeDetails" component={RecipeDetailsScreen} options={{ title: 'Рецепт' }} />
+            <Stack.Screen
+                name="RecipeDetails"
+                component={RecipeDetailsScreen}
+                options={{ title: '', headerTransparent: true }}
+            />
             <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Настройки' }} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Уведомления' }} />
             <Stack.Screen name="Pantry" component={PantryScreen} options={{ title: 'Кладовая' }} />

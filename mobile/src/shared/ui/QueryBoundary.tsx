@@ -1,8 +1,11 @@
-import { ActivityIndicator, Text, View } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 
-import { Button } from './Button'
-import { SkeletonList } from './Skeleton'
-import { palette, spacing } from './theme'
+import { usePalette } from '@shared/lib/use-palette'
+import { Button } from '@shared/ui/Button'
+import { Icon } from '@shared/ui/Icon'
+import { SkeletonList } from '@shared/ui/Skeleton'
+import { Text } from '@shared/ui/Text'
+import { radii, spacing } from '@shared/ui/theme'
 
 type QueryBoundaryProps = {
     isLoading: boolean
@@ -23,6 +26,8 @@ export function QueryBoundary({
     skeleton = 'spinner',
     skeletonCount = 4,
 }: QueryBoundaryProps) {
+    const palette = usePalette()
+
     if (isLoading) {
         if (skeleton === 'list') {
             return (
@@ -32,18 +37,52 @@ export function QueryBoundary({
             )
         }
         return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, gap: spacing.md }}>
-                <ActivityIndicator color={palette.primary} />
-                {loadingText ? <Text style={{ color: palette.textMuted }}>{loadingText}</Text> : null}
+            <View
+                style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: spacing.xl,
+                    gap: spacing.md,
+                }}
+            >
+                <ActivityIndicator color={palette.accent} />
+                {loadingText ? (
+                    <Text variant="body" tone="muted">
+                        {loadingText}
+                    </Text>
+                ) : null}
             </View>
         )
     }
     if (error) {
         const message = error instanceof Error ? error.message : 'Что-то пошло не так'
         return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, gap: spacing.md }}>
-                <Text style={{ fontSize: 18, fontWeight: '700', color: palette.danger }}>Не удалось загрузить</Text>
-                <Text style={{ color: palette.textMuted, textAlign: 'center' }}>{message}</Text>
+            <View
+                style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: spacing.xl,
+                    gap: spacing.md,
+                }}
+            >
+                <View
+                    style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: radii.pill,
+                        backgroundColor: palette.dangerBg,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Icon name="alertCircle" size={40} color={palette.danger} strokeWidth={1.8} />
+                </View>
+                <Text variant="h3">Не удалось загрузить</Text>
+                <Text variant="body" tone="muted" align="center">
+                    {message}
+                </Text>
                 {refetch ? <Button label="Повторить" onPress={refetch} variant="ghost" /> : null}
             </View>
         )
