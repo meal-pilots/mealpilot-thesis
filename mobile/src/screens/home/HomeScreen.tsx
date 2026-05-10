@@ -1,31 +1,56 @@
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { useMemo } from 'react'
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native'
+import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated'
 
 import type { AppStackParamList, AppTabParamList } from '@core/navigation/types'
 import { useAuth } from '@features/auth/model/AuthContext'
 import { useActiveGroup } from '@features/groups/hooks'
 import { useNotifications } from '@features/notifications/hooks'
-import { useCurrentPlan } from '@features/plans/hooks'
+import { useCurrentPlan, usePlanDetail } from '@features/plans/hooks'
 import { useFavorites } from '@features/recipes/hooks'
-import { formatCurrency, formatDateRange, formatScore } from '@shared/lib/formatters'
+import { formatCurrency, formatDateRange, formatScore, mealTypeLabel, pluralRu } from '@shared/lib/formatters'
+import { haptic } from '@shared/lib/haptics'
+import { mealTypeIcon } from '@shared/lib/meal-icons'
+import { usePalette } from '@shared/lib/use-palette'
 import { useRefresh } from '@shared/lib/use-refresh'
 import { Button } from '@shared/ui/Button'
 import { Card } from '@shared/ui/Card'
 import { Heading } from '@shared/ui/Heading'
+import { Icon, type IconName } from '@shared/ui/Icon'
 import { Screen } from '@shared/ui/Screen'
 import { Section } from '@shared/ui/Section'
 import { SkeletonCard } from '@shared/ui/Skeleton'
-import { palette, radii, shadows, spacing } from '@shared/ui/theme'
+import { Text } from '@shared/ui/Text'
+import { TouchableSurface } from '@shared/ui/TouchableSurface'
+import { radii, shadows, spacing, type Palette } from '@shared/ui/theme'
 
 type Navigation = NativeStackNavigationProp<AppStackParamList & AppTabParamList>
 
+function timeBasedGreeting(): string {
+    const hour = new Date().getHours()
+    if (hour < 5) return 'Доброй ночи'
+    if (hour < 12) return 'Доброе утро'
+    if (hour < 18) return 'Добрый день'
+    return 'Добрый вечер'
+}
+
+function todayLabel(): string {
+    const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота']
+    const today = new Date()
+    return `Сегодня ${today.getDate()} · ${days[today.getDay()]}`
+}
+
 export function HomeScreen() {
     const navigation = useNavigation<Navigation>()
+    const palette = usePalette()
     const { user } = useAuth()
     const groupQuery = useActiveGroup()
     const groupId = groupQuery.data?.id
     const planQuery = useCurrentPlan(groupId)
+    const planDetail = usePlanDetail(planQuery.data?.id)
     const favoritesQuery = useFavorites()
     const notifications = useNotifications()
     const unreadCount = notifications.data?.filter((n) => !n.is_read).length ?? 0
@@ -39,248 +64,420 @@ export function HomeScreen() {
         ])
     })
 
-    const greeting = user?.full_name ? `Привет, ${user.full_name.split(' ')[0]}!` : 'Добро пожаловать'
+    const greeting = `${timeBasedGreeting()}${user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}`
+
+    const todaysItems = useMemo(() => {
+        if (!planDetail.data) return []
+        const today = new Date().toISOString().slice(0, 10)
+        const day = planDetail.data.days.find((d) => d.plan_date === today) ?? planDetail.data.days[0]
+        return day?.items ?? []
+    }, [planDetail.data])
 
     return (
         <Screen contentContainerStyle={{ padding: 0 }}>
             <ScrollView
-                contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.lg }}
+                contentContainerStyle={{ padding: spacing.xxl, paddingBottom: spacing.huge, gap: spacing.xl }}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primary} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.accent} />
                 }
+                showsVerticalScrollIndicator={false}
             >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 14, color: palette.textMuted }}>{greeting}</Text>
-                        <Heading level={1}>{groupQuery.data?.name ?? 'Ваша кухня'}</Heading>
+                <Animated.View entering={FadeInDown.duration(420)}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View style={{ flex: 1 }}>
+                            <Text variant="caption" tone="muted">
+                                {todayLabel()}
+                            </Text>
+                            <Heading level={1} style={{ marginTop: 2 }}>
+                                {greeting}
+                            </Heading>
+                        </View>
+                        <NotificationBell
+                            palette={palette}
+                            count={unreadCount}
+                            onPress={() => {
+                                haptic.light()
+                                navigation.navigate('Notifications')
+                            }}
+                        />
                     </View>
-                    <Pressable
-                        onPress={() => navigation.navigate('Notifications')}
-                        hitSlop={8}
-                        style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 22,
-                            backgroundColor: palette.canvasMuted,
-                            borderWidth: 1,
-                            borderColor: palette.border,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <Text style={{ fontSize: 18 }}>🔔</Text>
-                        {unreadCount > 0 ? (
-                            <View
-                                style={{
-                                    position: 'absolute',
-                                    top: -2,
-                                    right: -2,
-                                    minWidth: 18,
-                                    height: 18,
-                                    borderRadius: 9,
-                                    backgroundColor: palette.danger,
-                                    paddingHorizontal: 4,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <Text style={{ color: palette.onPrimary, fontSize: 10, fontWeight: '700' }}>
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </Text>
-                            </View>
-                        ) : null}
-                    </Pressable>
-                </View>
+                </Animated.View>
 
-                <Section title="Текущий план">
+                <Animated.View entering={FadeInDown.delay(80).duration(420)}>
                     {planQuery.isLoading ? (
                         <SkeletonCard />
                     ) : planQuery.data ? (
-                        <Pressable
-                            onPress={() =>
-                                navigation.navigate('PlanDetails', { mealPlanId: planQuery.data!.id })
-                            }
-                            style={({ pressed }) => [
-                                {
-                                    backgroundColor: palette.primary,
-                                    borderRadius: radii.lg,
-                                    padding: spacing.lg,
-                                    transform: [{ scale: pressed ? 0.98 : 1 }],
-                                },
-                                shadows.raised,
-                            ]}
-                        >
-                            <Text
-                                style={{
-                                    fontSize: 12,
-                                    color: palette.accentStrong,
-                                    fontWeight: '700',
-                                    letterSpacing: 0.5,
-                                    textTransform: 'uppercase',
-                                }}
-                            >
-                                Активный план
-                            </Text>
-                            <Text
-                                style={{
-                                    color: palette.onPrimary,
-                                    fontSize: 22,
-                                    fontWeight: '700',
-                                    marginTop: spacing.xs,
-                                    letterSpacing: -0.3,
-                                }}
-                                numberOfLines={2}
-                            >
-                                {planQuery.data.title}
-                            </Text>
-                            <Text style={{ color: palette.accentStrong, marginTop: 4, fontSize: 13 }}>
-                                {formatDateRange(planQuery.data.start_date, planQuery.data.end_date)}
-                            </Text>
-                            <View
-                                style={{
-                                    marginTop: spacing.lg,
-                                    paddingTop: spacing.md,
-                                    borderTopWidth: 1,
-                                    borderTopColor: 'rgba(255,255,255,0.1)',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <View>
-                                    <Text style={{ color: palette.accentStrong, fontSize: 11, fontWeight: '600' }}>
-                                        БЮДЖЕТ
-                                    </Text>
-                                    <Text style={{ color: palette.onPrimary, fontWeight: '700', fontSize: 16, marginTop: 2 }}>
-                                        {formatCurrency(planQuery.data.estimated_total_cost)}
-                                    </Text>
-                                </View>
-                                <View>
-                                    <Text style={{ color: palette.accentStrong, fontSize: 11, fontWeight: '600' }}>
-                                        FIT
-                                    </Text>
-                                    <Text style={{ color: palette.onPrimary, fontWeight: '700', fontSize: 16, marginTop: 2 }}>
-                                        {formatScore(planQuery.data.overall_score)}
-                                    </Text>
-                                </View>
-                            </View>
-                        </Pressable>
+                        <ActivePlanHero
+                            palette={palette}
+                            title={planQuery.data.title}
+                            range={formatDateRange(planQuery.data.start_date, planQuery.data.end_date)}
+                            cost={formatCurrency(planQuery.data.estimated_total_cost)}
+                            score={formatScore(planQuery.data.overall_score)}
+                            onPress={() => navigation.navigate('PlanDetails', { mealPlanId: planQuery.data!.id })}
+                        />
                     ) : (
-                        <Card>
-                            <Text style={{ fontSize: 32 }}>🗓️</Text>
-                            <Heading level={3} style={{ marginTop: spacing.sm }}>
-                                Плана пока нет
-                            </Heading>
-                            <Text style={{ marginTop: spacing.xs, color: palette.textSecondary, lineHeight: 20 }}>
-                                Сгенерируйте недельный план под бюджет и предпочтения вашей семьи.
-                            </Text>
-                            <Button
-                                label="Сгенерировать план"
-                                onPress={() => navigation.navigate('GeneratePlan')}
-                                style={{ marginTop: spacing.md }}
-                            />
-                        </Card>
+                        <EmptyPlanCard palette={palette} onPress={() => navigation.navigate('GeneratePlan')} />
                     )}
-                </Section>
+                </Animated.View>
 
-                <Section title="Быстрые действия">
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-                        <QuickAction
-                            icon="✨"
-                            label="Новый план"
-                            onPress={() => navigation.navigate('GeneratePlan')}
-                        />
-                        <QuickAction
-                            icon="🍽️"
-                            label="Рецепты"
-                            onPress={() => navigation.navigate('Recipes')}
-                        />
-                        <QuickAction
-                            icon="🥫"
-                            label="Кладовая"
-                            onPress={() => navigation.navigate('Pantry')}
-                        />
-                        {planQuery.data ? (
+                {todaysItems.length > 0 ? (
+                    <Animated.View entering={FadeInDown.delay(150).duration(420)}>
+                        <Section
+                            title="Меню на сегодня"
+                            subtitle={`${todaysItems.length} ${pluralRu(todaysItems.length, ['блюдо', 'блюда', 'блюд'])}`}
+                        >
+                            <View style={{ gap: spacing.sm }}>
+                                {todaysItems.slice(0, 3).map((item) => (
+                                    <Card
+                                        key={item.id}
+                                        elevation="card"
+                                        onPress={() => navigation.navigate('RecipeDetails', { recipeId: item.recipe_id })}
+                                    >
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                                            <View
+                                                style={{
+                                                    width: 44,
+                                                    height: 44,
+                                                    borderRadius: radii.md,
+                                                    backgroundColor: palette.accentSoft,
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}
+                                            >
+                                                <Icon
+                                                    name={mealTypeIcon(item.meal_type)}
+                                                    size={22}
+                                                    color={palette.accentText}
+                                                />
+                                            </View>
+                                            <View style={{ flex: 1 }}>
+                                                <Text variant="caption" tone="muted">
+                                                    {mealTypeLabel(item.meal_type)}
+                                                </Text>
+                                                <Text variant="bodyStrong" numberOfLines={1}>
+                                                    {item.recipe_title}
+                                                </Text>
+                                            </View>
+                                            <Text variant="caption" tone="secondary" weight="700">
+                                                {formatCurrency(item.estimated_cost)}
+                                            </Text>
+                                        </View>
+                                    </Card>
+                                ))}
+                            </View>
+                        </Section>
+                    </Animated.View>
+                ) : null}
+
+                <Animated.View entering={FadeInDown.delay(220).duration(420)}>
+                    <Section title="Быстрые действия">
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
                             <QuickAction
-                                icon="🛒"
-                                label="Покупки"
-                                onPress={() =>
-                                    navigation.navigate('ShoppingList', {
-                                        mealPlanId: planQuery.data!.id,
-                                    })
-                                }
+                                palette={palette}
+                                icon="sparkles"
+                                label="Новый план"
+                                tint={palette.accent}
+                                onPress={() => navigation.navigate('GeneratePlan')}
                             />
-                        ) : null}
-                    </View>
-                </Section>
+                            <QuickAction
+                                palette={palette}
+                                icon="chefHat"
+                                label="Рецепты"
+                                tint={palette.success}
+                                onPress={() => navigation.navigate('Recipes')}
+                            />
+                            <QuickAction
+                                palette={palette}
+                                icon="package"
+                                label="Кладовая"
+                                tint={palette.info}
+                                onPress={() => navigation.navigate('Pantry')}
+                            />
+                            {planQuery.data ? (
+                                <QuickAction
+                                    palette={palette}
+                                    icon="cart"
+                                    label="Покупки"
+                                    tint={palette.warning}
+                                    onPress={() =>
+                                        navigation.navigate('ShoppingList', {
+                                            mealPlanId: planQuery.data!.id,
+                                        })
+                                    }
+                                />
+                            ) : null}
+                        </View>
+                    </Section>
+                </Animated.View>
 
                 {favoritesQuery.data && favoritesQuery.data.length > 0 ? (
-                    <Section
-                        title="Избранное"
-                        subtitle={`${favoritesQuery.data.length} рецептов`}
-                    >
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ gap: spacing.sm }}
+                    <Animated.View entering={FadeInDown.delay(300).duration(420)}>
+                        <Section
+                            title="Избранное"
+                            subtitle={`${favoritesQuery.data.length} ${pluralRu(favoritesQuery.data.length, ['рецепт', 'рецепта', 'рецептов'])}`}
                         >
-                            {favoritesQuery.data.slice(0, 8).map((favorite) => (
-                                <Card
-                                    key={favorite.recipe_id}
-                                    onPress={() =>
-                                        navigation.navigate('RecipeDetails', { recipeId: favorite.recipe_id })
-                                    }
-                                    style={{ width: 220 }}
-                                >
-                                    <Text
-                                        style={{
-                                            fontSize: 11,
-                                            color: palette.accentText,
-                                            fontWeight: '700',
-                                            letterSpacing: 0.4,
-                                            textTransform: 'uppercase',
-                                        }}
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.xxl }}
+                            >
+                                {favoritesQuery.data.slice(0, 8).map((favorite, index) => (
+                                    <Animated.View
+                                        key={favorite.recipe_id}
+                                        entering={FadeInRight.delay(80 * index).duration(360)}
                                     >
-                                        {formatScore(favorite.fit_score)} fit
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            marginTop: spacing.xs,
-                                            fontWeight: '700',
-                                            color: palette.text,
-                                            fontSize: 15,
-                                        }}
-                                        numberOfLines={2}
-                                    >
-                                        {favorite.title}
-                                    </Text>
-                                </Card>
-                            ))}
-                        </ScrollView>
-                    </Section>
+                                        <Card
+                                            onPress={() =>
+                                                navigation.navigate('RecipeDetails', { recipeId: favorite.recipe_id })
+                                            }
+                                            style={{ width: 220 }}
+                                            elevation="card"
+                                        >
+                                            <Text variant="overline" tone="accent">
+                                                {formatScore(favorite.fit_score)} fit
+                                            </Text>
+                                            <Text
+                                                variant="bodyStrong"
+                                                numberOfLines={2}
+                                                style={{ marginTop: spacing.xs }}
+                                            >
+                                                {favorite.title}
+                                            </Text>
+                                        </Card>
+                                    </Animated.View>
+                                ))}
+                            </ScrollView>
+                        </Section>
+                    </Animated.View>
                 ) : null}
             </ScrollView>
         </Screen>
     )
 }
 
-function QuickAction({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
+function NotificationBell({
+    palette,
+    count,
+    onPress,
+}: {
+    palette: Palette
+    count: number
+    onPress: () => void
+}) {
     return (
         <Pressable
             onPress={onPress}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={count > 0 ? `Уведомлений: ${count}` : 'Уведомления'}
             style={({ pressed }) => ({
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: palette.canvasElevated,
+                borderWidth: 1,
+                borderColor: palette.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.8 : 1,
+            })}
+        >
+            <Icon name="bell" size={20} color={palette.text} />
+            {count > 0 ? (
+                <View
+                    style={{
+                        position: 'absolute',
+                        top: -2,
+                        right: -2,
+                        minWidth: 20,
+                        height: 20,
+                        borderRadius: 10,
+                        backgroundColor: palette.danger,
+                        paddingHorizontal: 5,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 2,
+                        borderColor: palette.canvas,
+                    }}
+                >
+                    <Text variant="caption" style={{ color: palette.dangerOn, fontSize: 10 }}>
+                        {count > 9 ? '9+' : count}
+                    </Text>
+                </View>
+            ) : null}
+        </Pressable>
+    )
+}
+
+function ActivePlanHero({
+    palette,
+    title,
+    range,
+    cost,
+    score,
+    onPress,
+}: {
+    palette: Palette
+    title: string
+    range: string
+    cost: string
+    score: string
+    onPress: () => void
+}) {
+    return (
+        <TouchableSurface
+            onPress={onPress}
+            scaleTo={0.985}
+            accessibilityRole="button"
+            accessibilityLabel={`Активный план: ${title}`}
+            style={[{ borderRadius: radii.xl, overflow: 'hidden' }, shadows.raised]}
+        >
+            <LinearGradient
+                colors={[palette.primary, palette.primaryMuted, palette.accentStrong]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ padding: spacing.xl, position: 'relative', overflow: 'hidden' }}
+            >
+                <View
+                    style={{
+                        position: 'absolute',
+                        top: -50,
+                        right: -40,
+                        width: 180,
+                        height: 180,
+                        borderRadius: 90,
+                        backgroundColor: palette.accent,
+                        opacity: 0.18,
+                    }}
+                />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                    <View
+                        style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: palette.success,
+                        }}
+                    />
+                    <Text variant="overline" style={{ color: palette.accentSoft }}>
+                        Активный план
+                    </Text>
+                </View>
+                <Text
+                    variant="h1"
+                    numberOfLines={2}
+                    style={{ color: palette.onPrimary, marginTop: spacing.xs }}
+                >
+                    {title}
+                </Text>
+                <Text variant="caption" style={{ color: palette.accentSoft, marginTop: 2 }}>
+                    {range}
+                </Text>
+                <View
+                    style={{
+                        marginTop: spacing.lg,
+                        paddingTop: spacing.md,
+                        borderTopWidth: 1,
+                        borderTopColor: 'rgba(255,255,255,0.15)',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    <View>
+                        <Text variant="overline" style={{ color: palette.accentSoft }}>
+                            Бюджет
+                        </Text>
+                        <Text variant="h2" style={{ color: palette.onPrimary, marginTop: 2 }}>
+                            {cost}
+                        </Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end' }}>
+                        <Text variant="overline" style={{ color: palette.accentSoft }}>
+                            Подходит
+                        </Text>
+                        <Text variant="h2" style={{ color: palette.onPrimary, marginTop: 2 }}>
+                            {score}
+                        </Text>
+                    </View>
+                </View>
+            </LinearGradient>
+        </TouchableSurface>
+    )
+}
+
+function EmptyPlanCard({ palette, onPress }: { palette: Palette; onPress: () => void }) {
+    return (
+        <Card elevation="card">
+            <View
+                style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: radii.lg,
+                    backgroundColor: palette.accentSoft,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}
+            >
+                <Icon name="calendarDays" size={26} color={palette.accentText} />
+            </View>
+            <Heading level={3} style={{ marginTop: spacing.sm }}>
+                Плана пока нет
+            </Heading>
+            <Text variant="body" tone="secondary" style={{ marginTop: spacing.xs }}>
+                Сгенерируйте недельный план под бюджет и предпочтения вашей семьи.
+            </Text>
+            <Button
+                label="Сгенерировать план"
+                onPress={onPress}
+                style={{ marginTop: spacing.md }}
+                iconLeft={<Icon name="sparkles" size={18} color={palette.onPrimary} />}
+            />
+        </Card>
+    )
+}
+
+function QuickAction({
+    palette,
+    icon,
+    label,
+    tint,
+    onPress,
+}: {
+    palette: Palette
+    icon: IconName
+    label: string
+    tint: string
+    onPress: () => void
+}) {
+    return (
+        <TouchableSurface
+            onPress={onPress}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            scaleTo={0.96}
+            style={{
                 width: '47%',
-                backgroundColor: palette.canvasMuted,
+                backgroundColor: palette.canvasElevated,
                 borderRadius: radii.lg,
                 padding: spacing.md,
                 borderWidth: 1,
                 borderColor: palette.border,
-                alignItems: 'flex-start',
-                gap: spacing.xs,
-                opacity: pressed ? 0.85 : 1,
-            })}
+                gap: spacing.sm,
+            }}
         >
-            <Text style={{ fontSize: 22 }}>{icon}</Text>
-            <Text style={{ fontWeight: '700', color: palette.text, fontSize: 14 }}>{label}</Text>
-        </Pressable>
+            <View
+                style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: radii.md,
+                    backgroundColor: tint + '22',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}
+            >
+                <Icon name={icon} size={22} color={tint} />
+            </View>
+            <Text variant="bodyStrong">{label}</Text>
+        </TouchableSurface>
     )
 }

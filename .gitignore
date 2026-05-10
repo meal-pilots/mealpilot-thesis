@@ -47,7 +47,15 @@ static_cdn/        # Generated static files/CDNs
 
 # Environment variables (critical for security)
 .env               # Contains environment-specific variables like secret keys
+.env.fr
+.env.local
+.env.*.local
 .flaskenv
+
+# Database dumps (transferred out-of-band, see README)
+*.dump
+*.sql.gz
+backups/
 
 # IDE-specific files (e.g., PyCharm, VS Code)
 .idea/             # PyCharm project files

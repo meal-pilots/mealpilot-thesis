@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Text, TextInput, type TextInputProps, View } from 'react-native'
+import { TextInput, View, type TextInputProps } from 'react-native'
 
-import { palette, radii, spacing } from './theme'
+import { usePalette } from '@shared/lib/use-palette'
+import { Text } from '@shared/ui/Text'
+import { radii, spacing } from '@shared/ui/theme'
 
 type InputProps = TextInputProps & {
     label?: string
@@ -12,22 +14,28 @@ type InputProps = TextInputProps & {
 }
 
 export function Input({ label, error, hint, leftAddon, rightAddon, style, onFocus, onBlur, ...rest }: InputProps) {
+    const palette = usePalette()
     const [focused, setFocused] = useState(false)
+
+    const borderColor = error ? palette.danger : focused ? palette.primary : palette.border
 
     return (
         <View style={{ gap: spacing.xs }}>
             {label ? (
-                <Text style={{ fontSize: 14, fontWeight: '600', color: palette.textSecondary }}>{label}</Text>
+                <Text variant="caption" tone="secondary">
+                    {label}
+                </Text>
             ) : null}
             <View
                 style={{
                     flexDirection: 'row',
                     alignItems: 'center',
                     borderWidth: 1.5,
-                    borderColor: error ? palette.danger : focused ? palette.primary : palette.border,
+                    borderColor,
                     borderRadius: radii.md,
                     backgroundColor: palette.canvasMuted,
                     paddingHorizontal: spacing.md,
+                    minHeight: 52,
                 }}
             >
                 {leftAddon ? <View style={{ marginRight: spacing.sm }}>{leftAddon}</View> : null}
@@ -41,6 +49,7 @@ export function Input({ label, error, hint, leftAddon, rightAddon, style, onFocu
                         setFocused(false)
                         onBlur?.(e)
                     }}
+                    selectionColor={palette.accent}
                     style={[
                         {
                             flex: 1,
@@ -55,9 +64,13 @@ export function Input({ label, error, hint, leftAddon, rightAddon, style, onFocu
                 {rightAddon ? <View style={{ marginLeft: spacing.sm }}>{rightAddon}</View> : null}
             </View>
             {error ? (
-                <Text style={{ color: palette.danger, fontSize: 13, fontWeight: '500' }}>{error}</Text>
+                <Text variant="caption" tone="danger">
+                    {error}
+                </Text>
             ) : hint ? (
-                <Text style={{ color: palette.textMuted, fontSize: 13 }}>{hint}</Text>
+                <Text variant="caption" tone="muted">
+                    {hint}
+                </Text>
             ) : null}
         </View>
     )

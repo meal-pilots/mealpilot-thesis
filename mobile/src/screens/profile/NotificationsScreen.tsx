@@ -1,24 +1,33 @@
-import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native'
+import { FlatList, RefreshControl, View } from 'react-native'
+import Animated, { FadeInDown, Layout } from 'react-native-reanimated'
 
 import {
     useMarkAllNotificationsRead,
     useMarkNotificationRead,
     useNotifications,
 } from '@features/notifications/hooks'
+import { haptic } from '@shared/lib/haptics'
+import { usePalette } from '@shared/lib/use-palette'
 import { useRefresh } from '@shared/lib/use-refresh'
 import { Button } from '@shared/ui/Button'
 import { EmptyState } from '@shared/ui/EmptyState'
 import { Heading } from '@shared/ui/Heading'
+import { Icon, type IconName } from '@shared/ui/Icon'
 import { Screen } from '@shared/ui/Screen'
 import { SkeletonList } from '@shared/ui/Skeleton'
+import { Text } from '@shared/ui/Text'
 import { useToast } from '@shared/ui/Toast'
-import { palette, radii, spacing } from '@shared/ui/theme'
+import { TouchableSurface } from '@shared/ui/TouchableSurface'
+import { radii, spacing, type Palette } from '@shared/ui/theme'
 
-const TYPE_BADGES: Record<string, { label: string; color: string }> = {
-    pantry_expiring: { label: 'Кладовая', color: palette.warning },
-    plan_ready: { label: 'План', color: palette.info },
-    plan_failed: { label: 'Ошибка', color: palette.danger },
-    system: { label: 'Система', color: palette.textMuted },
+const TYPE_META: Record<
+    string,
+    { label: string; color: (p: Palette) => string; icon: IconName }
+> = {
+    pantry_expiring: { label: 'Кладовая', color: (p) => p.warning, icon: 'package' },
+    plan_ready: { label: 'План', color: (p) => p.info, icon: 'calendarDays' },
+    plan_failed: { label: 'Ошибка', color: (p) => p.danger, icon: 'alertCircle' },
+    system: { label: 'Система', color: (p) => p.textMuted, icon: 'info' },
 }
 
 function formatRelativeTime(iso: string): string {
@@ -35,6 +44,7 @@ function formatRelativeTime(iso: string): string {
 }
 
 export function NotificationsScreen() {
+    const palette = usePalette()
     const notifications = useNotifications()
     const markRead = useMarkNotificationRead()
     const markAll = useMarkAllNotificationsRead()
@@ -44,7 +54,7 @@ export function NotificationsScreen() {
     const unreadCount = notifications.data?.filter((n) => !n.is_read).length ?? 0
 
     const renderHeader = () => (
-        <View style={{ paddingBottom: spacing.md, gap: spacing.md }}>
+        <Animated.View entering={FadeInDown.duration(380)} style={{ paddingBottom: spacing.md, gap: spacing.md }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Heading level={1}>Уведомления</Heading>
                 {unreadCount > 0 ? (
@@ -52,20 +62,21 @@ export function NotificationsScreen() {
                         label="Прочитать всё"
                         size="sm"
                         variant="ghost"
-                        onPress={() =>
+                        onPress={() => {
+                            haptic.success()
                             markAll.mutate(undefined, {
                                 onSuccess: () => toast.success('Все уведомления прочитаны'),
                             })
-                        }
+                        }}
                     />
                 ) : null}
             </View>
             {unreadCount > 0 ? (
-                <Text style={{ color: palette.textMuted, fontSize: 14 }}>
+                <Text variant="caption" tone="muted">
                     Непрочитанных: {unreadCount}
                 </Text>
             ) : null}
-        </View>
+        </Animated.View>
     )
 
     if (notifications.isLoading && !notifications.data) {
@@ -84,63 +95,79 @@ export function NotificationsScreen() {
                 keyExtractor={(item) => item.id}
                 ListHeaderComponent={renderHeader}
                 contentContainerStyle={{
-                    padding: spacing.lg,
-                    paddingBottom: spacing.xxl,
+                    padding: spacing.xxl,
+                    paddingBottom: spacing.huge,
                     gap: spacing.sm,
                 }}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primary} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.accent} />
                 }
                 ListEmptyComponent={
                     <EmptyState
                         title="Уведомлений нет"
                         description="Здесь появятся напоминания об истечении продуктов и обновления плана."
-                        emoji="🔔"
+                        icon="bell"
                     />
                 }
-                renderItem={({ item }) => {
-                    const badge = TYPE_BADGES[item.type] ?? TYPE_BADGES.system
+                renderItem={({ item, index }) => {
+                    const meta = TYPE_META[item.type] ?? TYPE_META.system
+                    const accentColor = meta.color(palette)
                     return (
-                        <Pressable
-                            onPress={() => {
-                                if (!item.is_read) markRead.mutate(item.id)
-                            }}
-                            style={{
-                                backgroundColor: item.is_read ? palette.canvasMuted : palette.canvas,
-                                borderLeftWidth: item.is_read ? 0 : 4,
-                                borderLeftColor: badge.color,
-                                borderRadius: radii.lg,
-                                padding: spacing.md,
-                                borderWidth: 1,
-                                borderColor: palette.border,
-                                gap: spacing.xs,
-                            }}
+                        <Animated.View
+                            entering={FadeInDown.delay(index * 40).duration(360)}
+                            layout={Layout.springify()}
                         >
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text
-                                    style={{
-                                        fontSize: 11,
-                                        color: badge.color,
-                                        fontWeight: '700',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: 0.4,
-                                    }}
-                                >
-                                    {badge.label}
+                            <TouchableSurface
+                                onPress={() => {
+                                    if (!item.is_read) {
+                                        haptic.light()
+                                        markRead.mutate(item.id)
+                                    }
+                                }}
+                                accessibilityRole="button"
+                                accessibilityLabel={`${meta.label}: ${item.title}`}
+                                scaleTo={0.985}
+                                style={{
+                                    backgroundColor: item.is_read ? palette.canvasMuted : palette.canvasElevated,
+                                    borderLeftWidth: item.is_read ? 0 : 4,
+                                    borderLeftColor: accentColor,
+                                    borderRadius: radii.lg,
+                                    padding: spacing.md,
+                                    borderWidth: 1,
+                                    borderColor: palette.border,
+                                    gap: spacing.xs,
+                                }}
+                            >
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                                    <View
+                                        style={{
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: 14,
+                                            backgroundColor: accentColor + '22',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        <Icon name={meta.icon} size={16} color={accentColor} />
+                                    </View>
+                                    <Text variant="overline" style={{ color: accentColor, flex: 1 }}>
+                                        {meta.label}
+                                    </Text>
+                                    <Text variant="caption" tone="muted">
+                                        {formatRelativeTime(item.created_at)}
+                                    </Text>
+                                </View>
+                                <Text variant="bodyStrong" style={{ marginTop: 4 }}>
+                                    {item.title}
                                 </Text>
-                                <Text style={{ color: palette.textMuted, fontSize: 11 }}>
-                                    {formatRelativeTime(item.created_at)}
-                                </Text>
-                            </View>
-                            <Text style={{ fontSize: 16, fontWeight: '700', color: palette.text }}>
-                                {item.title}
-                            </Text>
-                            {item.message ? (
-                                <Text style={{ color: palette.textSecondary, fontSize: 14, lineHeight: 20 }}>
-                                    {item.message}
-                                </Text>
-                            ) : null}
-                        </Pressable>
+                                {item.message ? (
+                                    <Text variant="body" tone="secondary">
+                                        {item.message}
+                                    </Text>
+                                ) : null}
+                            </TouchableSurface>
+                        </Animated.View>
                     )
                 }}
             />

@@ -1,4 +1,5 @@
 import NetInfo from '@react-native-community/netinfo'
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { QueryClient, QueryClientProvider, focusManager, onlineManager } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
 import { AppState, type AppStateStatus, Platform } from 'react-native'
@@ -46,11 +47,13 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaProvider>
-                <QueryClientProvider client={queryClient}>
-                    <AuthProvider>
-                        <ToastProvider>{children}</ToastProvider>
-                    </AuthProvider>
-                </QueryClientProvider>
+                <BottomSheetModalProvider>
+                    <QueryClientProvider client={queryClient}>
+                        <AuthProvider>
+                            <ToastProvider>{children}</ToastProvider>
+                        </AuthProvider>
+                    </QueryClientProvider>
+                </BottomSheetModalProvider>
             </SafeAreaProvider>
         </GestureHandlerRootView>
     )

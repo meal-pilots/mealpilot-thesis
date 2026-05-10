@@ -1,4 +1,7 @@
-import { Text, View, type StyleProp, type ViewStyle } from 'react-native'
+import { View, type StyleProp, type ViewStyle } from 'react-native'
+
+import { Text } from '@shared/ui/Text'
+import { spacing } from '@shared/ui/theme'
 
 type SectionProps = {
     title?: string
@@ -10,15 +13,15 @@ type SectionProps = {
 
 export function Section({ title, subtitle, children, style, actionRight }: SectionProps) {
     return (
-        <View style={[{ gap: 12 }, style]}>
+        <View style={[{ gap: spacing.md }, style]}>
             {title || actionRight ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <View style={{ flex: 1 }}>
-                        {title ? (
-                            <Text style={{ fontSize: 18, fontWeight: '700', color: '#111827' }}>{title}</Text>
-                        ) : null}
+                        {title ? <Text variant="h3">{title}</Text> : null}
                         {subtitle ? (
-                            <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>{subtitle}</Text>
+                            <Text variant="caption" tone="muted" style={{ marginTop: 2 }}>
+                                {subtitle}
+                            </Text>
                         ) : null}
                     </View>
                     {actionRight}

@@ -1,44 +1,39 @@
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
+
+import { usePalette } from '@shared/lib/use-palette'
+import { Text } from '@shared/ui/Text'
+import { radii, spacing } from '@shared/ui/theme'
 
 type Stat = { label: string; value: string; emphasis?: boolean }
 
 export function StatRow({ stats }: { stats: Stat[] }) {
+    const palette = usePalette()
     return (
-        <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
-            {stats.map((stat) => (
-                <View
-                    key={stat.label}
-                    style={{
-                        flexBasis: '47%',
-                        flexGrow: 1,
-                        padding: 12,
-                        borderRadius: 12,
-                        backgroundColor: stat.emphasis ? '#1F2937' : '#FFE4B5',
-                    }}
-                >
-                    <Text
+        <View style={{ flexDirection: 'row', gap: spacing.md, flexWrap: 'wrap' }}>
+            {stats.map((stat) => {
+                const bg = stat.emphasis ? palette.primary : palette.accentSoft
+                const labelColor = stat.emphasis ? palette.accentSoft : palette.accentText
+                const valueColor = stat.emphasis ? palette.onPrimary : palette.text
+                return (
+                    <View
+                        key={stat.label}
                         style={{
-                            fontSize: 12,
-                            color: stat.emphasis ? '#FFE4B5' : '#7A4A0A',
-                            fontWeight: '600',
-                            textTransform: 'uppercase',
-                            letterSpacing: 0.5,
+                            flexBasis: '47%',
+                            flexGrow: 1,
+                            padding: spacing.md,
+                            borderRadius: radii.lg,
+                            backgroundColor: bg,
                         }}
                     >
-                        {stat.label}
-                    </Text>
-                    <Text
-                        style={{
-                            fontSize: 18,
-                            fontWeight: '700',
-                            color: stat.emphasis ? '#FFFFFF' : '#111827',
-                            marginTop: 4,
-                        }}
-                    >
-                        {stat.value}
-                    </Text>
-                </View>
-            ))}
+                        <Text variant="overline" style={{ color: labelColor }}>
+                            {stat.label}
+                        </Text>
+                        <Text variant="h3" style={{ color: valueColor, marginTop: spacing.xs }}>
+                            {stat.value}
+                        </Text>
+                    </View>
+                )
+            })}
         </View>
     )
 }

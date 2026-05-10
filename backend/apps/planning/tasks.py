@@ -90,8 +90,8 @@ def generate_meal_plan_async(
         try:
             send_push_to_user(
                 user=user,
-                title='Your meal plan is ready',
-                body=f'Plan "{meal_plan.title}" was generated for {group.name}.',
+                title='Ваш план готов',
+                body=f'План «{meal_plan.title}» сгенерирован для группы «{group.name}».',
                 data={
                     'type': 'plan_generated',
                     'meal_plan_id': str(meal_plan.id),
@@ -131,8 +131,8 @@ def notify_pantry_expiring() -> dict[str, int]:
         try:
             send_push_to_user(
                 user=owner,
-                title='Items expiring soon',
-                body=f'{item.ingredient.name} in {item.group.name} expires by {item.expires_at}.',
+                title='Продукты скоро истекают',
+                body=f'{item.ingredient.name} в кладовой «{item.group.name}» истекает {item.expires_at}.',
                 data={
                     'type': 'pantry_expiring',
                     'group_id': str(item.group_id),

@@ -10,7 +10,12 @@ import { registerDevice } from '@features/notifications/api/devices-api'
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
+        // iOS 14+ split foreground presentation into banner / list flags;
+        // shouldShowAlert is deprecated. Setting both keeps backwards
+        // compatibility with older OS builds.
         shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
         shouldPlaySound: true,
         shouldSetBadge: false,
     }),
@@ -22,7 +27,7 @@ async function ensureAndroidChannel(): Promise<void> {
         name: 'Default',
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
+        lightColor: '#F97316',
     })
 }
 
