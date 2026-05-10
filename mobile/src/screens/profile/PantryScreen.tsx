@@ -259,7 +259,7 @@ function PantryAddSheet({
     isLoading,
     palette,
 }: {
-    sheetRef: React.RefObject<BottomSheetModal>
+    sheetRef: React.RefObject<BottomSheetModal | null>
     renderBackdrop: (props: React.ComponentProps<typeof BottomSheetBackdrop>) => React.ReactElement
     onCreate: (payload: { ingredient_id: string; quantity: number; unit: string }) => void
     isLoading: boolean
