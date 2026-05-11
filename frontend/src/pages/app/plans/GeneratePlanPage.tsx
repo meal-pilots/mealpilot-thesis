@@ -25,6 +25,12 @@ type FocusOption = {
     icon: typeof PriceTagIcon
 }
 
+type GenerationResult = {
+    kind: 'timeout' | 'failed'
+    title: string
+    message: string
+}
+
 const mealOptions = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'] as const
 const focusOptions: FocusOption[] = [
     { id: 'budget', title: 'Best Price', icon: PriceTagIcon },
@@ -41,6 +47,14 @@ const varietyLabelMap: Record<VarietyLevel, string> = {
 
 const GENERATION_POLL_INTERVAL_MS = 2000
 const GENERATION_TIMEOUT_MS = 120000
+const GENERATION_TIMEOUT_MESSAGE = 'Meal plan generation is taking longer than expected. Please try again.'
+
+class GenerationTimeoutError extends Error {
+    constructor() {
+        super(GENERATION_TIMEOUT_MESSAGE)
+        this.name = 'GenerationTimeoutError'
+    }
+}
 
 function delay(ms: number) {
     return new Promise<void>((resolve) => {
@@ -108,6 +122,7 @@ export function GeneratePlanPage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
     const [generationStatusMessage, setGenerationStatusMessage] = useState('')
+    const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null)
 
     const [daysCount, setDaysCount] = useState(5)
     const [selectedMeals, setSelectedMeals] = useState<string[]>(['Breakfast', 'Dinner'])
@@ -199,7 +214,7 @@ export function GeneratePlanPage() {
             }
 
             if (Date.now() - startedAt >= GENERATION_TIMEOUT_MS) {
-                throw new Error('Meal plan generation is still running. Please try again in a moment.')
+                throw new GenerationTimeoutError()
             }
 
             setGenerationStatusMessage('Optimizing your plan...')
@@ -228,6 +243,7 @@ export function GeneratePlanPage() {
         setIsSubmitting(true)
         setErrorMessage('')
         setGenerationStatusMessage('Starting plan generation...')
+        setGenerationResult(null)
 
         try {
             const payload: GenerateMealPlanInput = {
@@ -253,6 +269,7 @@ export function GeneratePlanPage() {
                 return
             }
 
+            setGenerationStatusMessage('Checking generation status...')
             const mealPlanId = await waitForGeneratedMealPlan(response.generation_run_id)
 
             if (mealPlanId) {
@@ -260,7 +277,14 @@ export function GeneratePlanPage() {
             }
         } catch (error) {
             if (isPageActiveRef.current) {
-                setErrorMessage(getApiErrorMessage(error, 'Unable to generate a meal plan right now.'))
+                const message = getApiErrorMessage(error, 'Unable to generate a meal plan right now.')
+                const isTimeout = error instanceof GenerationTimeoutError
+
+                setGenerationResult({
+                    kind: isTimeout ? 'timeout' : 'failed',
+                    title: isTimeout ? 'This is taking longer than expected' : 'We could not generate the plan',
+                    message,
+                })
             }
         } finally {
             if (isPageActiveRef.current) {
@@ -294,6 +318,29 @@ export function GeneratePlanPage() {
         )
     }
 
+    if (isSubmitting) {
+        return (
+            <GenerationStateScreen
+                kind="loading"
+                title="Building your meal plan"
+                message={generationStatusMessage || 'Starting plan generation...'}
+                groupName={activeGroup.name}
+            />
+        )
+    }
+
+    if (generationResult) {
+        return (
+            <GenerationStateScreen
+                kind={generationResult.kind}
+                title={generationResult.title}
+                message={generationResult.message}
+                groupName={activeGroup.name}
+                onRetry={handleGenerate}
+            />
+        )
+    }
+
     return (
         <section className="plan-page plan-page--generate">
             <section className="plan-page__hero plan-page__hero--editorial">
@@ -309,15 +356,6 @@ export function GeneratePlanPage() {
                 <section className="app-page__section" style={{ marginTop: 0 }}>
                     <article className="app-page__detail-card app-page__error-card">
                         <p className="app-page__body">{errorMessage}</p>
-                    </article>
-                </section>
-            ) : null}
-
-            {isSubmitting && generationStatusMessage ? (
-                <section className="app-page__section" style={{ marginTop: 0 }}>
-                    <article className="app-page__detail-card">
-                        <p className="app-page__eyebrow">Planner</p>
-                        <p className="app-page__body">{generationStatusMessage}</p>
                     </article>
                 </section>
             ) : null}
@@ -506,6 +544,55 @@ export function GeneratePlanPage() {
                     <BellIcon className="plan-page__inline-icon" />
                     <span>{isSubmitting ? 'Generating...' : 'Generate Plan'}</span>
                 </button>
+            </div>
+        </section>
+    )
+}
+
+function GenerationStateScreen({
+    kind,
+    title,
+    message,
+    groupName,
+    onRetry,
+}: {
+    kind: 'loading' | GenerationResult['kind']
+    title: string
+    message: string
+    groupName: string
+    onRetry?: () => void
+}) {
+    const isLoading = kind === 'loading'
+    const Icon = isLoading ? SparkIcon : BellIcon
+
+    return (
+        <section className={`plan-page plan-page--generation-state plan-page--generation-${kind}`}>
+            <div className="plan-page__generation-panel" role={isLoading ? 'status' : 'alert'} aria-live="polite">
+                <div className="plan-page__generation-visual" aria-hidden="true">
+                    <span className="plan-page__generation-ring">
+                        <Icon className="plan-page__generation-icon" />
+                    </span>
+                </div>
+
+                <div className="plan-page__generation-copy">
+                    <p className="plan-page__eyebrow">Planner</p>
+                    <h1 className="plan-page__generation-title">{title}</h1>
+                    <p className="plan-page__body plan-page__generation-message">{message}</p>
+                    <p className="plan-page__caption">For {groupName}</p>
+                </div>
+
+                {isLoading ? (
+                    <div className="plan-page__generation-progress" aria-hidden="true">
+                        <span />
+                    </div>
+                ) : null}
+
+                {!isLoading && onRetry ? (
+                    <button type="button" className="app-page__button plan-page__generation-action" onClick={onRetry}>
+                        <BellIcon className="plan-page__inline-icon" />
+                        <span>Try again</span>
+                    </button>
+                ) : null}
             </div>
         </section>
     )

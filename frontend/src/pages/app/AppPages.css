@@ -3384,3 +3384,134 @@
 .atelier-page__caption--alert {
     color: #b3261e;
 }
+
+.plan-page--generation-state {
+    min-height: calc(100dvh - 48px);
+    display: grid;
+    place-items: center;
+    padding: 24px 0;
+}
+
+.plan-page__generation-panel {
+    width: min(100%, 560px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    padding: 34px 24px;
+    border-radius: 28px;
+    background: #ffffff;
+    box-shadow: 0 8px 40px rgba(25, 28, 28, 0.04);
+    text-align: center;
+}
+
+.plan-page__generation-visual {
+    width: 112px;
+    height: 112px;
+    display: grid;
+    place-items: center;
+}
+
+.plan-page__generation-ring {
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #446347;
+    background:
+        linear-gradient(#ffffff, #ffffff) padding-box,
+        conic-gradient(from 0deg, #446347, #d4e5ca, #5c7c5e, #446347) border-box;
+    border: 8px solid transparent;
+}
+
+.plan-page--generation-loading .plan-page__generation-ring {
+    animation: plan-generation-spin 1.6s linear infinite;
+}
+
+.plan-page--generation-timeout .plan-page__generation-ring {
+    color: #864f00;
+    background:
+        linear-gradient(#ffffff, #ffffff) padding-box,
+        conic-gradient(from 0deg, #864f00, #ffdcbb, #b87521, #864f00) border-box;
+}
+
+.plan-page--generation-failed .plan-page__generation-ring {
+    color: #b3261e;
+    background:
+        linear-gradient(#ffffff, #ffffff) padding-box,
+        conic-gradient(from 0deg, #b3261e, #ffdad6, #d15b50, #b3261e) border-box;
+}
+
+.plan-page__generation-icon {
+    width: 36px;
+    height: 36px;
+}
+
+.plan-page__generation-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.plan-page__generation-title {
+    margin: 0;
+    max-width: 12em;
+    font-family: 'Manrope', 'Inter', sans-serif;
+    font-size: 2rem;
+    line-height: 1.04;
+    letter-spacing: 0;
+    font-weight: 800;
+    color: #191c1c;
+}
+
+.plan-page__generation-message {
+    max-width: 38ch;
+    text-align: center;
+}
+
+.plan-page__generation-progress {
+    width: min(100%, 340px);
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #e1e3e2;
+}
+
+.plan-page__generation-progress span {
+    display: block;
+    width: 44%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #446347 0%, #5c7c5e 100%);
+    animation: plan-generation-progress 1.45s ease-in-out infinite;
+}
+
+.plan-page__generation-action {
+    min-width: 160px;
+}
+
+@keyframes plan-generation-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes plan-generation-progress {
+    0% {
+        transform: translateX(-110%);
+    }
+
+    100% {
+        transform: translateX(230%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .plan-page--generation-loading .plan-page__generation-ring,
+    .plan-page__generation-progress span {
+        animation: none;
+    }
+}
