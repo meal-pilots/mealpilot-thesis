@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../../app/router/paths'
 import { dashboardApi, type ActiveGroupSummary } from '../../../features/dashboard/api/dashboardApi'
@@ -37,6 +37,15 @@ const varietyLabelMap: Record<VarietyLevel, string> = {
     repeat: 'Repeat Favorites',
     balanced: 'Balanced',
     exploratory: 'Exploratory',
+}
+
+const GENERATION_POLL_INTERVAL_MS = 2000
+const GENERATION_TIMEOUT_MS = 120000
+
+function delay(ms: number) {
+    return new Promise<void>((resolve) => {
+        window.setTimeout(resolve, ms)
+    })
 }
 
 function toIsoDate(date: Date) {
@@ -92,11 +101,13 @@ function mapRepetitionAllowed(value: VarietyLevel) {
 
 export function GeneratePlanPage() {
     const navigate = useNavigate()
+    const isPageActiveRef = useRef(true)
 
     const [activeGroup, setActiveGroup] = useState<ActiveGroupSummary | null>(null)
     const [isBootstrapping, setIsBootstrapping] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const [generationStatusMessage, setGenerationStatusMessage] = useState('')
 
     const [daysCount, setDaysCount] = useState(5)
     const [selectedMeals, setSelectedMeals] = useState<string[]>(['Breakfast', 'Dinner'])
@@ -104,6 +115,14 @@ export function GeneratePlanPage() {
     const [cookingTime, setCookingTime] = useState(45)
     const [varietyLevel, setVarietyLevel] = useState<VarietyLevel>('exploratory')
     const [focuses, setFocuses] = useState<FocusKey[]>(['budget', 'taste'])
+
+    useEffect(() => {
+        isPageActiveRef.current = true
+
+        return () => {
+            isPageActiveRef.current = false
+        }
+    }, [])
 
     useEffect(() => {
         let isMounted = true
@@ -157,6 +176,39 @@ export function GeneratePlanPage() {
         setFocuses((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
     }
 
+    async function waitForGeneratedMealPlan(runId: string) {
+        const startedAt = Date.now()
+
+        while (isPageActiveRef.current) {
+            const status = await planningApi.getGenerationRunStatus(runId)
+
+            if (!isPageActiveRef.current) {
+                return null
+            }
+
+            if (status.status === 'completed') {
+                if (status.meal_plan_id) {
+                    return status.meal_plan_id
+                }
+
+                throw new Error('Meal plan generation completed without a plan id.')
+            }
+
+            if (status.status === 'failed') {
+                throw new Error(status.error_message || 'Meal plan generation failed.')
+            }
+
+            if (Date.now() - startedAt >= GENERATION_TIMEOUT_MS) {
+                throw new Error('Meal plan generation is still running. Please try again in a moment.')
+            }
+
+            setGenerationStatusMessage('Optimizing your plan...')
+            await delay(GENERATION_POLL_INTERVAL_MS)
+        }
+
+        return null
+    }
+
     async function handleGenerate() {
         if (!activeGroup) {
             setErrorMessage('Please complete onboarding and activate a household first.')
@@ -175,6 +227,7 @@ export function GeneratePlanPage() {
 
         setIsSubmitting(true)
         setErrorMessage('')
+        setGenerationStatusMessage('Starting plan generation...')
 
         try {
             const payload: GenerateMealPlanInput = {
@@ -190,11 +243,30 @@ export function GeneratePlanPage() {
             }
 
             const response = await planningApi.generateMealPlan(activeGroup.id, payload)
-            navigate(ROUTES.app.mealPlans.details(response.meal_plan_id))
+
+            if ('meal_plan_id' in response) {
+                if (!response.meal_plan_id) {
+                    throw new Error('Meal plan generation completed without a plan id.')
+                }
+
+                navigate(ROUTES.app.mealPlans.details(response.meal_plan_id))
+                return
+            }
+
+            const mealPlanId = await waitForGeneratedMealPlan(response.generation_run_id)
+
+            if (mealPlanId) {
+                navigate(ROUTES.app.mealPlans.details(mealPlanId))
+            }
         } catch (error) {
-            setErrorMessage(getApiErrorMessage(error, 'Unable to generate a meal plan right now.'))
+            if (isPageActiveRef.current) {
+                setErrorMessage(getApiErrorMessage(error, 'Unable to generate a meal plan right now.'))
+            }
         } finally {
-            setIsSubmitting(false)
+            if (isPageActiveRef.current) {
+                setIsSubmitting(false)
+                setGenerationStatusMessage('')
+            }
         }
     }
 
@@ -237,6 +309,15 @@ export function GeneratePlanPage() {
                 <section className="app-page__section" style={{ marginTop: 0 }}>
                     <article className="app-page__detail-card app-page__error-card">
                         <p className="app-page__body">{errorMessage}</p>
+                    </article>
+                </section>
+            ) : null}
+
+            {isSubmitting && generationStatusMessage ? (
+                <section className="app-page__section" style={{ marginTop: 0 }}>
+                    <article className="app-page__detail-card">
+                        <p className="app-page__eyebrow">Planner</p>
+                        <p className="app-page__body">{generationStatusMessage}</p>
                     </article>
                 </section>
             ) : null}
