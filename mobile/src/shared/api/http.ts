@@ -1,6 +1,7 @@
 import { Platform } from 'react-native'
 
 import { API_BASE_URL, APP_VERSION } from '@shared/config/api'
+import { extractApiErrorMessage } from '@shared/lib/api-error-message'
 import {
     clearStoredAuthSession,
     getStoredAuthSession,
@@ -53,23 +54,7 @@ async function parseBody(response: Response): Promise<unknown> {
 }
 
 function extractErrorMessage(payload: unknown, fallback: string): string {
-    if (!payload) return fallback
-    if (typeof payload === 'string') return payload
-    if (typeof payload !== 'object') return fallback
-
-    const obj = payload as Record<string, unknown>
-    if (typeof obj.detail === 'string') return obj.detail
-    if (obj.errors && typeof obj.errors === 'object') {
-        return extractErrorMessage(obj.errors, fallback)
-    }
-    if (obj.data && typeof obj.data === 'object') {
-        return extractErrorMessage(obj.data, fallback)
-    }
-    for (const value of Object.values(obj)) {
-        if (typeof value === 'string' && value.trim()) return value
-        if (Array.isArray(value) && typeof value[0] === 'string') return value[0] as string
-    }
-    return fallback
+    return extractApiErrorMessage(payload) ?? fallback
 }
 
 /**

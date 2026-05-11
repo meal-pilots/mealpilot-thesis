@@ -5,6 +5,7 @@ import {
     isStoredSessionPersistent,
     saveAuthSession,
 } from '../lib/auth-storage'
+import { extractApiErrorMessage } from '../lib/api-error-message'
 import type { ApiEnvelope } from '../types/api'
 
 export class ApiError extends Error {
@@ -45,38 +46,7 @@ async function parseResponseBody(response: Response) {
 }
 
 function extractErrorMessage(payload: unknown, fallback: string) {
-    if (!payload) {
-        return fallback
-    }
-
-    if (typeof payload === 'string') {
-        return payload
-    }
-
-    if (typeof payload === 'object') {
-        if ('detail' in payload && typeof payload.detail === 'string') {
-            return payload.detail
-        }
-
-        if ('data' in payload && payload.data && typeof payload.data === 'object') {
-            return extractErrorMessage(payload.data, fallback)
-        }
-
-        for (const value of Object.values(payload)) {
-            if (typeof value === 'string' && value.trim()) {
-                return value
-            }
-
-            if (Array.isArray(value) && value.length > 0) {
-                const firstValue = value[0]
-                if (typeof firstValue === 'string' && firstValue.trim()) {
-                    return firstValue
-                }
-            }
-        }
-    }
-
-    return fallback
+    return extractApiErrorMessage(payload) ?? fallback
 }
 
 async function refreshAccessToken() {
