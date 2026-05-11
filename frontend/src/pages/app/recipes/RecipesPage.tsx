@@ -103,7 +103,7 @@ export function RecipesPage() {
                                 if (typeof catalogTop === 'number') {
                                     window.scrollTo({
                                         top: window.scrollY + catalogTop - 16,
-                                        behavior: 'auto',
+                                        behavior: 'smooth',
                                     })
                                 }
                             })
