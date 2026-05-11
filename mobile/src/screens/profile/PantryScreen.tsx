@@ -1,6 +1,6 @@
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useCallback, useRef, useState } from 'react'
-import { Alert, FlatList, RefreshControl, View } from 'react-native'
+import { Alert, FlatList, RefreshControl, ScrollView, View } from 'react-native'
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated'
 
 import { useIngredientSearch } from '@features/catalog/hooks'
@@ -180,9 +180,8 @@ export function PantryScreen() {
                                             >
                                                 {formatQuantity(item.quantity, item.unit)}
                                                 {expiry
-                                                    ? ` · до ${expiry.toLocaleDateString('ru-RU')}${
-                                                          isExpired ? ' (просрочен)' : ''
-                                                      }`
+                                                    ? ` · до ${expiry.toLocaleDateString('ru-RU')}${isExpired ? ' (просрочен)' : ''
+                                                    }`
                                                     : ''}
                                             </Text>
                                         </View>
@@ -271,6 +270,7 @@ function PantryAddSheet({
     const [unit, setUnit] = useState('шт')
     const debouncedSearch = useDebouncedValue(search, 250)
     const ingredientsQuery = useIngredientSearch(debouncedSearch, !selected)
+    const ingredientResults = ingredientsQuery.data ?? []
 
     return (
         <BottomSheetModal
@@ -306,39 +306,44 @@ function PantryAddSheet({
                             borderWidth: 1,
                             borderColor: palette.border,
                             borderRadius: radii.md,
+                            overflow: 'hidden',
                         }}
                     >
-                        <FlatList
-                            data={ingredientsQuery.data ?? []}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({ item }) => (
-                                <TouchableSurface
-                                    onPress={() => {
-                                        setSelected({ id: item.id, name: item.name, unit: item.unit })
-                                        setSearch(item.name)
-                                        setUnit(item.unit)
-                                    }}
-                                    accessibilityRole="button"
-                                    accessibilityLabel={item.name}
-                                    style={{
-                                        paddingVertical: spacing.sm,
-                                        paddingHorizontal: spacing.md,
-                                        borderBottomWidth: 1,
-                                        borderBottomColor: palette.border,
-                                    }}
-                                >
-                                    <Text variant="body">{item.name}</Text>
-                                    <Text variant="caption" tone="muted" style={{ marginTop: 2 }}>
-                                        {ingredientCategoryLabel(item.category)} · {item.unit}
-                                    </Text>
-                                </TouchableSurface>
-                            )}
-                            ListEmptyComponent={
-                                <Text variant="caption" tone="muted" style={{ padding: spacing.md }}>
-                                    {ingredientsQuery.isLoading ? 'Поиск…' : 'Не найдено'}
-                                </Text>
-                            }
-                        />
+                        {ingredientResults.length > 0 ? (
+                            <ScrollView
+                                nestedScrollEnabled
+                                keyboardShouldPersistTaps="handled"
+                                showsVerticalScrollIndicator={ingredientResults.length > 4}
+                            >
+                                {ingredientResults.map((item, index) => (
+                                    <TouchableSurface
+                                        key={item.id}
+                                        onPress={() => {
+                                            setSelected({ id: item.id, name: item.name, unit: item.unit })
+                                            setSearch(item.name)
+                                            setUnit(item.unit)
+                                        }}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={item.name}
+                                        style={{
+                                            paddingVertical: spacing.sm,
+                                            paddingHorizontal: spacing.md,
+                                            borderBottomWidth: index < ingredientResults.length - 1 ? 1 : 0,
+                                            borderBottomColor: palette.border,
+                                        }}
+                                    >
+                                        <Text variant="body">{item.name}</Text>
+                                        <Text variant="caption" tone="muted" style={{ marginTop: 2 }}>
+                                            {ingredientCategoryLabel(item.category)} · {item.unit}
+                                        </Text>
+                                    </TouchableSurface>
+                                ))}
+                            </ScrollView>
+                        ) : (
+                            <Text variant="caption" tone="muted" style={{ padding: spacing.md }}>
+                                {ingredientsQuery.isLoading ? 'Поиск…' : 'Не найдено'}
+                            </Text>
+                        )}
                     </View>
                 ) : null}
                 <View style={{ flexDirection: 'row', gap: spacing.sm }}>
