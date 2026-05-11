@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import type { RecipeFilters } from '@entities/recipe/types'
 
@@ -25,6 +25,7 @@ export function useRecipes(filters?: RecipeFilters) {
     return useQuery({
         queryKey: recipeKeys.list(filters),
         queryFn: () => listRecipes(filters),
+        placeholderData: keepPreviousData,
         staleTime: 60_000,
     })
 }
