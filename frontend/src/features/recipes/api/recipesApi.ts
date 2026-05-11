@@ -5,11 +5,25 @@ import type {
     RecipeTagItem,
 } from '../../../entities/recipe/model/types'
 import { apiRequest } from '../../../shared/api/http'
+import type { ApiEnvelope } from '../../../shared/types/api'
 
 export interface ListRecipesParams {
     search?: string
     tagKey?: string | null
+    page?: number
     pageSize?: number
+}
+
+export interface PaginationMeta {
+    page: number
+    page_size: number
+    total: number
+    total_pages: number
+}
+
+export interface PaginatedRecipesResponse {
+    data: RecipeCard[]
+    meta: PaginationMeta
 }
 
 function buildRecipesQuery(params: ListRecipesParams = {}) {
@@ -23,6 +37,10 @@ function buildRecipesQuery(params: ListRecipesParams = {}) {
         searchParams.set('tags', params.tagKey.trim())
     }
 
+    if (params.page && params.page > 1) {
+        searchParams.set('page', String(params.page))
+    }
+
     searchParams.set('page_size', String(params.pageSize ?? 24))
 
     const queryString = searchParams.toString()
@@ -32,6 +50,18 @@ function buildRecipesQuery(params: ListRecipesParams = {}) {
 export const recipesApi = {
     list(params: ListRecipesParams = {}) {
         return apiRequest<RecipeCard[]>(buildRecipesQuery(params))
+    },
+
+    listPaginated(params: ListRecipesParams = {}) {
+        return apiRequest<ApiEnvelope<RecipeCard[]>>(buildRecipesQuery(params), { unwrap: false }).then((response) => ({
+            data: response.data,
+            meta: {
+                page: Number(response.meta?.page ?? params.page ?? 1),
+                page_size: Number(response.meta?.page_size ?? params.pageSize ?? response.data.length),
+                total: Number(response.meta?.total ?? response.data.length),
+                total_pages: Number(response.meta?.total_pages ?? 1),
+            },
+        }))
     },
 
     getById(recipeId: string) {

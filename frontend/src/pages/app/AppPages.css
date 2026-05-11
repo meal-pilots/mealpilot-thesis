@@ -3385,6 +3385,87 @@
     color: #b3261e;
 }
 
+.app-page__pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding-bottom: 12px;
+}
+
+.app-page__pagination-pages {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.app-page__pagination-button,
+.app-page__pagination-page {
+    border: none;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+    font-weight: 700;
+    color: #446347;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(25, 28, 28, 0.05);
+}
+
+.app-page__pagination-button {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+}
+
+.app-page__pagination-page,
+.app-page__pagination-ellipsis {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-page__pagination-page--active {
+    background: #446347;
+    color: #ffffff;
+}
+
+.app-page__pagination-ellipsis {
+    color: #737973;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+    font-weight: 700;
+}
+
+.app-page__pagination-button:disabled,
+.app-page__pagination-page:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.app-page__pagination-button:focus-visible,
+.app-page__pagination-page:focus-visible {
+    outline: 3px solid rgba(68, 99, 71, 0.22);
+    outline-offset: 4px;
+}
+
+@media (max-width: 479px) {
+    .app-page__pagination {
+        align-items: stretch;
+    }
+
+    .app-page__pagination-pages {
+        order: -1;
+        width: 100%;
+    }
+
+    .app-page__pagination-button {
+        flex: 1;
+    }
+}
+
 .plan-page--generation-state {
     min-height: calc(100dvh - 48px);
     display: grid;

@@ -23,6 +23,7 @@ type ApiRequestOptions = Omit<RequestInit, 'body'> & {
     body?: BodyInit | Record<string, unknown> | null
     auth?: boolean
     retryOnUnauthorized?: boolean
+    unwrap?: boolean
 }
 
 let refreshPromise: Promise<string | null> | null = null
@@ -132,6 +133,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     const {
         auth = true,
         retryOnUnauthorized = true,
+        unwrap = true,
         headers,
         body,
         ...restOptions
@@ -183,6 +185,10 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
             response.status,
             payload,
         )
+    }
+
+    if (!unwrap) {
+        return payload as T
     }
 
     if (payload && typeof payload === 'object' && 'data' in payload) {

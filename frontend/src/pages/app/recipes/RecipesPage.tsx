@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../../app/router/paths'
 import type { RecipeCard, RecipeTagItem } from '../../../entities/recipe/model/types'
-import { recipesApi } from '../../../features/recipes/api/recipesApi'
+import { recipesApi, type PaginationMeta } from '../../../features/recipes/api/recipesApi'
 import { getApiErrorMessage } from '../../../shared/lib/get-api-error-message'
 import { AppLoader } from '../../../shared/ui/AppLoader'
 import '../AppPages.css'
 import { ClockIcon, FireIcon, SearchIcon, SparkIcon } from '../AppIcons'
+
+const RECIPES_PAGE_SIZE = 24
 
 function formatTagLabel(tagKey: string, allTags: RecipeTagItem[]) {
     const matchingTag = allTags.find((tag) => tag.key === tagKey)
@@ -27,10 +29,14 @@ function formatRecipeSubtitle(recipe: RecipeCard) {
 }
 
 export function RecipesPage() {
+    const catalogTopRef = useRef<HTMLDivElement | null>(null)
+    const shouldScrollToCatalogTopRef = useRef(false)
     const [recipes, setRecipes] = useState<RecipeCard[]>([])
     const [tags, setTags] = useState<RecipeTagItem[]>([])
     const [activeTag, setActiveTag] = useState<string>('all')
     const [searchQuery, setSearchQuery] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
@@ -76,18 +82,39 @@ export function RecipesPage() {
             setErrorMessage('')
 
             try {
-                const loadedRecipes = await recipesApi.list({
+                const response = await recipesApi.listPaginated({
                     search: searchQuery,
                     tagKey: activeTag === 'all' ? null : activeTag,
-                    pageSize: 24,
+                    page: currentPage,
+                    pageSize: RECIPES_PAGE_SIZE,
                 })
 
                 if (isMounted) {
-                    setRecipes(loadedRecipes)
+                    setRecipes(response.data)
+                    setPaginationMeta(response.meta)
+
+                    if (shouldScrollToCatalogTopRef.current) {
+                        shouldScrollToCatalogTopRef.current = false
+
+                        window.requestAnimationFrame(() => {
+                            window.requestAnimationFrame(() => {
+                                const catalogTop = catalogTopRef.current?.getBoundingClientRect().top
+
+                                if (typeof catalogTop === 'number') {
+                                    window.scrollTo({
+                                        top: window.scrollY + catalogTop - 16,
+                                        behavior: 'auto',
+                                    })
+                                }
+                            })
+                        })
+                    }
                 }
             } catch (error) {
                 if (isMounted) {
                     setErrorMessage(getApiErrorMessage(error, 'Unable to load recipes right now.'))
+                    setRecipes([])
+                    setPaginationMeta(null)
                 }
             } finally {
                 if (isMounted) {
@@ -101,15 +128,65 @@ export function RecipesPage() {
         return () => {
             isMounted = false
         }
-    }, [activeTag, searchQuery])
+    }, [activeTag, currentPage, searchQuery])
 
     const filters = useMemo(
         () => [{ key: 'all', label: 'All' }, ...tags.map((tag) => ({ key: tag.key, label: tag.label }))],
         [tags],
     )
+    const paginationItems = useMemo<(number | 'ellipsis')[]>(() => {
+        const totalPages = paginationMeta?.total_pages ?? 1
+
+        if (totalPages <= 7) {
+            return Array.from({ length: totalPages }, (_, index) => index + 1)
+        }
+
+        const pages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1])
+        const sortedPages = Array.from(pages)
+            .filter((page) => page >= 1 && page <= totalPages)
+            .sort((left, right) => left - right)
+
+        return sortedPages.reduce<(number | 'ellipsis')[]>((items, page) => {
+            const previous = items[items.length - 1]
+
+            if (typeof previous === 'number' && page - previous > 1) {
+                items.push('ellipsis')
+            }
+
+            items.push(page)
+            return items
+        }, [])
+    }, [currentPage, paginationMeta?.total_pages])
 
     const featuredRecipe = recipes[0] ?? null
     const remainingRecipes = featuredRecipe ? recipes.slice(1) : recipes
+    const totalRecipes = paginationMeta?.total ?? recipes.length
+    const totalPages = paginationMeta?.total_pages ?? 1
+    const resolvedPage = paginationMeta?.page ?? currentPage
+    const resolvedPageSize = paginationMeta?.page_size ?? RECIPES_PAGE_SIZE
+    const pageStart = totalRecipes > 0 ? (resolvedPage - 1) * resolvedPageSize + 1 : 0
+    const pageEnd = totalRecipes > 0 ? Math.min(pageStart + recipes.length - 1, totalRecipes) : 0
+
+    function handleSearchChange(value: string) {
+        setSearchQuery(value)
+        setCurrentPage(1)
+    }
+
+    function handleTagChange(tagKey: string) {
+        setActiveTag(tagKey)
+        setCurrentPage(1)
+    }
+
+    function handlePageChange(page: number) {
+        if (page === currentPage || page < 1 || page > totalPages) {
+            return
+        }
+
+        const shouldScrollToCatalogTop = page > currentPage
+
+        shouldScrollToCatalogTopRef.current = shouldScrollToCatalogTop
+        setCurrentPage(page)
+    }
 
     if (isLoading) {
         return <AppLoader message="Loading recipe archive..." />
@@ -117,7 +194,7 @@ export function RecipesPage() {
 
     return (
         <section className="app-page">
-            <div className="app-page__section">
+            <div className="app-page__section" ref={catalogTopRef}>
                 <div className="app-page__pair">
                     <div>
                         <p className="app-page__eyebrow">Recipe archive</p>
@@ -132,7 +209,7 @@ export function RecipesPage() {
                         type="search"
                         placeholder="Search by title or description"
                         value={searchQuery}
-                        onChange={(event) => setSearchQuery(event.target.value)}
+                        onChange={(event) => handleSearchChange(event.target.value)}
                     />
                 </div>
 
@@ -142,7 +219,7 @@ export function RecipesPage() {
                             key={filter.key}
                             type="button"
                             className={`app-page__chip-button ${activeTag === filter.key ? 'app-page__chip-button--active' : ''}`}
-                            onClick={() => setActiveTag(filter.key)}
+                            onClick={() => handleTagChange(filter.key)}
                         >
                             {filter.label}
                         </button>
@@ -202,7 +279,13 @@ export function RecipesPage() {
                         <p className="app-page__eyebrow">Browse more</p>
                         <h2 className="app-page__title">Kitchen library</h2>
                     </div>
-                    <p className="app-page__helper">{isRefreshing ? 'Refreshing…' : `${recipes.length} recipes shown`}</p>
+                    <p className="app-page__helper">
+                        {isRefreshing
+                            ? 'Refreshing...'
+                            : totalRecipes
+                              ? `${pageStart}-${pageEnd} of ${totalRecipes} recipes`
+                              : '0 recipes shown'}
+                    </p>
                 </div>
 
                 {recipes.length === 0 ? (
@@ -245,6 +328,49 @@ export function RecipesPage() {
                         ))}
                     </div>
                 )}
+
+                {totalPages > 1 ? (
+                    <nav className="app-page__pagination" aria-label="Recipe pages">
+                        <button
+                            type="button"
+                            className="app-page__pagination-button"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage <= 1 || isRefreshing}
+                        >
+                            Previous
+                        </button>
+
+                        <div className="app-page__pagination-pages">
+                            {paginationItems.map((item, index) =>
+                                item === 'ellipsis' ? (
+                                    <span key={`ellipsis-${index}`} className="app-page__pagination-ellipsis">
+                                        ...
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={item}
+                                        type="button"
+                                        className={`app-page__pagination-page ${currentPage === item ? 'app-page__pagination-page--active' : ''}`}
+                                        onClick={() => handlePageChange(item)}
+                                        disabled={isRefreshing}
+                                        aria-current={currentPage === item ? 'page' : undefined}
+                                    >
+                                        {item}
+                                    </button>
+                                ),
+                            )}
+                        </div>
+
+                        <button
+                            type="button"
+                            className="app-page__pagination-button"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage >= totalPages || isRefreshing}
+                        >
+                            Next
+                        </button>
+                    </nav>
+                ) : null}
             </div>
         </section>
     )
