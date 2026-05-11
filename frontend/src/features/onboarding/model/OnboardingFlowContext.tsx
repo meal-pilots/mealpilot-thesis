@@ -39,7 +39,8 @@ export interface MemberDraft {
 
 export interface OnboardingDraft {
     groupId: string | null
-    groupType: GroupType
+    groupType: GroupType | null
+    hasSelectedGroupType: boolean
     householdName: string
     planningDuration: PlanningDuration
     meals: MealSlot[]
@@ -93,24 +94,29 @@ function createMemberTemplate(name: string, memberType: MemberType): MemberDraft
     }
 }
 
+function isGroupType(value: unknown): value is GroupType {
+    return value === 'solo' || value === 'two_adults' || value === 'adults_kids' || value === 'custom'
+}
+
 function buildMembersForMode(groupType: GroupType): MemberDraft[] {
     switch (groupType) {
         case 'solo':
             return [createMemberTemplate('You', 'adult')]
         case 'two_adults':
-            return [createMemberTemplate('Member 1', 'adult'), createMemberTemplate('Member 2', 'adult')]
+            return [createMemberTemplate('', 'adult'), createMemberTemplate('', 'adult')]
         case 'adults_kids':
-            return [createMemberTemplate('Parent', 'adult'), createMemberTemplate('Child', 'child')]
+            return [createMemberTemplate('', 'adult'), createMemberTemplate('', 'child')]
         case 'custom':
-            return [createMemberTemplate('Member 1', 'adult')]
+            return [createMemberTemplate('', 'adult')]
         default:
-            return [createMemberTemplate('Member 1', 'adult')]
+            return [createMemberTemplate('', 'adult')]
     }
 }
 
 export const DEFAULT_DRAFT: OnboardingDraft = {
     groupId: null,
-    groupType: 'two_adults',
+    groupType: null,
+    hasSelectedGroupType: false,
     householdName: '',
     planningDuration: 'weekly',
     meals: DEFAULT_MEALS,
@@ -126,7 +132,7 @@ export const DEFAULT_DRAFT: OnboardingDraft = {
     selectedRestrictions: [],
     spiceTolerance: 'medium',
     cookingTimeMinutes: 45,
-    members: buildMembersForMode('two_adults'),
+    members: [],
 }
 
 export const OnboardingFlowContext = createContext<OnboardingFlowContextValue | null>(null)
@@ -144,10 +150,15 @@ export function readStoredDraft(): OnboardingDraft | null {
         }
 
         const parsed = JSON.parse(rawValue) as Partial<OnboardingDraft>
+        const hasSelectedGroupType = Boolean(parsed.groupId) || parsed.hasSelectedGroupType === true
+        const parsedGroupType = isGroupType(parsed.groupType) ? parsed.groupType : null
+        const groupType = hasSelectedGroupType ? parsedGroupType : null
 
         return {
             ...DEFAULT_DRAFT,
             ...parsed,
+            groupType,
+            hasSelectedGroupType: Boolean(groupType),
             currencyCode: 'KZT',
             meals:
                 Array.isArray(parsed.meals) && parsed.meals.length
@@ -164,7 +175,9 @@ export function readStoredDraft(): OnboardingDraft | null {
             members:
                 Array.isArray(parsed.members) && parsed.members.length
                     ? parsed.members.map((member, index) => sanitizeMember(member, `Member ${index + 1}`))
-                    : DEFAULT_DRAFT.members,
+                    : groupType
+                        ? buildMembersForMode(groupType)
+                        : DEFAULT_DRAFT.members,
         }
     } catch {
         return null
@@ -332,6 +345,7 @@ export function fromSummary(summary: SetupSummaryDto): OnboardingDraft {
     return {
         groupId: summary.group.id,
         groupType: summary.group.group_type,
+        hasSelectedGroupType: true,
         householdName: summary.group.name,
         planningDuration: toPlanningDuration(summary.group.planning_days_default),
         meals: toMeals(summary.group.meals_per_day_default),
@@ -406,7 +420,7 @@ function normalizeConstraintKey(constraintType: ConstraintType, valueText: strin
 function sanitizeMember(member: Partial<MemberDraft>, fallbackName: string): MemberDraft {
     return {
         id: member.id,
-        display_name: member.display_name?.trim() || fallbackName,
+        display_name: member.display_name?.trim() ?? fallbackName,
         member_type: member.member_type ?? 'adult',
         sex: member.sex?.trim() ?? '',
         activity_level: member.activity_level?.trim() || '',
@@ -540,8 +554,20 @@ export function useOnboardingFlow() {
 }
 
 export async function saveGroupFromDraft(draft: OnboardingDraft) {
+    if (!draft.hasSelectedGroupType || !draft.groupType) {
+        throw new Error('Please choose who you are planning for.')
+    }
+
+    if (!draft.householdName.trim()) {
+        throw new Error('Please enter a household name.')
+    }
+
+    if (!draft.meals.length) {
+        throw new Error('Please select at least one meal per day.')
+    }
+
     const payload = {
-        name: draft.householdName.trim() || 'My Household',
+        name: draft.householdName.trim(),
         group_type: draft.groupType,
         planning_days_default: fromPlanningDuration(draft.planningDuration),
         meals_per_day_default: Math.max(draft.meals.length, 1),
@@ -561,21 +587,38 @@ export async function saveGroupFromDraft(draft: OnboardingDraft) {
 }
 
 export async function saveMembersFromDraft(groupId: string, draft: OnboardingDraft) {
-    const cleanedMembers = draft.members.map((member, index) => sanitizeMember(member, `Member ${index + 1}`))
-
-    if (!cleanedMembers.length) {
+    if (!draft.members.length) {
         throw new Error('Please add at least one member.')
     }
 
-    for (const [index, member] of cleanedMembers.entries()) {
+    for (const [index, member] of draft.members.entries()) {
+        const label = member.display_name.trim() || `member ${index + 1}`
+
         if (!member.display_name.trim()) {
             throw new Error(`Please enter a display name for member ${index + 1}.`)
         }
 
-        if (!member.age.trim() || Number.isNaN(Number(member.age)) || Number(member.age) <= 0) {
-            throw new Error(`Please enter a valid age for ${member.display_name || `member ${index + 1}`}.`)
+        const age = Number(member.age)
+        if (!member.age.trim() || !Number.isInteger(age) || age <= 0) {
+            throw new Error(`Please enter a valid age for ${label}.`)
+        }
+
+        if (!member.activity_level.trim()) {
+            throw new Error(`Please choose an activity level for ${label}.`)
+        }
+
+        const weight = member.weight_kg.trim() ? Number(member.weight_kg) : null
+        if (weight !== null && (!Number.isFinite(weight) || weight <= 0)) {
+            throw new Error(`Please enter a valid weight for ${label}.`)
+        }
+
+        const height = member.height_cm.trim() ? Number(member.height_cm) : null
+        if (height !== null && (!Number.isFinite(height) || height <= 0)) {
+            throw new Error(`Please enter a valid height for ${label}.`)
         }
     }
+
+    const cleanedMembers = draft.members.map((member, index) => sanitizeMember(member, `Member ${index + 1}`))
 
     await syncMembers(groupId, cleanedMembers)
 }

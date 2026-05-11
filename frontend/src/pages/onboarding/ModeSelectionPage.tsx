@@ -123,7 +123,13 @@ function buildMembersForMode(groupType: 'solo' | 'two_adults' | 'adults_kids' | 
 export function ModeSelectionPage() {
     const { draft, setDraft, registerStepSubmit } = useOnboardingFlow()
 
-    useEffect(() => registerStepSubmit(null), [registerStepSubmit])
+    useEffect(() => {
+        return registerStepSubmit(() => {
+            if (!draft.hasSelectedGroupType || !draft.groupType) {
+                throw new Error('Please choose who you are planning for.')
+            }
+        })
+    }, [draft.groupType, draft.hasSelectedGroupType, registerStepSubmit])
 
     return (
         <section className="onboarding-page">
@@ -145,6 +151,7 @@ export function ModeSelectionPage() {
                                 setDraft((current) => ({
                                     ...current,
                                     groupType: mode.id,
+                                    hasSelectedGroupType: true,
                                     members:
                                         current.groupType === mode.id
                                             ? current.members
