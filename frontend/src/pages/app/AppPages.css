@@ -1173,6 +1173,16 @@
     color: #446347;
 }
 
+.app-page__danger-card {
+    border: 1px solid rgba(160, 61, 42, 0.16);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.app-page__danger-copy {
+    margin-top: 10px;
+    color: #6f3b32;
+}
+
 .app-page__button--danger {
     background: #ffffff;
     color: #a03d2a;

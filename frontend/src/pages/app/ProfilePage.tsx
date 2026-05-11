@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../app/router/paths'
+import { authApi } from '../../features/auth/api/authApi'
 import { profileApi, type ProfileSnapshot } from '../../features/profile/api/profileApi'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { getApiErrorMessage } from '../../shared/lib/get-api-error-message'
@@ -87,6 +88,8 @@ export function ProfilePage() {
     const [isSavingProfile, setIsSavingProfile] = useState(false)
     const [isSavingSettings, setIsSavingSettings] = useState(false)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
+    const [deletePassword, setDeletePassword] = useState('')
+    const [isDeletingAccount, setIsDeletingAccount] = useState(false)
 
     useEffect(() => {
         let isMounted = true
@@ -214,6 +217,39 @@ export function ProfilePage() {
         setIsLoggingOut(true)
         await logOut()
         navigate(ROUTES.auth.login, { replace: true })
+    }
+
+    async function handleDeleteAccount(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setErrorMessage('')
+
+        if (!deletePassword.trim()) {
+            setErrorMessage('Enter your current password to confirm account deletion.')
+            return
+        }
+
+        const confirmed = window.confirm(
+            'Delete your account permanently? This will remove all households, plans, preferences, and saved data.',
+        )
+
+        if (!confirmed) {
+            return
+        }
+
+        setIsDeletingAccount(true)
+
+        try {
+            await authApi.deleteAccount({
+                password: deletePassword,
+                confirm: true,
+            })
+            await logOut()
+            navigate(ROUTES.auth.login, { replace: true })
+        } catch (error) {
+            setErrorMessage(getApiErrorMessage(error, 'Unable to delete your account.'))
+        } finally {
+            setIsDeletingAccount(false)
+        }
     }
 
     if (isLoading) {
@@ -434,14 +470,55 @@ export function ProfilePage() {
             </div>
 
             <div className="app-page__section">
-                <button
-                    className="app-page__button app-page__button--danger"
-                    type="button"
-                    onClick={handleLogOut}
-                    disabled={isLoggingOut}
-                >
-                    {isLoggingOut ? 'Logging out...' : 'Log out'}
-                </button>
+                <div className="app-page__section-header">
+                    <h2 className="app-page__subheading">Account</h2>
+                </div>
+
+                <div className="app-page__detail-card">
+                    <div className="app-page__form">
+                        <button
+                            className="app-page__button app-page__button--secondary"
+                            type="button"
+                            onClick={handleLogOut}
+                            disabled={isLoggingOut || isDeletingAccount}
+                        >
+                            {isLoggingOut ? 'Logging out...' : 'Log out'}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="app-page__detail-card app-page__danger-card">
+                    <form className="app-page__form" onSubmit={handleDeleteAccount}>
+                        <div>
+                            <p className="app-page__eyebrow">Danger zone</p>
+                            <h3 className="app-page__card-title">Delete account</h3>
+                            <p className="app-page__body app-page__danger-copy">
+                                Deletion is irreversible: all households, meal plans, preferences, pantry items, favorites, and account data will be permanently deleted.
+                            </p>
+                        </div>
+
+                        <label className="app-page__field">
+                            <span className="app-page__helper">Current password</span>
+                            <input
+                                className="app-page__input"
+                                type="password"
+                                autoComplete="current-password"
+                                value={deletePassword}
+                                onChange={(event) => setDeletePassword(event.target.value)}
+                                disabled={isDeletingAccount}
+                                placeholder="Enter your current password"
+                            />
+                        </label>
+
+                        <button
+                            className="app-page__button app-page__button--danger"
+                            type="submit"
+                            disabled={isDeletingAccount || !deletePassword.trim()}
+                        >
+                            {isDeletingAccount ? 'Deleting account...' : 'Delete account'}
+                        </button>
+                    </form>
+                </div>
             </div>
         </section>
     )
