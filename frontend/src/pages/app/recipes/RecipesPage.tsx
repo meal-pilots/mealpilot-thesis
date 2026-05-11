@@ -9,6 +9,7 @@ import '../AppPages.css'
 import { ClockIcon, FireIcon, SearchIcon, SparkIcon } from '../AppIcons'
 
 const RECIPES_PAGE_SIZE = 24
+const SEARCH_DEBOUNCE_MS = 350
 
 function formatTagLabel(tagKey: string, allTags: RecipeTagItem[]) {
     const matchingTag = allTags.find((tag) => tag.key === tagKey)
@@ -34,6 +35,7 @@ export function RecipesPage() {
     const [recipes, setRecipes] = useState<RecipeCard[]>([])
     const [tags, setTags] = useState<RecipeTagItem[]>([])
     const [activeTag, setActiveTag] = useState<string>('all')
+    const [searchInput, setSearchInput] = useState('')
     const [searchQuery, setSearchQuery] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null)
@@ -73,6 +75,17 @@ export function RecipesPage() {
             isMounted = false
         }
     }, [])
+
+    useEffect(() => {
+        const timeoutId = window.setTimeout(() => {
+            setSearchQuery(searchInput.trim())
+            setCurrentPage(1)
+        }, SEARCH_DEBOUNCE_MS)
+
+        return () => {
+            window.clearTimeout(timeoutId)
+        }
+    }, [searchInput])
 
     useEffect(() => {
         let isMounted = true
@@ -168,8 +181,7 @@ export function RecipesPage() {
     const pageEnd = totalRecipes > 0 ? Math.min(pageStart + recipes.length - 1, totalRecipes) : 0
 
     function handleSearchChange(value: string) {
-        setSearchQuery(value)
-        setCurrentPage(1)
+        setSearchInput(value)
     }
 
     function handleTagChange(tagKey: string) {
@@ -208,7 +220,7 @@ export function RecipesPage() {
                         className="app-page__search-field"
                         type="search"
                         placeholder="Search by title or description"
-                        value={searchQuery}
+                        value={searchInput}
                         onChange={(event) => handleSearchChange(event.target.value)}
                     />
                 </div>

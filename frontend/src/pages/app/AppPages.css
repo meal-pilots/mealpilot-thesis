@@ -197,7 +197,6 @@
 .app-page__recipe-card:focus-visible,
 .app-page__back:focus-visible,
 .app-page__chip-button:focus-visible,
-.app-page__search-field:focus-visible,
 .app-page__icon-button:focus-visible,
 .app-page__action-link:focus-visible {
     outline: 3px solid rgba(68, 99, 71, 0.22);
