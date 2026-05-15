@@ -16,6 +16,24 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+def _mark_generation_run_failed(
+    generation_run_id: str | None,
+    error: Exception,
+) -> PlanGenerationRun | None:
+    if not generation_run_id:
+        return None
+
+    try:
+        api_run = PlanGenerationRun.objects.get(id=generation_run_id)
+    except PlanGenerationRun.DoesNotExist:
+        return None
+
+    api_run.status = GenerationRunStatus.FAILED
+    api_run.error_message = str(error)
+    api_run.save(update_fields=['status', 'error_message', 'updated_at'])
+    return api_run
+
+
 @shared_task(
     bind=True,
     name='apps.planning.tasks.generate_meal_plan_async',
@@ -45,24 +63,41 @@ def generate_meal_plan_async(
         extra={'group_id': group_id, 'user_id': user_id, 'task_id': self.request.id},
     )
 
-    group = (
-        Group.objects.select_related('preferences')
-        .prefetch_related('members__constraints')
-        .get(id=group_id)
-    )
-    user = User.objects.get(id=user_id) if user_id else None
+    try:
+        api_run = PlanGenerationRun.objects.get(id=generation_run_id) if generation_run_id else None
+    except PlanGenerationRun.DoesNotExist:
+        api_run = None
+
+    try:
+        group = (
+            Group.objects.select_related('preferences')
+            .prefetch_related('members__constraints')
+            .get(id=group_id)
+        )
+        user = User.objects.get(id=user_id) if user_id else None
+    except (Group.DoesNotExist, User.DoesNotExist) as exc:
+        if api_run is not None:
+            api_run.status = GenerationRunStatus.FAILED
+            api_run.error_message = str(exc)
+            api_run.save(update_fields=['status', 'error_message', 'updated_at'])
+        logger.warning(
+            'Async meal plan generation references missing data',
+            extra={
+                'group_id': group_id,
+                'user_id': user_id,
+                'generation_run_id': generation_run_id,
+            },
+        )
+        return {
+            'meal_plan_id': None,
+            'generation_run_id': generation_run_id,
+            'status': GenerationRunStatus.FAILED,
+        }
 
     payload = dict(validated_data)
     raw_start = payload.get('start_date')
     if isinstance(raw_start, str):
         payload['start_date'] = date_cls.fromisoformat(raw_start)
-
-    api_run = None
-    if generation_run_id:
-        try:
-            api_run = PlanGenerationRun.objects.get(id=generation_run_id)
-        except PlanGenerationRun.DoesNotExist:
-            api_run = None
 
     try:
         meal_plan = generate_meal_plan_for_group(
@@ -71,10 +106,7 @@ def generate_meal_plan_async(
             validated_data=payload,
         )
     except Exception as exc:
-        if api_run is not None:
-            api_run.status = GenerationRunStatus.FAILED
-            api_run.error_message = str(exc)
-            api_run.save(update_fields=['status', 'error_message', 'updated_at'])
+        _mark_generation_run_failed(generation_run_id, exc)
         raise
 
     if api_run is not None and meal_plan is not None:
