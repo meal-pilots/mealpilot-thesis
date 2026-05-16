@@ -1,0 +1,212 @@
+% File:    AITU Diploma 2025-2026 — Intelligent Meal Planning Web Application
+% Authors: Bexultan Yessirkegen (SE-2329), Temirlan Ilyassov (SE-2312)
+% Class:   memoir (per AITU template)
+% Engine:  pdflatex + bibtex
+%
+% Build:
+%   pdflatex main
+%   bibtex   main
+%   pdflatex main
+%   pdflatex main
+%
+\RequirePackage[l2tabu]{nag}
+
+\documentclass[a4paper,12pt,oneside,openbib,oldfontcommands]{memoir}
+
+\let\ordinal\relax
+\usepackage{datetime}
+\usepackage{ifpdf}
+\ifpdf
+\pdfinfo{
+   /Author (Bexultan Yessirkegen; Temirlan Ilyassov)
+   /Title (Design and Implementation of a Web Application for Intelligent Meal Planning with Local Cuisine Integration)
+   /Keywords (meal planning; constraint programming; CP-SAT; learning-to-rank; LightGBM; Django; React Native; Expo; AWS; Terraform)
+   /CreationDate (D:\pdfdate)
+}
+\fi
+
+\ifdraftdoc
+  \usepackage{draftwatermark}
+  \SetWatermarkScale{0.3}
+  \SetWatermarkText{\bf Draft: \today}
+\fi
+
+\usepackage[protrusion=true,expansion=false]{microtype}  % expansion disabled for safety with T2A
+\sloppy
+
+% A4 layout exactly as in the AITU template
+\settrimmedsize{297mm}{210mm}{*}
+\setlength{\trimtop}{0pt}
+\setlength{\trimedge}{\stockwidth}
+\addtolength{\trimedge}{-\paperwidth}
+\settypeblocksize{634pt}{448.13pt}{*}
+\setulmargins{4cm}{*}{*}
+\setlrmargins{*}{*}{1.5}
+\setmarginnotes{17pt}{51pt}{\onelineskip}
+\setheadfoot{\onelineskip}{2\onelineskip}
+\setheaderspaces{*}{2\onelineskip}{*}
+\checkandfixthelayout
+
+\frenchspacing
+
+\OnehalfSpacing
+
+\setsecnumdepth{subsection}
+\maxsecnumdepth{subsubsection}
+
+\makepagestyle{myvf}
+\makeoddfoot{myvf}{}{\thepage}{}
+\makeevenfoot{myvf}{}{\thepage}{}
+\makeheadrule{myvf}{\textwidth}{\normalrulethickness}
+\makeevenhead{myvf}{\small\textsc{\leftmark}}{}{}
+\makeoddhead{myvf}{}{}{\small\textsc{\rightmark}}
+\pagestyle{myvf}
+
+\newcommand{\clearemptydoublepage}{\newpage{\thispagestyle{empty}\cleardoublepage}}
+
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}  % scalable Latin Modern (Cyrillic-compatible); required for microtype expansion
+\usepackage[main=english, russian, kazakh]{babel}
+
+\makeindex
+
+\usepackage{import}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{stmaryrd}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{newlfont}
+\usepackage{layouts}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[square,numbers,sort&compress]{natbib}
+\usepackage{url}
+
+\usepackage[colorlinks=true,allcolors=black]{hyperref}
+\usepackage{memhfixc}
+\usepackage{enumerate}
+\usepackage{footnote}
+\usepackage[version=0.96]{pgf}
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  numberstyle=\tiny,
+  numbersep=6pt,
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  backgroundcolor=\color{white},
+  keywordstyle=\color{black},
+  commentstyle=\color{black},
+  stringstyle=\color{black},
+  frame=single,
+  framerule=0.2pt,
+  framesep=4pt,
+  xleftmargin=8pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  captionpos=b,
+}
+
+\widowpenalty=1000
+\clubpenalty=1000
+
+\newcommand{\keywords}[1]{\par\noindent{\small{\bf Keywords:} #1}}
+
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+
+\usepackage{xcolor}
+\definecolor{UniversityBlue}{RGB}{38,90,130}
+
+% Float spacing: give every table/figure breathing room above and below,
+% and use a positive belowskip for captions so [H] tables do not visually
+% glue themselves to the preceding paragraph.
+\usepackage{caption}
+\captionsetup[table]{position=above,skip=6pt,belowskip=4pt}
+\captionsetup[figure]{position=below,skip=6pt}
+\setlength{\intextsep}{12pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{14pt plus 2pt minus 2pt}
+\setlength{\floatsep}{12pt plus 2pt minus 2pt}
+
+\theoremstyle{plain}
+\newtheorem{theo}{Theorem}[chapter]
+\theoremstyle{plain}
+\newtheorem{prop}{Proposition}[chapter]
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}[chapter]
+\theoremstyle{plain}
+\newtheorem{lema}{Lemma}[chapter]
+\theoremstyle{plain}
+\newtheorem{cor}{Corollary}[chapter]
+\theoremstyle{plain}
+\newtheorem{resu}{Result}[chapter]
+
+
+\begin{document}
+
+\frontmatter
+\pagenumbering{roman}
+
+\input{frontmatter/title}
+
+\input{frontmatter/abstract}
+\clearemptydoublepage
+
+\input{frontmatter/dedication}
+
+\input{frontmatter/declaration}
+
+\input{frontmatter/definitions}
+
+\input{frontmatter/dda}
+
+\listoftables
+\addtocontents{lot}{\par\nobreak\textbf{{\scshape Table} \hfill Page}\par\nobreak}
+\newpage
+
+\listoffigures
+\addtocontents{lof}{\par\nobreak\textbf{{\scshape Figure} \hfill Page}\par\nobreak}
+\newpage
+
+\addtocontents{toc}{\par\nobreak \mbox{}\hfill{\bf }\par\nobreak}
+
+\renewcommand{\contentsname}{Table of Contents}
+\maxtocdepth{subsection}
+\tableofcontents*
+
+\input{frontmatter/intro.tex}
+
+
+\mainmatter
+
+\import{chapters/chapter01/}{introduction.tex}
+
+\import{chapters/chapter02/}{main.tex}
+
+\import{chapters/chapter03/}{main.tex}
+
+\import{chapters/chapter04/}{main.tex}
+
+
+\backmatter
+\input{frontmatter/concl.tex}
+
+\bibliographystyle{unsrt}
+\refstepcounter{chapter}
+\bibliography{thesisbiblio}
+
+\clearemptydoublepage
+
+\end{document}

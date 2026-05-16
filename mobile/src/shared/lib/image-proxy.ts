@@ -1,9 +1,9 @@
 /**
- * Wraps a remote image URL with the public images.weserv.nl proxy so we get:
+ * Wraps a remote image URL with the public wsrv.nl proxy so we get:
  * - Server-side resize (huge bandwidth saving on mobile)
  * - Format normalization to jpg/webp (avoids broken WebP variants on iOS)
  * - Origin spoofing — many recipe CDNs block hotlinking without `Referer`
- *   from their own domain; weserv presents itself as a regular browser
+ *   from their own domain; wsrv presents itself as a regular browser
  *   and aggressively caches the result on Cloudflare.
  *
  * Returns `null` when the input is missing so callers can fall back to a
@@ -13,16 +13,29 @@ export type ImageProxyOptions = {
     width?: number
     height?: number
     quality?: number
-    /** Pass-through for already-trusted hosts (own S3, weserv, expo assets). */
+    /** Pass-through for already-trusted hosts (own S3, wsrv, expo assets). */
     skipProxy?: boolean
 }
 
 const TRUSTED_HOSTS = new Set([
+    'wsrv.nl',
     'images.weserv.nl',
     'mealplanner.kz',
     'static.mealplanner.kz',
     'expo.dev',
 ])
+
+/**
+ * Some upstream CDNs we ingest from are unreliable; rewrite to a sibling host
+ * that serves the same paths reliably. Keep this list narrow — only rewrite
+ * when we have verified identical path semantics.
+ */
+const HOST_REWRITES: Record<string, string> = {
+    // russianfood.com's image subdomain has been returning 502 since spring '26;
+    // the main domain serves the exact same /dycontent/images_upl/... paths.
+    'img1.russianfood.com': 'www.russianfood.com',
+    'img2.russianfood.com': 'www.russianfood.com',
+}
 
 function shouldSkipProxy(url: string): boolean {
     try {
@@ -35,19 +48,30 @@ function shouldSkipProxy(url: string): boolean {
     }
 }
 
+function rewriteOrigin(rawUrl: string): string {
+    try {
+        const parsed = new URL(rawUrl)
+        const replacement = HOST_REWRITES[parsed.hostname]
+        if (!replacement) return rawUrl
+        parsed.hostname = replacement
+        return parsed.toString()
+    } catch {
+        return rawUrl
+    }
+}
+
 export function proxiedImageUrl(
     rawUrl: string | null | undefined,
     options: ImageProxyOptions = {},
 ): string | null {
     if (!rawUrl) return null
-    const trimmed = rawUrl.trim()
+    const trimmed = rewriteOrigin(rawUrl.trim())
     if (!trimmed) return null
     if (options.skipProxy || shouldSkipProxy(trimmed)) return trimmed
 
     let stripped: string
     try {
         const parsed = new URL(trimmed)
-        // weserv expects `host/path` — protocol included via `&ssl=1` flag.
         stripped = `${parsed.host}${parsed.pathname}${parsed.search}`
     } catch {
         return trimmed
@@ -60,7 +84,6 @@ export function proxiedImageUrl(
     if (options.width && options.height) params.set('fit', 'cover')
     params.set('q', String(options.quality ?? 80))
     params.set('output', 'jpg')
-    params.set('default', 'placeholder')
 
-    return `https://images.weserv.nl/?${params.toString()}`
+    return `https://wsrv.nl/?${params.toString()}`
 }

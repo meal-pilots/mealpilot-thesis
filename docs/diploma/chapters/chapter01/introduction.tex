@@ -1,0 +1,107 @@
+%
+% File: chapters/chapter01/introduction.tex
+% Chapter 1: Literature Review and Analysis of Existing Systems
+%
+\chapter{Literature Review and Existing Systems}
+\label{chap:01}
+\setlength{\parskip}{1em}
+
+\section{Food recommender systems as a research domain}
+
+The domain of food recommender systems has matured significantly over the last decade. Two recent systematic reviews \cite{bondevik2024,mahajan2024} characterise food recommendation as a specialised branch of recommender systems research with unique domain requirements. Unlike movie or music recommendation, food recommendation must account for health conditions, meal context, ingredient compatibility, cooking skill, and household routines. These requirements change the structure of both the data and the recommendation objective. A recipe that seems appealing from a preference perspective may still be unusable if it violates nutrient goals or cost constraints.
+
+Research in this domain covers multiple paradigms. Content-based methods analyse recipe features and ingredients \cite{freyne2010a,teng2012}. Knowledge-based and ontology-driven approaches represent domain semantics explicitly \cite{al_nazer2014,bianchini2015,maneerat2013}. Constraint-based systems model hard user restrictions directly \cite{felfernig2008,pawar2016}. Health-aware systems incorporate nutrient-based or disease-specific considerations \cite{jung2016,yera2023}. This diversity demonstrates that no single recommendation paradigm is universally sufficient for food-related decision support.
+
+\section{Classical recommendation theory}
+
+General recommender system theory provides the background needed to interpret food recommendation approaches. Hybrid recommenders combine multiple information sources and are useful when single-strategy recommendation proves insufficient \cite{burke2002}. Broader recommender system surveys describe the major strengths and limitations of collaborative filtering, content-based filtering, and hybrid strategies \cite{bobadilla2013,adomavicius2005}. Content-based recommendation remains especially relevant in domains where item semantics are rich and explicit, which is why Pazzani and Billsus \cite{pazzani2007} and Lops et al.\ \cite{lops2011} are useful conceptual references for recipe and ingredient-based recommendation.
+
+Traditional recommendation theory has to be adapted in the food domain. Collaborative filtering often depends on large-scale historical feedback and performs poorly when user restrictions are explicit or when household-level decisions matter more than individual taste profiles. Constraint-based and knowledge-based approaches therefore become more attractive. Felfernig and Burke \cite{felfernig2008} argue that constraint-based recommenders are particularly effective when explicit user requirements must shape the recommendation process. This perspective aligns strongly with meal planning, where allergies, dislikes, budgets, and preparation limits cannot be treated as minor preferences.
+
+\section{Food and recipe recommendation studies}
+
+Early food recommendation research focused on recipe similarity and ingredient reasoning \cite{freyne2010a,freyne2010b}. Teng, Lin, and Adamic \cite{teng2012} explored recipe recommendation through ingredient networks, which highlighted the value of ingredient co-occurrence patterns as a signal for food recommendation. Later studies expanded the domain toward personalised health and demographic specificity. Ng and Jin \cite{ng2017} proposed personalised recipe recommendations for toddlers based on nutrient intake and food preferences. Phanich, Pholkul, and Phimoltares \cite{phanich2010} considered diabetic patients. Mao, Yuan, Xu, and Wei \cite{mao2016} explicitly considered regional cuisine flavour. Ribeiro et al.\ \cite{ribeiro2018} focused on Portuguese older adults.
+
+Health-aware recommendation has also advanced in meal-level systems. Yang et al.\ \cite{yang2018} demonstrated that a nutrient-based meal recommender can combine nutritional objectives with preference learning. Jung and Chung \cite{jung2016} provided a knowledge-based dietary recommendation system for obesity management, while Ueta, Iwakami, and Ito \cite{ueta2011} proposed a goal-oriented recipe recommendation system that explicitly exposed nutritional information.
+
+\section{Diet optimisation and combinatorial planning}
+
+Meal planning is closely related to the classical diet optimisation literature. The diet problem formulated in operations research showed that food selection can be cast as an optimisation task. van Dooren \cite{vandooren2018} reviews the use of linear programming to optimise diets under nutritional, economic, and environmental constraints and emphasises the importance of acceptability constraints. The methodological lesson is that a mathematically valid diet may still be unacceptable to the user if it ignores habitual food patterns or culinary realism; the present project therefore treats optimisation as necessary but not sufficient.
+
+The move from continuous linear programming to expressive combinatorial methods is significant. Once a system must optimise over discrete slots, recipe repetition, category fit, and multi-objective trade-offs, a constraint-programming approach becomes appealing. The CP-SAT-LP solver described by Perron, Didier, and Gay \cite{perron2023} represents a modern development in this area, combining SAT-based search with linear relaxation ideas. For a meal planner that must assign recipes to several day-slot pairs simultaneously while honouring hard constraints, this solver family is theoretically grounded and practically powerful.
+
+\section{Learning-to-rank in recommendation contexts}
+
+Once a planning system grows beyond hand-crafted scoring, learning-to-rank becomes a natural extension. Gradient-boosted decision tree libraries such as LightGBM \cite{ke2017} provide listwise ranking objectives (notably LambdaRank) that align directly with recommendation-style problems where the relative ordering of items per query (or, here, per household) is more important than absolute regression accuracy. The classical ranking metric suite (NDCG@$k$, MAP, hit-rate) gives a principled vocabulary for comparing a learned ranker against a deterministic baseline, and the listwise formulation makes it natural to train on per-group recipe shortlists. This work adopts LightGBM as the supporting scoring layer precisely because of this fit, while keeping the deterministic scorer as a robust fallback for cold-start operation.
+
+\subsection{Internals of the LightGBM ranker}
+
+LightGBM \cite{ke2017lightgbm} differs from classical gradient-boosted decision trees in two algorithmic ways that matter for this work. First, Gradient-based One-Side Sampling (GOSS) retains all instances with large absolute gradients and randomly samples instances with small gradients; this approximates information gain while reducing the cost of split-finding by an order of magnitude on large recipe datasets. Second, Exclusive Feature Bundling (EFB) bundles mutually-exclusive sparse features (such as one-hot encodings) into a single denser feature, which is especially useful for the project's category, meal type, and cuisine one-hots. The leaf-wise (best-first) tree growth additionally tends to produce deeper trees on the most informative branches, which captures the highly non-linear interactions between group profile and recipe metadata observed in the training data.
+
+For learning-to-rank, the project uses the \texttt{lambdarank} objective. The conceptual lineage runs from RankNet (pairwise probabilistic loss) through LambdaRank (gradient weighted by an information-retrieval metric, typically NDCG) to LambdaMART (LambdaRank applied to gradient-boosted trees) \cite{burges2010ranknet}. The intuition is that the gradient at each pair of items is scaled by the change in NDCG that swapping them would induce; this implicitly biases the model toward correctly ranking items near the top of the list, which matches how a household scrolls through plan options. The evaluation in Chapter~\ref{chap:04} reports NDCG@$5$ and NDCG@$10$ because these are the cut-offs the user actually sees in the mobile app.
+
+\section{Constraint programming for combinatorial planning}
+
+Constraint programming (CP) is the theoretically appropriate framework for the assignment subproblem that arises after candidate generation. Once the candidate pool has been narrowed to a few dozen recipes per meal slot, the planner must select one recipe per (day, meal) cell so that uniqueness, recipe-repeat caps, and aggregate budget and time are satisfied while a weighted sum of preference scores is maximised. This problem class --- assignment under combinatorial constraints with an objective --- is well studied in the CP literature. MiniZinc \cite{nethercote2007minizinc} established a standard high-level constraint modelling language that decouples the model from the underlying solver, and most modern CP solvers internally combine SAT-based search with constraint propagation.
+
+Two implementation strategies are relevant for the present work. The classical \emph{integer linear programming} (ILP) formulation models each (slot, recipe) pair as a binary variable, with linear constraints on slot uniqueness, category caps, budget, and total preparation time, and an objective that is a linear function of preference scores. ILP is well supported by commercial solvers but has two drawbacks for this domain: discrete logical constraints such as ``do not place the same category in two adjacent slots'' or ``at most one heavy main per day'' are unnatural to express linearly, and the search procedure is purely branch-and-bound. The \emph{constraint programming with SAT learning} formulation (CP-SAT) instead models the same problem with high-level constraint primitives such as \texttt{AllDifferent} and \texttt{AtMostK}, and uses lazy clause generation to compactly encode propagation reasons as clauses that can be reused across the search \cite{ohrimenko2009propagation}. OR-Tools' CP-SAT solver \cite{perron2024ortools,perron2023} blends this CP search with a linear relaxation, yielding a hybrid that is competitive with ILP on linear-friendly instances and clearly better on combinatorially structured instances.
+
+For the meal planner specifically, CP-SAT was chosen for three reasons. First, the natural model is full of discrete logical constraints (no recipe twice, no category twice in two days, soft time targets, exact slot uniqueness) for which CP primitives are more expressive than linear ones. Second, OR-Tools' CP-SAT is permissively licensed, well documented, and embedded directly into the Python process, so there is no separate solver service to operate. Third, the wall-clock budget for plan generation is small (five seconds in production), and CP-SAT's any-time behaviour --- it returns the best solution found so far when interrupted --- matches this deadline-driven setting well.
+
+\section{Production-grade machine learning systems}
+
+Production machine learning differs from offline modelling in well-known ways. Sculley et al.\ \cite{sculley2015} document the hidden technical debt accumulated by ML systems: configuration sprawl, data dependencies, glue code, and unstable feature pipelines. The implication for this work is to keep the ML scoring layer narrowly scoped (a single (recipe, group) pair mapped to a scalar), to share feature extraction code between training and inference, and to ensure that any failure path falls through to the deterministic scorer. This design discipline is reflected concretely in the project's ML scoring package, which is structured around a single feature extractor reused by both the training and the inference modules.
+
+\section{Usability principles for household-scale planning}
+
+A meal planner that is operationally correct can still fail if the user cannot follow the plan. Nielsen's ten usability heuristics \cite{nielsen2024shneiderman} apply directly to a household planning surface. The most relevant heuristics are \emph{visibility of system status} (the user must understand whether a plan is being generated, ready, or stale), \emph{match between system and the real world} (Russian-language recipes for a Kazakh audience, metric units, KZT prices), \emph{user control and freedom} (the planner must support undo through plan archiving and recipe replacement, never trapping the user into a single output), \emph{consistency and standards} (the same recipe card layout in the home tab, plan tab, shopping list, and shared link), \emph{recognition rather than recall} (the user should not have to remember constraints from setup; group preferences, allergies, and budget should be visible whenever they influence a recommendation), and \emph{help and documentation} (per-meal explanations that justify why a recipe was chosen). The mobile design surveyed in Chapter~\ref{chap:02} maps each of these heuristics onto specific screens and components.
+
+A second design strand relevant for household planning is \emph{transparency as a trust signal}. Recommender systems literature has consistently found that opaque algorithmic outputs erode trust even when the outputs are correct \cite{adomavicius2005}. For a meal planner, transparency takes two concrete forms. First, the per-meal rationale (\texttt{PlanExplanation}) must show which constraints and preferences influenced the choice; this is rendered in the plan detail screen as a list of human-readable bullet points. Second, the post-plan analytics screen exposes the cost, nutrition, and balance achieved by the plan, so that the user can audit the planner's behaviour rather than being asked to take the result on faith. Both forms are reflected in the system architecture and APIs presented in Chapter~\ref{chap:02}.
+
+\section{Cloud-native architectures for ML-enabled applications}
+
+Once a system needs to ship to public app stores and serve household traffic, cloud-native architectural patterns become relevant. Container-based orchestration on managed clouds has become the default for small teams that cannot afford operational complexity overhead. Cluster scheduling research dating back to Borg \cite{burns2016} establishes the conceptual foundation for the managed-compute services that the project consumes (AWS ECS Fargate). The architectural relevance is not in adopting cluster research directly, but in understanding why managed Fargate over Kubernetes is the correct trade-off for a three-service workload: web, worker, and beat. Continuous architecture practice \cite{erder2015} additionally argues for small, justified decisions captured as Architecture Decision Records (ADRs) rather than monolithic up-front design documents; the project applies this practice through five ADRs summarised in Chapter~\ref{chap:04}.
+
+\section{Data quality and reference nutrition databases}
+
+Data quality is a recurring issue in food recommendation and nutrition-support systems. Recipe lines on public websites are semi-structured, culturally inconsistent, and full of implicit assumptions. Ingredient-level semantics must often be reconstructed before cost and nutrient calculations are possible. Ontology-based and semantic approaches \cite{bianchini2015,al_nazer2014,maneerat2013} implicitly recognise this issue by emphasising the need for structured food knowledge rather than raw text alone.
+
+For nutritional reference data, USDA FoodData Central offers a structured public baseline. McKillop et al.\ \cite{mckillop2021} describe FoodData Central as an integrated food composition system intended to support both research and practical use. This makes USDA especially attractive for a software engineering project that needs reliable and citable nutrient values. The present project additionally confirms a common limitation noted across nutrition-aware systems: even when the nutrient database is high quality, local ingredients and local dish interpretations still require curation at the application level.
+
+\section{Local context: food economics in Kazakhstan}
+
+A small but growing body of applied work targets the Kazakhstani context. Sapakova et al.\ \cite{sapakova2023application} apply supervised machine-learning models to forecast food prices in Kazakhstan, demonstrating that locally collected data supports practically useful price-prediction tooling. The same paper underscores that the Kazakhstani food market is sufficiently distinctive that imported prediction baselines do not transfer well. This conclusion is consistent with the present work's choice to combine an official Kazakh statistical price reference with a Kazakh retail snapshot (Arbuz.kz), rather than to import generic price data. While the present work targets household planning rather than price prediction, the same locality-first reasoning applies: both nutrition and price baselines benefit from local curation.
+
+\section{Synthesis: position of this work in the literature}
+
+Two threads frame the contribution of this work. First, methodologically, the work follows the constraint-based and knowledge-based traditions in food recommendation \cite{felfernig2008,pawar2016,jung2016} while complementing them with a learning-to-rank scoring layer \cite{ke2017} guarded by production-discipline principles \cite{sculley2015}. Second, infrastructurally, the work commits to ADR-driven cloud-native delivery \cite{erder2015,burns2016} so that the engineering effort is not lost in a prototype-only artifact. Both threads are connected by the deliberate choice to make the data path itself reproducible: from public recipe sources and USDA references \cite{mckillop2021} through canonical normalisation and quality scoring to the planner's candidate pool. This combination is rare in the literature: most academic prototypes stop at the algorithmic contribution, and most production ML projects do not document their optimisation core. The present work aims to occupy the intersection.
+
+\section{Analysis of existing systems}
+
+Existing food-related applications and research systems can be grouped into several categories. \emph{General recipe portals} provide variety and volume but rarely support household-level decision support, and almost never expose budget or nutrition reasoning beyond per-serving labels. \emph{Calorie loggers and trackers} emphasise personal nutrition logging rather than plan generation. \emph{Commercial meal planners} (Mealime, Yummly, Plant Jammer, Whisk) come closer to the problem but typically operate on opaque recommendation logic, lack explicit support for local cuisine, and target individual users with at most rudimentary household notions. \emph{Health-aware research systems} \cite{jung2016,phanich2010,yera2023} focus on narrow medical conditions and rarely provide the production engineering layer that an end-user product needs. \emph{Ontology-driven research systems} \cite{al_nazer2014,bianchini2015,maneerat2013} provide deep semantic reasoning but limited operational evaluation. \emph{Regional and population-specific systems} \cite{ribeiro2018,ng2017,mao2016} demonstrate that contextual narrowing improves usefulness but they remain prototype-level deliveries.
+
+This analysis indicates that no single existing category satisfies the combination of transparency, localisation, budgeting, household modelling, and operational maturity required by the present work. The gap is not the absence of any single ingredient but the absence of a delivery that combines them coherently. The qualitative comparison along eight axes is summarised in Table~\ref{tab:landscape}.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Qualitative landscape comparison across eight axes (HHM = household modelling, CON = constraints, BUD = budget, NUT = nutrition, LOC = local cuisine, OPT = optimisation transparency, OPS = production operations, PLT = multi-platform).}
+\label{tab:landscape}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\hline
+System & HHM & CON & BUD & NUT & LOC & OPT & OPS & PLT \\
+\hline
+General recipe portals & -- & -- & -- & part. & -- & -- & -- & varies \\
+Calorie loggers & -- & lim. & -- & yes & -- & -- & varies & varies \\
+Commercial planners & lim. & lim. & lim. & part. & no & opaque & yes & yes \\
+Ontology-based \cite{al_nazer2014,bianchini2015} & part. & yes & lim. & yes & lim. & yes & no & no \\
+Health-aware \cite{jung2016,phanich2010} & no & yes & no & yes & no & yes & no & no \\
+Regional-specific \cite{ribeiro2018,mao2016} & lim. & lim. & no & part. & yes & part. & no & no \\
+\textbf{This work} & yes & yes & yes & yes & yes & yes & yes & yes \\
+\hline
+\end{tabular}
+\end{table}
+
+Two qualifications must be added. First, ``yes'' in the OPS column for the present work means \emph{deployment-ready} (Terraform, GitHub OIDC, CloudWatch dashboards, runbooks) rather than \emph{currently deployed}; this distinction is preserved throughout. Second, the commercial systems were evaluated by their publicly observable behaviour rather than by source-level inspection, so the assessment reflects observable product surface rather than internal architecture. With these qualifications, the gap identified in Table~\ref{tab:landscape} provides the motivation for the system design presented in Chapter~\ref{chap:02}.
+
+\clearpage

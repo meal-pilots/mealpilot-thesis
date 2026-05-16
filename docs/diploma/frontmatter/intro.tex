@@ -1,0 +1,62 @@
+%
+% File: intro.tex
+%
+\chapter{Introduction}
+\label{chap:intro}
+\setlength{\parskip}{1em}
+
+\section{Relevance of intelligent meal planning in household contexts}
+
+Food choice is an everyday necessity, yet the computational interpretation of meal planning as a structured optimisation problem remains an active research domain. A household deciding what to eat across a planning horizon is not selecting individual recipes by taste alone. The decision is shaped by nutritional adequacy for several members with potentially different goals, a shared monetary budget, total available cooking time, ingredient availability, family preferences and dislikes, religious and medical constraints, and the practical sequence of meals so that ingredients can be purchased once and consumed across several days. In digital food systems, these decisions become even harder, because the software must integrate heterogeneous data, encode constraints faithfully, and surface recommendations that are not only mathematically valid but also culturally plausible. Recent surveys of food recommender systems argue that food recommendation is not a straightforward extension of generic recommender systems but a specialised domain with unique sensitivity to health, context, and decision constraints \cite{bondevik2024,mahajan2024}.
+
+The relevance of intelligent meal planning is reinforced by the rising importance of preventive health and by the widespread adoption of digital services for nutrition. Nutrition-aware recommendation has been explored in systems such as Yum-Me, which showed that users respond positively when recommendations combine preference learning with nutrient-based reasoning \cite{yang2018}. Earlier work on automatic meal plan generation emphasised that daily or weekly plans must be evaluated differently from isolated recipe suggestions: plan quality depends on aggregate nutrient and repetition effects rather than on the immediate appeal of any single item \cite{elsweiler2015}. Modern systematic reviews further confirm that specialised domains (diabetes management, religious diets, regional cuisine) all require dedicated treatment within food recommender research \cite{yera2023,mahajan2024}.
+
+In the Kazakhstani context, recent applied work has begun to address local food economics with machine learning, including the use of supervised models to forecast food prices in Kazakhstan \cite{sapakova2023application}. This confirms that local nutrition and food-economics decision support is an active practical concern; the present work approaches the household-planning side of the same problem.
+
+From a software engineering perspective, intelligent meal planning is a particularly suitable thesis topic because it forces the integration of several engineering concerns at once. The system must perform large-scale data acquisition and cleaning across multiple recipe sources, normalise noisy ingredient strings, integrate canonical price and nutrition data, serialise the resulting domain in a relational schema, expose a clean API to client applications, embed both classical optimisation and modern machine learning in a single inference pipeline, develop user-facing software for at least one mobile platform, and stand up a reproducible deployment environment.
+
+\section{Problem statement}
+
+The central problem addressed in this thesis is the absence of a localised, explainable, and operationally reproducible meal planning system that can generate household plans under realistic budget, nutrition, and cultural constraints, with first-class support for both mobile and web clients and an infrastructure plan suitable for actual public deployment. Existing tools suffer from one or more weaknesses: they focus on calorie logging rather than plan generation, ignore local cuisines and local prices, use opaque recommendation logic, target individuals rather than households, or stop at prototype-level operational maturity (no asynchronous orchestration, no infrastructure-as-code, no observability, no auditable data pipeline). These limitations make existing tools weak fits for households where several people share a shopping budget, where local cuisine should be a first-class option, and where the planning system is expected to function as a long-running service rather than as a one-off prototype.
+
+\section{Research questions}
+
+The research questions of this work are formulated as follows.
+
+\begin{description}[style=multiline,leftmargin=1.6cm,labelwidth=1.4cm]
+  \item[RQ1] How can a heterogeneous corpus of public recipe sources, public price data, and a canonical nutrition reference be reproducibly transformed into a structured catalog that supports household-level cost and nutrition reasoning?
+  \item[RQ2] How can hard household constraints (budget, allergies, religious bans, time, repetition) and soft preferences (nutritional fit, diversity, cuisine affinity, learned ranking) be combined into a single planning model that is both feasible to solve at interactive latency and inspectable enough to explain to the user?
+  \item[RQ3] How should the system be decomposed across backend, mobile, web, and ETL codebases so that the algorithmic core remains isolated from delivery concerns while the public API remains a stable contract for both clients?
+  \item[RQ4] What infrastructure, observability, and release-engineering choices are required to take the prototype from a laptop-only experiment to a deployment-ready system that satisfies recoverability, security, and store-submission requirements?
+  \item[RQ5] How can the resulting system be evaluated along multiple axes (corpus quality, solver characteristics, deterministic-versus-learned scoring, end-to-end production readiness) in a way that produces honest, reproducible numbers rather than aspirational claims?
+\end{description}
+
+\section{Aim and objectives}
+
+The aim of this work is to design, implement, and operationally prepare an intelligent meal planning system for Kazakhstani households with hybrid constraint-programming and learning-to-rank scoring. To meet this aim, the work pursues nine objectives.
+
+\begin{enumerate}
+\item Collect and normalise a multi-source recipe corpus including a ninety-three-thousand-recipe Hugging Face dataset and supplementary scraped sources, then deduplicate and quality-score the result.
+\item Integrate two complementary price baselines: an official Kazakhstani statistical reference for socially significant goods, and an Arbuz.kz retail snapshot for long-tail coverage.
+\item Synchronise an ingredient-level nutrition catalog from USDA FoodData Central as a stable, citable scientific baseline.
+\item Design a relational domain model that captures households, members, constraints, preferences, the recipe catalog, prices, nutrition, planning artifacts, shopping lists, pantry items, feedback, devices, and notifications with explicit boundaries and migrations.
+\item Implement a three-tier hybrid planner combining a deterministic candidate-pool builder, an OR-Tools CP-SAT combinatorial assignment, and a LightGBM listwise scoring layer with a robust fallback chain.
+\item Build a React Native mobile client (Expo managed workflow) covering the full household workflow from onboarding to plan analytics with push-driven asynchronous job delivery.
+\item Maintain a sibling React + Vite web client for landing and marketing that exercises the same public API contract.
+\item Prepare a Terraform-managed AWS infrastructure layer for three environments with GitHub OIDC, ECS Fargate, RDS Multi-AZ, ElastiCache, CloudFront, WAF, and Secrets Manager, accompanied by runbooks for deployment, incident response, disaster recovery, secret rotation, and mobile rollback.
+\item Evaluate the resulting system using only measurable artifacts that can be reproduced from the repository state, while documenting the validity boundaries of each measurement.
+\end{enumerate}
+
+\section{Object, subject, and significance}
+
+The \emph{object} of the research is an intelligent meal planning system addressing household-level decision support. The \emph{subject} of the research is the architectural, data-engineering, optimisation, and production-engineering methodology required to implement such a system with local cuisine integration and operational maturity beyond prototype scope. The \emph{practical significance} lies in the fact that the project does not remain at a mockup level. It includes a functioning backend with asynchronous orchestration, a mobile client targeting App Store and Google Play submission, a sibling web client, a multi-source ETL pipeline, an ingredient-level nutrition catalog, a Kazakhstan-specific price baseline, a reproducible bootstrap procedure, a three-tier hybrid planner, and a complete infrastructure-as-code plan for production deployment.
+
+\section{Scope and non-goals}
+
+The scope of the project is explicitly bounded. The work covers planning at the weekly horizon for households of one to ten members, with optional pantry awareness and an optional share-link mechanism. The mobile client is store-submission-ready but not yet published. The infrastructure layer is deployment-ready (Terraform plans and GitHub workflows wired through OIDC) but is not currently running in production, because that would require active Apple Developer Program, Google Play Console, and AWS billing arrangements that lie outside the scope of this thesis. The LightGBM ranker pipeline is implemented end to end (feature extraction, dataset building, training, lazy inference, fallback), but offline benchmarking against accumulated real feedback is deferred until production rollout produces sufficient labelled data; the work therefore reports engineering readiness criteria rather than benchmark deltas extracted from synthetic-only data.
+
+\section{Structure of the thesis}
+
+The thesis is organised in four chapters preceded by this Introduction. Chapter~\ref{chap:01} reviews the literature and analyses existing systems. Chapter~\ref{chap:02} presents the system architecture, the data engineering layer, the ETL pipeline, the API surface, and the mobile user flow. Chapter~\ref{chap:03} presents the planning algorithm in detail and the cloud-deployment plan. Chapter~\ref{chap:04} reports the evaluation, summarises the architecture decisions, and discusses limitations and future work. A Conclusion and references follow.
+
+\clearpage

@@ -1,0 +1,127 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{Abstract}{i}{chapter*.2}%
+\contentsline {chapter}{Dedication and acknowledgements}{iii}{chapter*.4}%
+\contentsline {chapter}{Authors' declaration}{iv}{chapter*.6}%
+\contentsline {chapter}{Definitions}{v}{chapter*.8}%
+\contentsline {chapter}{Designations and Abbreviations}{vii}{chapter*.10}%
+\contentsline {chapter}{List of Tables}{x}{chapter*.11}%
+\contentsline {chapter}{List of Figures}{xi}{chapter*.12}%
+\par \nobreak \mbox {}\hfill {\bfseries }\par \nobreak 
+\contentsline {chapter}{Introduction}{xvi}{chapter*.15}%
+\contentsline {section}{Relevance of intelligent meal planning in household contexts}{xvi}{section*.16}%
+\contentsline {section}{Problem statement}{xvii}{section*.17}%
+\contentsline {section}{Research questions}{xvii}{section*.18}%
+\contentsline {section}{Aim and objectives}{xviii}{section*.19}%
+\contentsline {section}{Object, subject, and significance}{xix}{section*.20}%
+\contentsline {section}{Scope and non-goals}{xx}{section*.21}%
+\contentsline {section}{Structure of the thesis}{xx}{section*.22}%
+\contentsline {chapter}{\chapternumberline {1}Literature Review and Existing Systems}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Food recommender systems as a research domain}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Classical recommendation theory}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Food and recipe recommendation studies}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Diet optimisation and combinatorial planning}{3}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Learning-to-rank in recommendation contexts}{3}{section.1.5}%
+\contentsline {subsection}{\numberline {1.5.1}Internals of the LightGBM ranker}{4}{subsection.1.5.1}%
+\contentsline {section}{\numberline {1.6}Constraint programming for combinatorial planning}{4}{section.1.6}%
+\contentsline {section}{\numberline {1.7}Production-grade machine learning systems}{5}{section.1.7}%
+\contentsline {section}{\numberline {1.8}Usability principles for household-scale planning}{6}{section.1.8}%
+\contentsline {section}{\numberline {1.9}Cloud-native architectures for ML-enabled applications}{6}{section.1.9}%
+\contentsline {section}{\numberline {1.10}Data quality and reference nutrition databases}{7}{section.1.10}%
+\contentsline {section}{\numberline {1.11}Local context: food economics in Kazakhstan}{7}{section.1.11}%
+\contentsline {section}{\numberline {1.12}Synthesis: position of this work in the literature}{8}{section.1.12}%
+\contentsline {section}{\numberline {1.13}Analysis of existing systems}{8}{section.1.13}%
+\contentsline {chapter}{\chapternumberline {2}System Architecture and Data Engineering}{10}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Architectural method}{10}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Five sibling codebases}{10}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}C4 model at three levels}{10}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Domain modelling}{12}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Application boundaries}{12}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Entity inventory}{12}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Methodological principle}{14}{subsection.2.2.3}%
+\contentsline {section}{\numberline {2.3}Reproducible bootstrap}{15}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Reproduce-from-scratch commands}{16}{subsection.2.3.1}%
+\contentsline {section}{\numberline {2.4}Data sources landscape}{17}{section.2.4}%
+\contentsline {section}{\numberline {2.5}\texttt {etl-meals} pipeline}{17}{section.2.5}%
+\contentsline {section}{\numberline {2.6}URL discovery, acquisition, and extraction}{19}{section.2.6}%
+\contentsline {subsection}{\numberline {2.6.1}Discovery and raw acquisition}{19}{subsection.2.6.1}%
+\contentsline {subsection}{\numberline {2.6.2}Schema extraction with fallback}{19}{subsection.2.6.2}%
+\contentsline {section}{\numberline {2.7}Canonical ingredient normalisation}{19}{section.2.7}%
+\contentsline {section}{\numberline {2.8}Embedding-based clustering and MinHash deduplication}{20}{section.2.8}%
+\contentsline {section}{\numberline {2.9}Quality scoring}{20}{section.2.9}%
+\contentsline {section}{\numberline {2.10}USDA nutrition synchronisation}{20}{section.2.10}%
+\contentsline {section}{\numberline {2.11}Multi-source price ingestion}{21}{section.2.11}%
+\contentsline {section}{\numberline {2.12}Backend implementation surface}{21}{section.2.12}%
+\contentsline {subsection}{\numberline {2.12.1}Public API surface map}{22}{subsection.2.12.1}%
+\contentsline {paragraph}{Authentication and account.}{22}{section*.28}%
+\contentsline {paragraph}{Groups, members, constraints, preferences.}{22}{section*.29}%
+\contentsline {paragraph}{Catalog, favourites, ingredients.}{23}{section*.30}%
+\contentsline {paragraph}{Planning, runs, lifecycle.}{24}{section*.31}%
+\contentsline {paragraph}{Feedback, history, notifications.}{25}{section*.32}%
+\contentsline {paragraph}{Devices.}{25}{section*.33}%
+\contentsline {section}{\numberline {2.13}Mobile and web clients}{26}{section.2.13}%
+\contentsline {subsection}{\numberline {2.13.1}Mobile client}{26}{subsection.2.13.1}%
+\contentsline {subsection}{\numberline {2.13.2}Onboarding workflow}{26}{subsection.2.13.2}%
+\contentsline {subsection}{\numberline {2.13.3}Plan viewing and explanation}{26}{subsection.2.13.3}%
+\contentsline {subsection}{\numberline {2.13.4}Analytics, shopping, pantry, and sharing}{27}{subsection.2.13.4}%
+\contentsline {subsection}{\numberline {2.13.5}Plan generation, pantry, and sharing}{28}{subsection.2.13.5}%
+\contentsline {subsection}{\numberline {2.13.6}Feature-Sliced Design in the mobile client}{28}{subsection.2.13.6}%
+\contentsline {subsection}{\numberline {2.13.7}Web client}{29}{subsection.2.13.7}%
+\contentsline {section}{\numberline {2.14}Asynchronous planning pipeline}{30}{section.2.14}%
+\contentsline {subsection}{\numberline {2.14.1}Celery queue topology and idempotency}{30}{subsection.2.14.1}%
+\contentsline {section}{\numberline {2.15}API design principles}{30}{section.2.15}%
+\contentsline {section}{\numberline {2.16}Testing strategy}{31}{section.2.16}%
+\contentsline {section}{\numberline {2.17}Database evolution and zero-downtime migrations}{32}{section.2.17}%
+\contentsline {section}{\numberline {2.18}Security and compliance model}{32}{section.2.18}%
+\contentsline {chapter}{\chapternumberline {3}Algorithm Design and Production Deployment}{34}{chapter.3}%
+\contentsline {section}{\numberline {3.1}End-to-end planning pipeline}{34}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Candidate pool construction}{35}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Hard-constraint extraction}{35}{section.3.3}%
+\contentsline {section}{\numberline {3.4}CP-SAT model formulation}{35}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Objective weight tuning}{36}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Solver behaviour in production}{37}{subsection.3.4.2}%
+\contentsline {section}{\numberline {3.5}Deterministic fallback}{37}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Scoring layer: deterministic versus learned}{38}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Deterministic scorer}{38}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}LightGBM listwise ranker}{38}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Training data preparation and label sources}{39}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Cold-start behaviour and graceful degradation}{40}{subsection.3.6.4}%
+\contentsline {section}{\numberline {3.7}Dynamic servings, shopping list, and explanations}{40}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Dynamic servings}{40}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Shopping-list aggregation}{40}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.3}Plan explanations}{41}{subsection.3.7.3}%
+\contentsline {section}{\numberline {3.8}Cloud infrastructure}{41}{section.3.8}%
+\contentsline {subsection}{\numberline {3.8.1}Operational goals}{41}{subsection.3.8.1}%
+\contentsline {subsection}{\numberline {3.8.2}Terraform module structure}{41}{subsection.3.8.2}%
+\contentsline {subsection}{\numberline {3.8.3}Networking}{42}{subsection.3.8.3}%
+\contentsline {subsection}{\numberline {3.8.4}Identity, secrets, and least-privilege IAM}{43}{subsection.3.8.4}%
+\contentsline {subsection}{\numberline {3.8.5}Threat model and mitigations}{43}{subsection.3.8.5}%
+\contentsline {subsection}{\numberline {3.8.6}Compute and data plane}{44}{subsection.3.8.6}%
+\contentsline {section}{\numberline {3.9}Continuous integration and continuous delivery}{44}{section.3.9}%
+\contentsline {section}{\numberline {3.10}ETL throughput, parallelism, and provenance}{44}{section.3.10}%
+\contentsline {section}{\numberline {3.11}Observability}{45}{section.3.11}%
+\contentsline {section}{\numberline {3.12}Runbooks and disaster recovery}{46}{section.3.12}%
+\contentsline {section}{\numberline {3.13}Mobile delivery, store submission, and cost model}{46}{section.3.13}%
+\contentsline {chapter}{\chapternumberline {4}Evaluation, Discussion, and Decisions}{48}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Evaluation philosophy}{48}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Recipe corpus quality}{48}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Catalog distributions}{49}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Candidate pool reduction}{50}{section.4.4}%
+\contentsline {section}{\numberline {4.5}CP-SAT versus deterministic planner}{51}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Additional household scenarios}{52}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Sensitivity analysis}{53}{section.4.7}%
+\contentsline {section}{\numberline {4.8}User-experience heuristic walkthrough}{54}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Observability instrumentation in evaluation}{55}{section.4.9}%
+\contentsline {section}{\numberline {4.10}ETL throughput}{55}{section.4.10}%
+\contentsline {section}{\numberline {4.11}ML scoring layer readiness}{56}{section.4.11}%
+\contentsline {section}{\numberline {4.12}Production readiness checklist}{56}{section.4.12}%
+\contentsline {section}{\numberline {4.13}Architecture Decision Records}{57}{section.4.13}%
+\contentsline {paragraph}{ADR-0001: Monorepo with sibling codebases.}{58}{section*.47}%
+\contentsline {paragraph}{ADR-0002: ECS Fargate over EKS or App Runner.}{58}{section*.48}%
+\contentsline {paragraph}{ADR-0003: CP-SAT with LightGBM-augmented scoring.}{58}{section*.49}%
+\contentsline {paragraph}{ADR-0004: Expo Managed workflow.}{59}{section*.50}%
+\contentsline {paragraph}{ADR-0005: PostgreSQL as primary store.}{59}{section*.51}%
+\contentsline {section}{\numberline {4.14}Threats to validity}{59}{section.4.14}%
+\contentsline {section}{\numberline {4.15}Limitations}{60}{section.4.15}%
+\contentsline {section}{\numberline {4.16}Future work}{60}{section.4.16}%
+\contentsline {chapter}{Conclusion}{62}{chapter*.53}%
+\contentsline {chapter}{Bibliography}{64}{chapter*.55}%

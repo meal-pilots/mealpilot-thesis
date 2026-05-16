@@ -114,6 +114,30 @@ DRY_SPICE_KEYWORDS = (
 FRESH_HERB_VOLUME_OK: tuple[str, ...] = ()  # nothing should be measured in litres for spices/herbs
 
 
+_IMAGE_HOST_REWRITES = {
+    # russianfood.com's image subdomain has been returning 502 since spring '26;
+    # the main domain serves the exact same /dycontent/images_upl/... paths.
+    'img1.russianfood.com': 'www.russianfood.com',
+    'img2.russianfood.com': 'www.russianfood.com',
+}
+
+
+def _normalize_image_url(value: str | None) -> str | None:
+    if not value:
+        return None
+    raw = value.strip()
+    if not raw:
+        return None
+    match = re.match(r'^(https?://)([^/]+)(/.*)?$', raw, flags=re.IGNORECASE)
+    if not match:
+        return raw
+    scheme, host, path = match.group(1), match.group(2).lower(), match.group(3) or ''
+    replacement = _IMAGE_HOST_REWRITES.get(host)
+    if replacement:
+        return f'{scheme}{replacement}{path}'
+    return raw
+
+
 def _clean_text(value: str) -> str:
     return re.sub(r'\s+', ' ', (value or '')).strip()
 
@@ -499,7 +523,7 @@ class Command(BaseCommand):
                     'cook_time_minutes': int(payload.get('cook_time_minutes') or 0),
                     'servings_default': servings_default,
                     'is_child_friendly': category in {RecipeCategory.BREAKFAST, RecipeCategory.SNACK},
-                    'image_url': payload.get('image_url') or None,
+                    'image_url': _normalize_image_url(payload.get('image_url')),
                     'video_url': payload.get('video_url') or None,
                     'status': options['status'],
                 }

@@ -1,0 +1,101 @@
+erDiagram
+    USER ||--o| USER_SETTINGS : has
+    USER ||--o{ DEVICE : registers
+    USER ||--o{ GROUP : owns
+    USER ||--o{ FAVORITE_RECIPE : marks
+    USER ||--o{ RECIPE_FEEDBACK : leaves
+    USER ||--o{ PLAN_FEEDBACK : leaves
+    USER ||--o{ NOTIFICATION : receives
+
+    GROUP ||--|| GROUP_PREFERENCE : has
+    GROUP ||--o{ GROUP_MEMBER : contains
+    GROUP_MEMBER ||--o{ MEMBER_CONSTRAINT : declares
+    GROUP ||--o{ MEAL_PLAN : owns
+    GROUP ||--o{ PANTRY_ITEM : tracks
+    GROUP ||--o{ PLAN_GENERATION_RUN : triggers
+
+    RECIPE ||--|| RECIPE_NUTRITION : has
+    RECIPE ||--o{ RECIPE_STEP : composed_of
+    RECIPE ||--o{ RECIPE_INGREDIENT : composed_of
+    RECIPE ||--o{ RECIPE_TAG : tagged
+    RECIPE ||--o{ RECIPE_VERSION : versioned
+    RECIPE ||--o{ FAVORITE_RECIPE : marked_by
+    RECIPE ||--o{ RECIPE_FEEDBACK : scored_by
+    TAG ||--o{ RECIPE_TAG : applies_to
+
+    INGREDIENT ||--o{ RECIPE_INGREDIENT : used_in
+    INGREDIENT ||--o{ INGREDIENT_PRICE : priced_at
+    INGREDIENT ||--o{ INGREDIENT_SUBSTITUTION : substituted_by
+    INGREDIENT ||--o{ SHOPPING_LIST_ITEM : appears_in
+    INGREDIENT ||--o{ PANTRY_ITEM : stocked_as
+
+    MEAL_PLAN ||--o{ MEAL_PLAN_DAY : spans
+    MEAL_PLAN_DAY ||--o{ MEAL_PLAN_ITEM : schedules
+    MEAL_PLAN_ITEM }o--|| RECIPE : refers_to
+    MEAL_PLAN_ITEM ||--o{ MEAL_ITEM_ADAPTATION : adapts
+    GROUP_MEMBER ||--o{ MEAL_ITEM_ADAPTATION : opts_into
+
+    MEAL_PLAN ||--|| SHOPPING_LIST : produces
+    SHOPPING_LIST ||--o{ SHOPPING_LIST_ITEM : contains
+    MEAL_PLAN ||--o{ PLAN_EXPLANATION : explained_by
+    MEAL_PLAN ||--o{ SHARE_LINK : shared_via
+    MEAL_PLAN ||--o{ PLAN_FEEDBACK : evaluated_by
+
+    USER {
+        uuid id PK
+        string email
+        string password_hash
+        datetime created_at
+    }
+    GROUP {
+        uuid id PK
+        uuid owner_user FK
+        string name
+        json budget
+    }
+    GROUP_MEMBER {
+        uuid id PK
+        uuid group FK
+        string display_name
+        string member_type
+        int age
+    }
+    RECIPE {
+        uuid id PK
+        string title
+        text instructions
+        int time_minutes
+        decimal cost_kzt
+    }
+    INGREDIENT {
+        uuid id PK
+        string canonical_name
+        string default_unit
+        json aliases
+    }
+    MEAL_PLAN {
+        uuid id PK
+        uuid group FK
+        date start_date
+        int days
+        string status
+    }
+    MEAL_PLAN_ITEM {
+        uuid id PK
+        uuid meal_plan_day FK
+        uuid recipe FK
+        string meal_type
+        decimal servings
+    }
+    SHOPPING_LIST {
+        uuid id PK
+        uuid meal_plan FK
+        decimal total_cost
+    }
+    PLAN_GENERATION_RUN {
+        uuid id PK
+        uuid group FK
+        json input_snapshot
+        json output_metrics
+        string status
+    }
