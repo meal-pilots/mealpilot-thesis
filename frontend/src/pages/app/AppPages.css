@@ -710,12 +710,12 @@
     width: 64px;
     height: 64px;
     border-radius: 999px;
-    background: #f97316;
+    background: linear-gradient(135deg, #446347 0%, #5c7c5e 100%);
     color: #ffffff;
     padding: 0;
     display: grid;
     place-items: center;
-    box-shadow: 0 0 24px rgba(249, 115, 22, 0.28);
+    box-shadow: 0 10px 24px rgba(68, 99, 71, 0.2);
 }
 
 .app-page__profile-avatar {
@@ -740,12 +740,12 @@
     height: 30px;
     border: none;
     border-radius: 999px;
-    background: #2d2419;
+    background: #191c1c;
     color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 24px rgba(45, 36, 25, 0.22);
+    box-shadow: 0 10px 24px rgba(25, 28, 28, 0.16);
     cursor: pointer;
 }
 
@@ -810,9 +810,9 @@
 .app-page__profile-household-card,
 .app-page__profile-pref-card {
     background: #ffffff;
-    border: 1px solid rgba(240, 228, 207, 0.86);
+    border: 1px solid rgba(115, 121, 115, 0.16);
     border-radius: 18px;
-    box-shadow: 0 8px 28px rgba(31, 17, 0, 0.05);
+    box-shadow: 0 8px 28px rgba(25, 28, 28, 0.04);
 }
 
 .app-page__profile-list-card {
@@ -845,12 +845,12 @@
 }
 
 .app-page__profile-list-item+.app-page__profile-list-item {
-    box-shadow: inset 0 1px 0 rgba(240, 228, 207, 0.72);
+    box-shadow: inset 0 1px 0 rgba(115, 121, 115, 0.14);
 }
 
 .app-page__profile-list-item:hover,
 .app-page__profile-setting-row:hover {
-    background: #fff6e8;
+    background: #f3f4f3;
 }
 
 .app-page__profile-list-item-main {
@@ -872,8 +872,8 @@
 }
 
 .app-page__profile-list-icon-wrap {
-    background: #ffe4b5;
-    color: #7c2d0e;
+    background: #d4e5ca;
+    color: #446347;
 }
 
 .app-page__profile-list-icon-wrap--danger {
@@ -945,8 +945,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #ffe4b5;
-    color: #7c2d0e;
+    background: #d4e5ca;
+    color: #446347;
     font-family: 'Work Sans', 'Inter', sans-serif;
     font-size: 0.72rem;
     font-weight: 800;
@@ -996,9 +996,9 @@
 }
 
 .app-page__profile-pill-button--primary {
-    background: #f97316;
+    background: linear-gradient(135deg, #446347 0%, #5c7c5e 100%);
     color: #ffffff;
-    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.22);
+    box-shadow: 0 10px 24px rgba(68, 99, 71, 0.2);
 }
 
 .app-page__profile-pref-grid {
@@ -1028,8 +1028,8 @@
 }
 
 .app-page__profile-pref-badge--warm {
-    background: #ffe4b5;
-    color: #7c2d0e;
+    background: #f3f4f3;
+    color: #586751;
 }
 
 .app-page__profile-pref-badge--soft-red {
@@ -1063,7 +1063,7 @@
     width: 72%;
     height: 100%;
     border-radius: inherit;
-    background: #f97316;
+    background: linear-gradient(90deg, #446347 0%, #5c7c5e 100%);
 }
 
 .app-page__profile-heat-scale {
@@ -1078,7 +1078,7 @@
 }
 
 .app-page__profile-setting-row+.app-page__profile-setting-row {
-    box-shadow: inset 0 1px 0 rgba(240, 228, 207, 0.72);
+    box-shadow: inset 0 1px 0 rgba(115, 121, 115, 0.14);
 }
 
 .app-page__profile-setting-value {
@@ -1103,7 +1103,7 @@
 }
 
 .app-page__profile-toggle--on {
-    background: #f97316;
+    background: #446347;
 }
 
 .app-page__profile-toggle-knob {
@@ -1169,9 +1169,9 @@
 .app-page__profile-input {
     width: min(100%, 240px);
     min-height: 44px;
-    border: 1px solid #f0e4cf;
+    border: 1px solid #d9dad9;
     border-radius: 14px;
-    background: #fff6e8;
+    background: #f3f4f3;
     color: #191c1c;
     padding: 0 14px;
     font-family: 'Work Sans', 'Inter', sans-serif;
@@ -1179,7 +1179,7 @@
 }
 
 .app-page__profile-input:focus-visible {
-    outline: 3px solid rgba(249, 115, 22, 0.22);
+    outline: 3px solid rgba(68, 99, 71, 0.22);
     outline-offset: 2px;
 }
 
@@ -1215,7 +1215,7 @@
     border: 1px solid rgba(185, 28, 28, 0.16);
     border-radius: 18px;
     background: #ffffff;
-    box-shadow: 0 8px 28px rgba(31, 17, 0, 0.05);
+    box-shadow: 0 8px 28px rgba(25, 28, 28, 0.04);
 }
 
 .app-page__profile-delete-field {
@@ -1241,7 +1241,7 @@
 .app-page__profile-toggle:focus-visible,
 .app-page__profile-logout:focus-visible,
 .app-page__profile-input:focus-visible {
-    outline: 3px solid rgba(249, 115, 22, 0.22);
+    outline: 3px solid rgba(68, 99, 71, 0.22);
     outline-offset: 4px;
 }
 
