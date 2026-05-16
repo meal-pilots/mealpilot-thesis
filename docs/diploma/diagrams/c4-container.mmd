@@ -1,0 +1,78 @@
+flowchart TB
+    classDef client fill:#08427b,stroke:#073B6F,color:#fff,font-weight:bold
+    classDef edge fill:#FF9900,stroke:#CC7A00,color:#fff
+    classDef compute fill:#438DD5,stroke:#2E6DAB,color:#fff
+    classDef data fill:#1A8754,stroke:#136844,color:#fff
+    classDef etl fill:#8E44AD,stroke:#6C3483,color:#fff
+    classDef ext fill:#999999,stroke:#6B6B6B,color:#fff
+
+    subgraph clients [Clients]
+        Mobile["Mobile App<br/>React Native + Expo"]:::client
+        Web["Web Landing<br/>React + Vite"]:::client
+    end
+
+    subgraph awsedge [AWS Edge]
+        Route53["Route 53"]:::edge
+        CloudFront["CloudFront CDN"]:::edge
+        WAF["AWS WAF"]:::edge
+        ALB["ALB + ACM TLS"]:::edge
+    end
+
+    subgraph compute [ECS Fargate]
+        Web8000["Django web<br/>gunicorn :8000"]:::compute
+        Worker["Celery worker"]:::compute
+        Beat["Celery beat"]:::compute
+    end
+
+    subgraph datastore [Data]
+        RDS["RDS Postgres 16<br/>Multi-AZ, encrypted"]:::data
+        Redis["ElastiCache Redis<br/>cache + broker"]:::data
+        S3Media["S3 (media)"]:::data
+        S3Static["S3 (static)"]:::data
+        Secrets["Secrets Manager"]:::data
+    end
+
+    subgraph etl [ETL]
+        ETLPipeline["etl-meals pipeline<br/>local / batch jobs"]:::etl
+        Ollama["Local Ollama<br/>LLM normalisation"]:::etl
+    end
+
+    subgraph external [External]
+        ExpoPush["Expo Push"]:::ext
+        SentryEx["Sentry"]:::ext
+        PostHogEx["PostHog"]:::ext
+        USDAEx["USDA"]:::ext
+        SpoonEx["Spoonacular"]:::ext
+        HFEx["Hugging Face"]:::ext
+    end
+
+    Mobile --> Route53
+    Web --> Route53
+    Route53 --> CloudFront
+    CloudFront --> S3Static
+    Route53 --> ALB
+    ALB --> WAF
+    WAF --> Web8000
+
+    Web8000 --> RDS
+    Web8000 --> Redis
+    Web8000 --> Secrets
+    Web8000 --> S3Media
+    Web8000 --> ExpoPush
+    Web8000 --> SentryEx
+
+    Worker --> RDS
+    Worker --> Redis
+    Worker --> ExpoPush
+    Beat --> RDS
+
+    ETLPipeline --> RDS
+    ETLPipeline --> S3Media
+    ETLPipeline --> Ollama
+    ETLPipeline --> USDAEx
+    ETLPipeline --> SpoonEx
+    ETLPipeline --> HFEx
+
+    Mobile --> ExpoPush
+    Mobile --> SentryEx
+    Mobile --> PostHogEx

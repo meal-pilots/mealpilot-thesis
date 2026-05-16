@@ -1,0 +1,36 @@
+flowchart LR
+    classDef api fill:#08427b,stroke:#073B6F,color:#fff,font-weight:bold
+    classDef logic fill:#438DD5,stroke:#2E6DAB,color:#fff
+    classDef ml fill:#8E44AD,stroke:#6C3483,color:#fff
+    classDef solver fill:#FF9900,stroke:#CC7A00,color:#fff
+    classDef data fill:#1A8754,stroke:#136844,color:#fff
+
+    GenerateAPI["MealPlanGenerateAPIView"]:::api
+    Throttle["PlanGenerationThrottle"]:::api
+    AsyncTask["Celery task<br/>generate_meal_plan_async"]:::logic
+    Orchestrator["generate_meal_plan_for_group"]:::logic
+    CandidatePool["_build_candidate_pool"]:::logic
+    Fits["_recipe_fits_group<br/>(hard constraints)"]:::logic
+    Scorer["_score_recipe_for_group<br/>(deterministic)"]:::logic
+    MLScorer["ml_scoring.predict_score<br/>(LightGBM ranker)"]:::ml
+    CPSAT["_build_cp_sat_selection<br/>(OR-Tools CP-SAT)"]:::solver
+    Deterministic["Deterministic greedy<br/>fallback"]:::logic
+    ShoppingList["_build_shopping_list"]:::logic
+    Explanations["_build_plan_explanations"]:::logic
+    Push["send_push_to_user<br/>(plan ready)"]:::logic
+    Models[("Catalog + Groups<br/>+ Planning models")]:::data
+
+    GenerateAPI --> Throttle
+    Throttle --> AsyncTask
+    AsyncTask --> Orchestrator
+    Orchestrator --> CandidatePool
+    CandidatePool --> Fits
+    CandidatePool --> Scorer
+    Scorer --> MLScorer
+    MLScorer -.fallback.-> Scorer
+    Orchestrator --> CPSAT
+    CPSAT -.fallback.-> Deterministic
+    Orchestrator --> ShoppingList
+    Orchestrator --> Explanations
+    Orchestrator --> Models
+    Orchestrator --> Push

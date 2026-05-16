@@ -1,4 +1,8 @@
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import {
+    BottomSheetBackdrop,
+    BottomSheetModal,
+    BottomSheetScrollView,
+} from '@gorhom/bottom-sheet'
 import { useCallback, useRef, useState } from 'react'
 import { Alert, FlatList, RefreshControl, ScrollView, View } from 'react-native'
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated'
@@ -29,6 +33,7 @@ import { TouchableSurface } from '@shared/ui/TouchableSurface'
 import { radii, spacing, type Palette } from '@shared/ui/theme'
 
 const COMMON_UNITS = ['г', 'кг', 'мл', 'л', 'шт', 'ст. л.', 'ч. л.']
+type PantrySheetRef = React.ComponentRef<typeof BottomSheetModal>
 
 export function PantryScreen() {
     const palette = usePalette()
@@ -40,7 +45,7 @@ export function PantryScreen() {
     const toast = useToast()
     const { refreshing, onRefresh } = useRefresh(pantry.refetch)
 
-    const sheetRef = useRef<BottomSheetModal>(null)
+    const sheetRef = useRef<PantrySheetRef>(null)
 
     const expiringSoon = (pantry.data ?? []).filter((item) => {
         if (!item.expires_at) return false
@@ -258,7 +263,7 @@ function PantryAddSheet({
     isLoading,
     palette,
 }: {
-    sheetRef: React.RefObject<BottomSheetModal | null>
+    sheetRef: React.RefObject<PantrySheetRef | null>
     renderBackdrop: (props: React.ComponentProps<typeof BottomSheetBackdrop>) => React.ReactElement
     onCreate: (payload: { ingredient_id: string; quantity: number; unit: string }) => void
     isLoading: boolean
