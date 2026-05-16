@@ -68,12 +68,12 @@ export function HomeScreen() {
     const greeting = `${timeBasedGreeting()}${user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}`
     const quickActionWidth = Math.floor((viewportWidth - spacing.xxl * 2 - spacing.sm) / 2)
 
-    const todaysItems = useMemo(() => {
-        if (!planDetail.data) return []
+    const todaysDay = useMemo(() => {
+        if (!planDetail.data) return null
         const today = new Date().toISOString().slice(0, 10)
-        const day = planDetail.data.days.find((d) => d.plan_date === today) ?? planDetail.data.days[0]
-        return day?.items ?? []
+        return planDetail.data.days.find((d) => d.plan_date === today) ?? planDetail.data.days[0] ?? null
     }, [planDetail.data])
+    const todaysItems = todaysDay?.items ?? []
 
     return (
         <Screen contentContainerStyle={{ padding: 0 }}>
@@ -129,11 +129,17 @@ export function HomeScreen() {
                             subtitle={`${todaysItems.length} ${pluralRu(todaysItems.length, ['блюдо', 'блюда', 'блюд'])}`}
                         >
                             <View style={{ gap: spacing.sm }}>
-                                {todaysItems.slice(0, 3).map((item) => (
+                                {todaysItems.map((item) => (
                                     <Card
                                         key={item.id}
                                         elevation="card"
-                                        onPress={() => navigation.navigate('RecipeDetails', { recipeId: item.recipe_id })}
+                                        onPress={() => {
+                                            if (!todaysDay || !planDetail.data) return
+                                            navigation.navigate('DayDetails', {
+                                                mealPlanId: planDetail.data.summary.id,
+                                                dayIndex: todaysDay.day_index,
+                                            })
+                                        }}
                                     >
                                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                                             <View
