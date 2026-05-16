@@ -34,6 +34,7 @@ import { ShoppingListPage } from '../../pages/app/ShoppingListPage'
 import { BudgetAnalyticsPage } from '../../pages/app/analytics/BudgetAnalyticsPage'
 import { NutritionAnalyticsPage } from '../../pages/app/analytics/NutritionAnalyticsPage'
 import { WhyThisPlanPage } from '../../pages/app/plans/WhyThisPlanPage'
+import { SettingsPage } from '../../pages/app/SettingsPage'
 
 export const router = createBrowserRouter([
     {
@@ -260,13 +261,7 @@ export const router = createBrowserRouter([
 
                     {
                         path: 'settings',
-                        element: (
-                            <ScreenPlaceholder
-                                section="Settings"
-                                title="Settings"
-                                description="App settings screen."
-                            />
-                        ),
+                        element: <SettingsPage />,
                     },
 
                     {
