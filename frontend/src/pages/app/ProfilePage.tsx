@@ -12,7 +12,6 @@ import {
     BowlIcon,
     ChevronRightIcon,
     ClockIcon,
-    EditIcon,
     FireIcon,
     GlobeIcon,
     HeartIcon,
@@ -366,14 +365,6 @@ export function ProfilePage() {
                             <span className="app-page__profile-avatar-fallback">{initials}</span>
                         )}
                     </div>
-                    <button
-                        className="app-page__profile-avatar-edit"
-                        type="button"
-                        aria-label="Edit profile"
-                        onClick={() => profileEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                    >
-                        <EditIcon className="app-page__profile-avatar-edit-icon" />
-                    </button>
                 </div>
 
                 <div className="app-page__profile-identity">
@@ -483,22 +474,6 @@ export function ProfilePage() {
                                 </select>
                             </label>
 
-                            <label className="app-page__profile-setting-row app-page__profile-setting-row--field">
-                                <span>
-                                    <span className="app-page__profile-list-label">Avatar URL</span>
-                                    <span className="app-page__profile-card-subtitle">Optional profile image</span>
-                                </span>
-                                <input
-                                    className="app-page__profile-input"
-                                    value={profileForm.avatarUrl}
-                                    onChange={(event) =>
-                                        setProfileForm((current) => ({ ...current, avatarUrl: event.target.value }))
-                                    }
-                                    disabled={isSavingProfile}
-                                    placeholder="https://..."
-                                />
-                            </label>
-
                             <div className="app-page__profile-form-actions">
                                 {profileSuccess ? (
                                     <p className="app-page__profile-feedback app-page__profile-feedback--success">
@@ -551,11 +526,10 @@ export function ProfilePage() {
                                 {[1, 2, 3].map((level) => (
                                     <FireIcon
                                         key={level}
-                                        className={`app-page__profile-heat-icon ${
-                                            level <= spiceScore(snapshot.preferences?.spice_tolerance)
-                                                ? 'app-page__profile-heat-icon--active'
-                                                : ''
-                                        }`}
+                                        className={`app-page__profile-heat-icon ${level <= spiceScore(snapshot.preferences?.spice_tolerance)
+                                            ? 'app-page__profile-heat-icon--active'
+                                            : ''
+                                            }`}
                                     />
                                 ))}
                             </span>
@@ -581,9 +555,8 @@ export function ProfilePage() {
                                     </div>
                                 </div>
                                 <button
-                                    className={`app-page__profile-toggle ${
-                                        settingsForm.notificationsEnabled ? 'app-page__profile-toggle--on' : ''
-                                    }`}
+                                    className={`app-page__profile-toggle ${settingsForm.notificationsEnabled ? 'app-page__profile-toggle--on' : ''
+                                        }`}
                                     type="button"
                                     role="switch"
                                     aria-checked={settingsForm.notificationsEnabled}
