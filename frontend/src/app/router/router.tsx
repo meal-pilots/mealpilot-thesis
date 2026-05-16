@@ -7,6 +7,7 @@ import { ScreenPlaceholder } from '../../shared/ui/ScreenPlaceholder'
 import { ROUTES } from './paths'
 import { WelcomePage } from '../../pages/welcome/WelcomePage'
 import { HomePage } from '../../pages/app/HomePage'
+import { FavoritesPage } from '../../pages/app/recipes/FavoritesPage'
 import { RecipeDetailsPage } from '../../pages/app/recipes/RecipeDetailsPage'
 import { RecipesPage } from '../../pages/app/recipes/RecipesPage'
 import { LogInPage } from '../../pages/auth/LogInPage'
@@ -205,13 +206,7 @@ export const router = createBrowserRouter([
 
                     {
                         path: 'favorites',
-                        element: (
-                            <ScreenPlaceholder
-                                section="Favorites"
-                                title="Favorites"
-                                description="Saved recipes and meals."
-                            />
-                        ),
+                        element: <FavoritesPage />,
                     },
 
                     {
