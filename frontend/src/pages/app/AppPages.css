@@ -302,6 +302,21 @@
     border-radius: 999px;
 }
 
+.app-page__favorite-button--active {
+    background: #fce7f3;
+    color: #db2777;
+    box-shadow: 0 10px 24px rgba(219, 39, 119, 0.18);
+}
+
+.app-page__favorite-active {
+    color: #db2777;
+}
+
+.app-page__favorite-active path {
+    fill: currentColor;
+    stroke: currentColor;
+}
+
 .app-page__feature-card {
     padding: 18px;
     background: #ffffff;
@@ -454,6 +469,38 @@
     gap: 18px;
 }
 
+.app-page__hero.app-page__detail-card {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+.app-page__detail-card .app-page__hero-inner {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.app-page__detail-card .app-page__pair {
+    display: block;
+    position: relative;
+}
+
+.app-page__detail-card .app-page__pair>div {
+    min-width: 0;
+}
+
+.app-page__detail-card .app-page__title {
+    overflow-wrap: break-word;
+}
+
+.app-page__detail-card .app-page__icon-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    flex-shrink: 0;
+}
+
 .app-page__ingredient-list,
 .app-page__steps {
     gap: 12px;
@@ -594,9 +641,9 @@
 }
 
 .app-page--profile {
-    max-width: 760px;
+    max-width: 680px;
     margin: 0 auto;
-    padding-bottom: 12px;
+    padding: 10px 0 12px;
 }
 
 .app-page__section--compact {
@@ -608,7 +655,7 @@
     grid-template-columns: 44px 1fr 44px;
     align-items: center;
     gap: 16px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
 }
 
 .app-page__profile-back {
@@ -638,9 +685,9 @@
 
 .app-page__profile-heading {
     text-align: center;
-    font-size: 2rem;
-    line-height: 1;
-    letter-spacing: -0.04em;
+    font-size: 1.65rem;
+    line-height: 1.08;
+    letter-spacing: 0;
     font-weight: 800;
 }
 
@@ -651,9 +698,8 @@
 
 .app-page__profile-hero {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 14px;
 }
 
 .app-page__profile-avatar-wrap {
@@ -661,14 +707,15 @@
 }
 
 .app-page__profile-avatar-shell {
-    width: 108px;
-    height: 108px;
+    width: 64px;
+    height: 64px;
     border-radius: 999px;
-    background: linear-gradient(180deg, #edc8b4 0%, #e3b89e 100%);
-    padding: 4px;
+    background: #f97316;
+    color: #ffffff;
+    padding: 0;
     display: grid;
     place-items: center;
-    box-shadow: inset 0 0 0 1px rgba(115, 121, 115, 0.18);
+    box-shadow: 0 0 24px rgba(249, 115, 22, 0.28);
 }
 
 .app-page__profile-avatar {
@@ -678,36 +725,46 @@
     border-radius: 999px;
 }
 
+.app-page__profile-avatar-fallback {
+    font-family: 'Manrope', 'Inter', sans-serif;
+    font-size: 1.42rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
 .app-page__profile-avatar-edit {
     position: absolute;
-    right: -2px;
-    bottom: 2px;
-    width: 36px;
-    height: 36px;
+    right: -4px;
+    bottom: -4px;
+    width: 30px;
+    height: 30px;
     border: none;
     border-radius: 999px;
-    background: linear-gradient(135deg, #446347 0%, #5c7c5e 100%);
+    background: #2d2419;
     color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 24px rgba(68, 99, 71, 0.24);
+    box-shadow: 0 10px 24px rgba(45, 36, 25, 0.22);
+    cursor: pointer;
 }
 
 .app-page__profile-avatar-edit-icon {
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
 }
 
 .app-page__profile-identity {
-    text-align: center;
+    min-width: 0;
+    text-align: left;
 }
 
 .app-page__profile-name {
-    font-size: clamp(2rem, 7vw, 3rem);
-    line-height: 0.98;
-    letter-spacing: -0.05em;
+    font-size: clamp(1.45rem, 5vw, 2.1rem);
+    line-height: 1.08;
+    letter-spacing: 0;
     font-weight: 800;
+    overflow-wrap: anywhere;
 }
 
 .app-page__profile-email,
@@ -720,17 +777,24 @@
 }
 
 .app-page__profile-email {
-    margin-top: 8px;
-    font-size: 1rem;
+    margin-top: 2px;
+    font-size: 0.94rem;
     line-height: 1.5;
     color: #737973;
+    overflow-wrap: anywhere;
 }
 
 .app-page__profile-sections {
     display: flex;
     flex-direction: column;
-    gap: 34px;
-    margin-top: 38px;
+    gap: 28px;
+    margin-top: 30px;
+}
+
+.app-page__profile-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .app-page__profile-section-title {
@@ -746,12 +810,13 @@
 .app-page__profile-household-card,
 .app-page__profile-pref-card {
     background: #ffffff;
-    border-radius: 24px;
-    box-shadow: 0 8px 40px rgba(25, 28, 28, 0.04);
+    border: 1px solid rgba(240, 228, 207, 0.86);
+    border-radius: 18px;
+    box-shadow: 0 8px 28px rgba(31, 17, 0, 0.05);
 }
 
 .app-page__profile-list-card {
-    padding: 8px;
+    padding: 4px;
 }
 
 .app-page__profile-list-card--settings {
@@ -764,17 +829,28 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 18px 16px;
+    gap: 14px;
+    padding: 14px;
     border: none;
-    border-radius: 18px;
+    border-radius: 14px;
     background: transparent;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
     text-align: left;
+}
+
+.app-page__profile-list-item {
+    cursor: pointer;
+}
+
+.app-page__profile-list-item+.app-page__profile-list-item {
+    box-shadow: inset 0 1px 0 rgba(240, 228, 207, 0.72);
 }
 
 .app-page__profile-list-item:hover,
 .app-page__profile-setting-row:hover {
-    background: #f3f4f3;
+    background: #fff6e8;
 }
 
 .app-page__profile-list-item-main {
@@ -786,9 +862,9 @@
 
 .app-page__profile-list-icon-wrap,
 .app-page__profile-pref-badge {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -796,8 +872,13 @@
 }
 
 .app-page__profile-list-icon-wrap {
-    background: rgba(212, 229, 202, 0.3);
-    color: #586751;
+    background: #ffe4b5;
+    color: #7c2d0e;
+}
+
+.app-page__profile-list-icon-wrap--danger {
+    background: #fee2e2;
+    color: #b91c1c;
 }
 
 .app-page__profile-list-icon,
@@ -813,9 +894,10 @@
 
 .app-page__profile-list-label,
 .app-page__profile-card-title {
-    font-size: 1.18rem;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
+    display: block;
+    font-size: 1rem;
+    line-height: 1.22;
+    letter-spacing: 0;
     font-weight: 700;
 }
 
@@ -825,8 +907,7 @@
 }
 
 .app-page__profile-household-card {
-    background: #f3f4f3;
-    padding: 24px;
+    padding: 16px;
 }
 
 .app-page__profile-household-top {
@@ -837,10 +918,16 @@
 }
 
 .app-page__profile-card-subtitle {
-    margin-top: 8px;
-    font-size: 0.98rem;
+    display: block;
+    margin-top: 3px;
+    font-size: 0.9rem;
     line-height: 1.45;
     color: #737973;
+    overflow-wrap: anywhere;
+}
+
+.app-page__profile-card-subtitle--members {
+    margin-top: 14px;
 }
 
 .app-page__profile-member-stack {
@@ -851,10 +938,18 @@
 
 .app-page__profile-member-avatar,
 .app-page__profile-member-extra {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border-radius: 999px;
-    border: 2px solid #f3f4f3;
+    border: 2px solid #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffe4b5;
+    color: #7c2d0e;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 800;
 }
 
 .app-page__profile-member-avatar+.app-page__profile-member-avatar,
@@ -864,14 +959,8 @@
 }
 
 .app-page__profile-member-extra {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     background: #d4e5ca;
     color: #586751;
-    font-family: 'Work Sans', 'Inter', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 700;
 }
 
 .app-page__profile-household-actions {
@@ -889,7 +978,7 @@
 }
 
 .app-page__profile-pill-button {
-    min-height: 56px;
+    min-height: 48px;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
@@ -907,8 +996,9 @@
 }
 
 .app-page__profile-pill-button--primary {
-    background: linear-gradient(135deg, #446347 0%, #5c7c5e 100%);
+    background: #f97316;
     color: #ffffff;
+    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.22);
 }
 
 .app-page__profile-pref-grid {
@@ -921,8 +1011,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 18px;
+    gap: 14px;
+    padding: 16px;
 }
 
 .app-page__profile-pref-main {
@@ -933,13 +1023,13 @@
 }
 
 .app-page__profile-pref-badge--sage {
-    background: rgba(212, 229, 202, 0.3);
+    background: rgba(212, 229, 202, 0.42);
     color: #586751;
 }
 
 .app-page__profile-pref-badge--warm {
-    background: rgba(255, 220, 188, 0.3);
-    color: #864f00;
+    background: #ffe4b5;
+    color: #7c2d0e;
 }
 
 .app-page__profile-pref-badge--soft-red {
@@ -973,7 +1063,7 @@
     width: 72%;
     height: 100%;
     border-radius: inherit;
-    background: #446347;
+    background: #f97316;
 }
 
 .app-page__profile-heat-scale {
@@ -988,7 +1078,7 @@
 }
 
 .app-page__profile-setting-row+.app-page__profile-setting-row {
-    box-shadow: inset 0 1px 0 rgba(194, 200, 193, 0.12);
+    box-shadow: inset 0 1px 0 rgba(240, 228, 207, 0.72);
 }
 
 .app-page__profile-setting-value {
@@ -1008,6 +1098,12 @@
     align-items: center;
     justify-content: flex-start;
     padding: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.app-page__profile-toggle--on {
+    background: #f97316;
 }
 
 .app-page__profile-toggle-knob {
@@ -1016,6 +1112,11 @@
     border-radius: 999px;
     background: #ffffff;
     box-shadow: 0 4px 16px rgba(25, 28, 28, 0.08);
+    transition: transform 0.2s ease;
+}
+
+.app-page__profile-toggle--on .app-page__profile-toggle-knob {
+    transform: translateX(20px);
 }
 
 .app-page__profile-footer {
@@ -1025,7 +1126,7 @@
 
 .app-page__profile-logout {
     width: 100%;
-    min-height: 62px;
+    min-height: 54px;
     border-radius: 999px;
     background: transparent;
     box-shadow: inset 0 0 0 1.5px rgba(186, 26, 26, 0.2);
@@ -1036,6 +1137,91 @@
     font-family: 'Manrope', 'Inter', sans-serif;
     font-size: 1.12rem;
     font-weight: 800;
+    cursor: pointer;
+}
+
+.app-page__profile-alert {
+    margin-top: 22px;
+    padding: 14px 16px;
+    border: 1px solid rgba(185, 28, 28, 0.16);
+    border-radius: 18px;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+    font-size: 0.94rem;
+    line-height: 1.45;
+}
+
+.app-page__profile-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.app-page__profile-setting-row--field {
+    align-items: flex-start;
+}
+
+.app-page__profile-setting-row--field>span {
+    flex: 1;
+    min-width: 0;
+}
+
+.app-page__profile-input {
+    width: min(100%, 240px);
+    min-height: 44px;
+    border: 1px solid #f0e4cf;
+    border-radius: 14px;
+    background: #fff6e8;
+    color: #191c1c;
+    padding: 0 14px;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+    font-size: 0.94rem;
+}
+
+.app-page__profile-input:focus-visible {
+    outline: 3px solid rgba(249, 115, 22, 0.22);
+    outline-offset: 2px;
+}
+
+.app-page__profile-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px 14px 14px;
+}
+
+.app-page__profile-feedback {
+    margin: 0;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.app-page__profile-feedback--success {
+    color: #15803d;
+}
+
+.app-page__profile-list-item--danger {
+    color: #b91c1c;
+}
+
+.app-page__profile-danger-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 12px;
+    padding: 16px;
+    border: 1px solid rgba(185, 28, 28, 0.16);
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 8px 28px rgba(31, 17, 0, 0.05);
+}
+
+.app-page__profile-delete-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .app-page__profile-version {
@@ -1053,15 +1239,25 @@
 .app-page__profile-pill-button:focus-visible,
 .app-page__profile-avatar-edit:focus-visible,
 .app-page__profile-toggle:focus-visible,
-.app-page__profile-logout:focus-visible {
-    outline: 3px solid rgba(68, 99, 71, 0.22);
+.app-page__profile-logout:focus-visible,
+.app-page__profile-input:focus-visible {
+    outline: 3px solid rgba(249, 115, 22, 0.22);
     outline-offset: 4px;
+}
+
+.app-page__profile-pill-button:disabled,
+.app-page__profile-list-item:disabled,
+.app-page__profile-toggle:disabled,
+.app-page__profile-logout:disabled,
+.app-page__profile-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.68;
 }
 
 @media (min-width: 720px) {
     .app-page__profile-hero {
         flex-direction: row;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
         gap: 24px;
     }
@@ -1082,11 +1278,11 @@
 
 @media (max-width: 479px) {
     .app-page__profile-heading {
-        font-size: 1.65rem;
+        font-size: 1.45rem;
     }
 
     .app-page__profile-name {
-        font-size: 2.25rem;
+        font-size: 1.55rem;
     }
 
     .app-page__profile-household-card {
@@ -1123,6 +1319,22 @@
 
     .app-page__profile-list-item {
         padding-inline: 12px;
+    }
+}
+
+@media (max-width: 560px) {
+    .app-page__profile-setting-row--field {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .app-page__profile-input {
+        width: 100%;
+    }
+
+    .app-page__profile-form-actions {
+        align-items: stretch;
+        flex-direction: column;
     }
 }
 
@@ -3472,6 +3684,310 @@
 
     .app-page__pagination-button {
         flex: 1;
+    }
+}
+
+.app-page--favorites {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 10px 0 12px;
+}
+
+.app-page__favorites-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.app-page__favorites-title,
+.app-page__favorites-empty-title,
+.app-page__favorite-title {
+    margin: 0;
+    font-family: 'Manrope', 'Inter', sans-serif;
+    color: #191c1c;
+}
+
+.app-page__favorites-title {
+    font-size: 1.9rem;
+    line-height: 1.08;
+    letter-spacing: 0;
+    font-weight: 800;
+}
+
+.app-page__favorites-count,
+.app-page__favorite-fit,
+.app-page__favorites-empty-copy,
+.app-page__favorites-alert p {
+    margin: 0;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+}
+
+.app-page__favorites-count {
+    margin-top: 4px;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: #737973;
+}
+
+.app-page__favorites-refresh,
+.app-page__favorites-alert button,
+.app-page__favorites-empty-action {
+    border: none;
+    font: inherit;
+    text-decoration: none;
+}
+
+.app-page__favorites-refresh,
+.app-page__favorites-alert button {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: #fff6e8;
+    color: #7c2d0e;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.app-page__favorites-refresh:disabled,
+.app-page__favorites-alert button:disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+}
+
+.app-page__favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.app-page__favorite-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 78px;
+    padding: 16px;
+    border: 1px solid rgba(240, 228, 207, 0.92);
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 8px 28px rgba(31, 17, 0, 0.05);
+    color: inherit;
+    text-decoration: none;
+}
+
+.app-page__favorite-card:hover {
+    background: #fffdf8;
+}
+
+.app-page__favorite-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fee2e2;
+    color: #b91c1c;
+    flex-shrink: 0;
+}
+
+.app-page__favorite-icon {
+    width: 21px;
+    height: 21px;
+}
+
+.app-page__favorite-icon path,
+.app-page__favorites-empty-heart path {
+    fill: currentColor;
+}
+
+.app-page__favorite-copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.app-page__favorite-fit {
+    font-size: 0.72rem;
+    line-height: 1.4;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #f97316;
+}
+
+.app-page__favorite-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    font-size: 1rem;
+    line-height: 1.32;
+    font-weight: 800;
+}
+
+.app-page__favorite-chevron {
+    width: 20px;
+    height: 20px;
+    color: #c2c8c1;
+    flex-shrink: 0;
+}
+
+.app-page__favorite-card--skeleton {
+    pointer-events: none;
+}
+
+.app-page__favorite-card--skeleton .app-page__favorite-icon-wrap,
+.app-page__favorite-skeleton-line {
+    overflow: hidden;
+    background: linear-gradient(90deg, #f0e4cf 0%, #fff6e8 48%, #f0e4cf 100%);
+    background-size: 220% 100%;
+    animation: favorites-skeleton 1.3s ease-in-out infinite;
+}
+
+.app-page__favorite-skeleton-line {
+    display: block;
+    width: 100%;
+    height: 14px;
+    border-radius: 999px;
+}
+
+.app-page__favorite-skeleton-line--short {
+    width: 34%;
+}
+
+.app-page__favorites-alert,
+.app-page__favorites-empty {
+    border: 1px solid rgba(240, 228, 207, 0.92);
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 8px 28px rgba(31, 17, 0, 0.05);
+}
+
+.app-page__favorites-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 16px;
+}
+
+.app-page__favorites-alert p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #b91c1c;
+}
+
+.app-page__favorites-empty {
+    min-height: 440px;
+    padding: 44px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+}
+
+.app-page__favorites-empty-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffe4b5;
+    color: #7c2d0e;
+}
+
+.app-page__favorites-empty-heart {
+    width: 40px;
+    height: 40px;
+}
+
+.app-page__favorites-empty-title {
+    font-size: 1.35rem;
+    line-height: 1.14;
+    font-weight: 800;
+}
+
+.app-page__favorites-empty-copy {
+    max-width: 360px;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #3f362c;
+}
+
+.app-page__favorites-empty-action {
+    min-height: 50px;
+    margin-top: 6px;
+    padding: 0 20px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f97316;
+    color: #ffffff;
+    font-family: 'Work Sans', 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.22);
+}
+
+.app-page__favorite-card:focus-visible,
+.app-page__favorites-refresh:focus-visible,
+.app-page__favorites-alert button:focus-visible,
+.app-page__favorites-empty-action:focus-visible {
+    outline: 3px solid rgba(249, 115, 22, 0.22);
+    outline-offset: 4px;
+}
+
+@keyframes favorites-skeleton {
+    0% {
+        background-position: 100% 0;
+    }
+
+    100% {
+        background-position: -100% 0;
+    }
+}
+
+@media (max-width: 479px) {
+    .app-page__favorites-header {
+        align-items: flex-start;
+        margin-bottom: 22px;
+    }
+
+    .app-page__favorites-title {
+        font-size: 1.75rem;
+    }
+
+    .app-page__favorites-refresh {
+        min-height: 38px;
+        padding-inline: 14px;
+        font-size: 0.84rem;
+    }
+
+    .app-page__favorite-card {
+        min-height: 82px;
+        padding: 16px;
+    }
+
+    .app-page__favorites-alert {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .app-page__favorites-alert button {
+        width: 100%;
     }
 }
 
