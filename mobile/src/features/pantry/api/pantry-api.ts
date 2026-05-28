@@ -26,23 +26,23 @@ export type PantryItemUpdatePayload = {
 }
 
 export async function listPantryItems(groupId: string): Promise<PantryItem[]> {
-    return apiRequest<PantryItem[]>(`/api/v1/groups/${groupId}/pantry-items`)
+    return apiRequest<PantryItem[]>(`/groups/${groupId}/pantry-items`)
 }
 
 export async function createPantryItem(groupId: string, payload: PantryItemCreatePayload): Promise<PantryItem> {
-    return apiRequest<PantryItem>(`/api/v1/groups/${groupId}/pantry-items`, {
+    return apiRequest<PantryItem>(`/groups/${groupId}/pantry-items`, {
         method: 'POST',
         body: payload,
     })
 }
 
 export async function updatePantryItem(itemId: string, payload: PantryItemUpdatePayload): Promise<PantryItem> {
-    return apiRequest<PantryItem>(`/api/v1/pantry-items/${itemId}`, {
+    return apiRequest<PantryItem>(`/pantry-items/${itemId}`, {
         method: 'PATCH',
         body: payload,
     })
 }
 
 export async function deletePantryItem(itemId: string): Promise<void> {
-    await apiRequest(`/api/v1/pantry-items/${itemId}`, { method: 'DELETE' })
+    await apiRequest(`/pantry-items/${itemId}`, { method: 'DELETE' })
 }

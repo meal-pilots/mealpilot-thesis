@@ -15,10 +15,11 @@ emulator, or scan the QR code from Expo Go on your phone.
 
 ## Configuration
 
-The base API URL is read from the `EXPO_PUBLIC_API_BASE_URL` environment
-variable, configured per build profile in `eas.json`. Local development
-defaults to `http://localhost:8000` — start the backend with
-`docker compose up` from `../backend`.
+The versioned API root is read from the `EXPO_PUBLIC_API_BASE_URL`
+environment variable, configured per build profile in `eas.json`. Local
+development defaults to `http://localhost:8000/api/v1` — start the backend
+with `docker compose up` from the repository root. Root-style values such as
+`http://localhost:8000` are also accepted and normalized automatically.
 
 ## Project layout
 

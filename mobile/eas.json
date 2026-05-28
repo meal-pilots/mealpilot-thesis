@@ -9,7 +9,7 @@
       "distribution": "internal",
       "channel": "development",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://localhost:8000",
+        "EXPO_PUBLIC_API_BASE_URL": "http://localhost:8000/api/v1",
         "EXPO_PUBLIC_ENV": "development"
       },
       "ios": {
@@ -23,7 +23,7 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://staging.api.mealplanner.kz",
+        "EXPO_PUBLIC_API_BASE_URL": "https://staging.api.mealplanner.kz/api/v1",
         "EXPO_PUBLIC_ENV": "preview"
       },
       "android": {
@@ -33,7 +33,7 @@
     "production": {
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.mealplanner.kz",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.mealplanner.kz/api/v1",
         "EXPO_PUBLIC_ENV": "production"
       },
       "autoIncrement": true,

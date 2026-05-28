@@ -12,7 +12,7 @@ export type DeviceRegistrationPayload = {
 }
 
 export async function registerDevice(payload: DeviceRegistrationPayload): Promise<void> {
-    await apiRequest<unknown>('/api/v1/devices/register', {
+    await apiRequest<unknown>('/devices/register', {
         method: 'POST',
         body: payload,
     })

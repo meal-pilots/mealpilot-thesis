@@ -90,7 +90,7 @@ function refreshAccessToken(): Promise<string | null> {
             const stored = await getStoredAuthSession()
             if (!stored) return null
 
-            const response = await fetchWithTimeout(buildUrl('/api/v1/auth/refresh'), {
+            const response = await fetchWithTimeout(buildUrl('/auth/refresh'), {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',

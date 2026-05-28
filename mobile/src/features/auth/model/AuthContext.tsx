@@ -1,11 +1,17 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
-import { fetchMe, login as loginRequest, signUp as signUpRequest } from '@features/auth/api/auth-api'
+import {
+    fetchMe,
+    login as loginRequest,
+    logout as logoutRequest,
+    signUp as signUpRequest,
+} from '@features/auth/api/auth-api'
 import { getActiveGroup, getGroupDashboard } from '@features/groups/api/groups-api'
 import {
     clearStoredAuthSession,
     getStoredAuthSession,
     saveAuthSession,
+    subscribeToAuthSessionCleared,
     updateStoredAuthUser,
 } from '@shared/lib/secure-storage'
 import type { AuthUser, StoredAuthSession } from '@shared/types/auth'
@@ -76,9 +82,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [refreshOnboardingStatus])
 
+    const handleAuthSessionCleared = useCallback(() => {
+        setState({ status: 'unauthenticated', user: null, onboardingCompleted: false })
+    }, [])
+
     useEffect(() => {
         hydrate()
     }, [hydrate])
+
+    useEffect(() => {
+        return subscribeToAuthSessionCleared(handleAuthSessionCleared)
+    }, [handleAuthSessionCleared])
 
     const login = useCallback(async (input: { email: string; password: string }) => {
         const session = await loginRequest(input)
@@ -99,8 +113,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     const logout = useCallback(async () => {
-        await clearStoredAuthSession()
-        setState({ status: 'unauthenticated', user: null, onboardingCompleted: false })
+        try {
+            await logoutRequest()
+        } catch {
+            // Always complete local logout, even if the network or server is unavailable.
+        } finally {
+            await clearStoredAuthSession()
+            setState({ status: 'unauthenticated', user: null, onboardingCompleted: false })
+        }
     }, [])
 
     const refreshUser = useCallback(async () => {
