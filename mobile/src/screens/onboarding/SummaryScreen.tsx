@@ -209,6 +209,8 @@ export function SummaryScreen() {
                 budget_period_type: draft.budget_period_type,
                 currency_code: draft.currency_code,
                 region_code: draft.region_code,
+                planning_days_default: draft.planning_days_default,
+                meals_per_day_default: draft.meals_per_day_default,
             }
 
             const group: Group = draft.groupId

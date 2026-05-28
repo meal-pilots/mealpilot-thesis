@@ -33,6 +33,8 @@ export type OnboardingDraft = {
     currency_code: string
     budget_amount: string
     budget_period_type: 'daily' | 'weekly'
+    planning_days_default: number
+    meals_per_day_default: number
     members: OnboardingMember[]
     max_cooking_time_minutes: number
     variety_preference: 'low' | 'medium' | 'high'
@@ -47,10 +49,12 @@ const DEFAULT_DRAFT: OnboardingDraft = {
     groupId: null,
     groupType: null,
     name: '',
-    region_code: 'KZ',
+    region_code: 'KZ-AST',
     currency_code: 'KZT',
-    budget_amount: '60000',
+    budget_amount: '35000',
     budget_period_type: 'weekly',
+    planning_days_default: 7,
+    meals_per_day_default: 3,
     members: [],
     max_cooking_time_minutes: 45,
     variety_preference: 'medium',
@@ -295,6 +299,8 @@ function fromSetupSummary(summary: GroupSetupSummary, fallback: OnboardingDraft 
         currency_code: summary.group.currency_code,
         budget_amount: summary.group.budget_amount,
         budget_period_type: summary.group.budget_period_type,
+        planning_days_default: summary.group.planning_days_default,
+        meals_per_day_default: summary.group.meals_per_day_default,
         members: summary.members.length
             ? summary.members.map(memberFromSummary)
             : fallback?.members ?? buildMembersForMode(summary.group.group_type),
