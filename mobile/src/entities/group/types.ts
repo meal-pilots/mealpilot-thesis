@@ -49,6 +49,18 @@ export type GroupMember = {
     carb_target_g?: number | null
 }
 
+export type GroupMemberPayload = {
+    display_name: string
+    member_type: MemberType
+    sex: string
+    age: number
+    activity_level: string
+    goal_type: GoalType
+    priority_weight?: string | number
+    height_cm?: number | null
+    weight_kg?: string | number | null
+}
+
 export type ConstraintType =
     | 'allergy'
     | 'intolerance'
@@ -65,6 +77,14 @@ export type MemberConstraint = {
     tag_key?: string | null
     value_text?: string | null
     severity_level: 'low' | 'medium' | 'high'
+}
+
+export type MemberConstraintPayload = {
+    constraint_type: ConstraintType
+    ingredient_id?: string | null
+    tag_key?: string | null
+    value_text?: string | null
+    severity_level?: 'low' | 'medium' | 'high'
 }
 
 export type GroupPreferences = {
