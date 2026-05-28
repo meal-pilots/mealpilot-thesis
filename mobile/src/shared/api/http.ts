@@ -27,6 +27,8 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
     retryOnUnauthorized?: boolean
 }
 
+const REQUEST_TIMEOUT_MS = 15_000
+
 let refreshPromise: Promise<string | null> | null = null
 
 function buildUrl(path: string): string {
@@ -57,6 +59,22 @@ function extractErrorMessage(payload: unknown, fallback: string): string {
     return extractApiErrorMessage(payload) ?? fallback
 }
 
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+    try {
+        return await fetch(url, { ...init, signal: controller.signal })
+    } catch (error) {
+        if (controller.signal.aborted) {
+            throw new ApiError('Сервер не ответил. Проверьте подключение и попробуйте еще раз.', 0, null)
+        }
+        throw new ApiError('Не удалось подключиться к серверу. Проверьте подключение и попробуйте еще раз.', 0, error)
+    } finally {
+        clearTimeout(timeoutId)
+    }
+}
+
 /**
  * Single-flight refresh.
  *
@@ -72,7 +90,7 @@ function refreshAccessToken(): Promise<string | null> {
             const stored = await getStoredAuthSession()
             if (!stored) return null
 
-            const response = await fetch(buildUrl('/api/v1/auth/refresh'), {
+            const response = await fetchWithTimeout(buildUrl('/api/v1/auth/refresh'), {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -136,7 +154,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
         }
     }
 
-    const response = await fetch(buildUrl(path), {
+    const response = await fetchWithTimeout(buildUrl(path), {
         ...rest,
         headers: requestHeaders,
         body: requestBody,

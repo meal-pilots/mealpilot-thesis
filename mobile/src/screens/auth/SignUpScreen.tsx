@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { KeyboardAvoidingView, Platform, Pressable, View } from 'react-native'
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, View } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 
 import type { AuthStackParamList } from '@core/navigation/types'
@@ -30,14 +30,29 @@ export function SignUpScreen() {
         defaultValues: { email: '', password: '', full_name: '' },
     })
 
-    const onSubmit = handleSubmit(async (values) => {
-        try {
-            await signUp(values)
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Не удалось зарегистрироваться'
-            toast.error(message)
-        }
-    })
+    const onSubmit = handleSubmit(
+        async (values) => {
+            Keyboard.dismiss()
+            try {
+                await signUp({
+                    email: values.email.trim().toLowerCase(),
+                    password: values.password,
+                    full_name: values.full_name.trim(),
+                })
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Не удалось зарегистрироваться'
+                toast.error(message)
+            }
+        },
+        (errors) => {
+            const message =
+                errors.full_name?.message ||
+                errors.email?.message ||
+                errors.password?.message ||
+                'Проверьте поля регистрации'
+            toast.error(String(message))
+        },
+    )
 
     return (
         <KeyboardAvoidingView
@@ -56,7 +71,9 @@ export function SignUpScreen() {
                     <Controller
                         control={control}
                         name="full_name"
-                        rules={{ required: 'Введите имя' }}
+                        rules={{
+                            validate: (value) => value.trim().length > 0 || 'Введите имя',
+                        }}
                         render={({ field, fieldState }) => (
                             <Input
                                 label="Полное имя"
@@ -76,7 +93,7 @@ export function SignUpScreen() {
                         name="email"
                         rules={{
                             required: 'Введите email',
-                            pattern: { value: /.+@.+\..+/, message: 'Неверный email' },
+                            validate: (value) => /.+@.+\..+/.test(value.trim()) || 'Неверный email',
                         }}
                         render={({ field, fieldState }) => (
                             <Input

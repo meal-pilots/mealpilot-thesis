@@ -29,7 +29,7 @@ export function Screen({
 
     const inner = scroll ? (
         <ScrollView
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps="always"
             contentContainerStyle={[{ padding, gap }, contentContainerStyle]}
             showsVerticalScrollIndicator={false}
         >

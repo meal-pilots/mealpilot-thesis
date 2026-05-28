@@ -36,8 +36,9 @@ class PlanningCandidatePoolTests(TestCase):
         category: str,
         estimated_cost: str = "1200.00",
         is_child_friendly: bool = False,
+        with_nutrition: bool = True,
     ) -> Recipe:
-        return Recipe.objects.create(
+        recipe = Recipe.objects.create(
             title=title,
             short_description=title,
             long_description=title,
@@ -53,6 +54,19 @@ class PlanningCandidatePoolTests(TestCase):
             is_child_friendly=is_child_friendly,
             status=RecipeStatus.PUBLISHED,
         )
+        if with_nutrition:
+            RecipeNutrition.objects.create(
+                recipe=recipe,
+                calories_total="600",
+                protein_total_g="30",
+                fat_total_g="20",
+                carb_total_g="60",
+                calories_per_serving="300",
+                protein_per_serving_g="15",
+                fat_per_serving_g="10",
+                carb_per_serving_g="30",
+            )
+        return recipe
 
     def test_non_child_friendly_dinner_remains_eligible_for_adults_kids(self):
         group = self._make_group(GroupType.ADULTS_KIDS)
@@ -113,11 +127,13 @@ class PlanningCandidatePoolTests(TestCase):
             title="Сорпа",
             category=RecipeCategory.LUNCH,
             estimated_cost="800.00",
+            with_nutrition=False,
         )
         recipe_two = self._make_recipe(
             title="Кеспе с мясом",
             category=RecipeCategory.LUNCH,
             estimated_cost="900.00",
+            with_nutrition=False,
         )
         RecipeNutrition.objects.create(recipe=recipe_one, calories_total="600", protein_total_g="30", fat_total_g="20", carb_total_g="40", calories_per_serving="300", protein_per_serving_g="15", fat_per_serving_g="10", carb_per_serving_g="20")
         RecipeNutrition.objects.create(recipe=recipe_two, calories_total="620", protein_total_g="28", fat_total_g="18", carb_total_g="50", calories_per_serving="310", protein_per_serving_g="14", fat_per_serving_g="9", carb_per_serving_g="25")
@@ -152,6 +168,7 @@ class PlanningCandidatePoolTests(TestCase):
             title="Легкий салат",
             category=RecipeCategory.BREAKFAST,
             estimated_cost="300.00",
+            with_nutrition=False,
         )
         RecipeNutrition.objects.create(
             recipe=low_calorie,
@@ -173,3 +190,49 @@ class PlanningCandidatePoolTests(TestCase):
         )
 
         self.assertGreater(servings, 1)
+
+    def test_candidate_pool_excludes_recipes_with_zero_cost_or_zero_nutrition(self):
+        group = self._make_group(GroupType.TWO_ADULTS)
+        valid_lunch = self._make_recipe(
+            title="Кеспе с мясом",
+            category=RecipeCategory.LUNCH,
+            estimated_cost="900.00",
+        )
+        self._make_recipe(
+            title="Бесплатный суп",
+            category=RecipeCategory.LUNCH,
+            estimated_cost="0.00",
+        )
+        self._make_recipe(
+            title="Необогащенный плов",
+            category=RecipeCategory.LUNCH,
+            estimated_cost="700.00",
+            with_nutrition=False,
+        )
+        zero_nutrition = self._make_recipe(
+            title="Пустой салат",
+            category=RecipeCategory.LUNCH,
+            estimated_cost="500.00",
+            with_nutrition=False,
+        )
+        RecipeNutrition.objects.create(
+            recipe=zero_nutrition,
+            calories_total="0",
+            protein_total_g="0",
+            fat_total_g="0",
+            carb_total_g="0",
+            calories_per_serving="0",
+            protein_per_serving_g="0",
+            fat_per_serving_g="0",
+            carb_per_serving_g="0",
+        )
+
+        candidate_pool = _build_candidate_pool(
+            group=group,
+            meal_types=[RecipeCategory.LUNCH],
+            budget_strictness="medium",
+            cooking_time_strictness="medium",
+            optimization_focus=["budget", "nutrition"],
+        )
+
+        self.assertEqual(candidate_pool[RecipeCategory.LUNCH], [valid_lunch])
