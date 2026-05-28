@@ -2,6 +2,7 @@ import { apiRequest } from '../../../shared/api/http'
 
 export type OptimizationFocus = 'budget' | 'nutrition' | 'speed' | 'taste'
 export type MealPlanStatus = 'draft' | 'generated' | 'approved' | 'modified' | 'archived'
+export type GenerationRunStatus = 'pending' | 'completed' | 'failed'
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 export type AdaptationType =
     | 'portion_change'
@@ -116,10 +117,28 @@ export interface GenerateMealPlanInput {
     optimization_focus: OptimizationFocus[]
 }
 
-export interface GenerateMealPlanResponse {
+export interface GenerateMealPlanSyncResponse {
+    mode: 'sync'
     meal_plan_id: string
     summary: MealPlanSummaryDto
     top_explanations: PlanExplanationDto[]
+}
+
+export interface GenerateMealPlanAsyncResponse {
+    mode: 'async'
+    generation_run_id: string
+    status: GenerationRunStatus
+    poll_url: string
+}
+
+export type GenerateMealPlanResponse = GenerateMealPlanSyncResponse | GenerateMealPlanAsyncResponse
+
+export interface GenerationRunStatusResponse {
+    generation_run_id: string
+    status: GenerationRunStatus
+    execution_time_ms: number | null
+    error_message: string | null
+    meal_plan_id: string | null
 }
 
 export interface CreateAdaptationInput {
@@ -212,7 +231,7 @@ export interface NutritionAnalyticsDto {
 
 export const planningApi = {
     generateMealPlan(groupId: string, input: GenerateMealPlanInput) {
-        return apiRequest<GenerateMealPlanResponse>(`/groups/${groupId}/meal-plans/generate`, {
+        return apiRequest<GenerateMealPlanResponse>(`/groups/${groupId}/meal-plans/generate?async=1`, {
             method: 'POST',
             body: input as unknown as Record<string, unknown>,
         })
@@ -224,6 +243,10 @@ export const planningApi = {
 
     getMealPlanDetail(mealPlanId: string) {
         return apiRequest<MealPlanDetailDto>(`/meal-plans/${mealPlanId}`)
+    },
+
+    getGenerationRunStatus(runId: string) {
+        return apiRequest<GenerationRunStatusResponse>(`/meal-plans/generation-run/${runId}`)
     },
 
     getDayDetail(mealPlanId: string, dayIndex: number) {

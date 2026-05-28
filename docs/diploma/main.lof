@@ -1,0 +1,24 @@
+\babel@toc {english}{}\relax 
+\addvspace {10pt}
+\addvspace {10pt}
+\addvspace {10pt}
+\addvspace {10pt}
+\addvspace {10pt}
+\par \nobreak \textbf {{\scshape Figure} \hfill Page}\par \nobreak 
+\addvspace {10pt}
+\addvspace {10pt}
+\addvspace {10pt}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces C4 Level~1 --- system context.}}{11}{figure.caption.24}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces C4 Level~2 --- deployable containers and managed services.}}{12}{figure.caption.25}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Domain ER overview across users, groups, catalog, planning, feedback, and devices apps. Audit-only and link tables are omitted for visual clarity.}}{14}{figure.caption.26}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces \texttt {etl-meals} pipeline from discovery and external datasets to the \texttt {diploma\_work} import bundle.}}{18}{figure.caption.27}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Mobile plan-viewing surfaces: weekly overview, daily detail, recipe detail, and plan explanation.}}{27}{figure.caption.34}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Mobile analytics, shopping, and pantry surfaces captured from the Expo client.}}{28}{figure.caption.35}%
+\addvspace {10pt}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces C4 Level~3 --- planning service components from REST request to persisted plan, shopping list, explanation, and push notification.}}{34}{figure.caption.36}%
+\addvspace {10pt}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Recipe category distribution across the bootstrap sample (n = 5{,}000).}}{50}{figure.caption.39}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Recipe preparation-time distribution (n = 5{,}000).}}{50}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Candidate-pool funnel from all published recipes to the solver shortlist on the representative scenario (logarithmic x axis).}}{51}{figure.caption.41}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Before-and-after comparison of macro target gaps (lower is better).}}{52}{figure.caption.43}%
+\addvspace {10pt}

@@ -1,0 +1,45 @@
+%
+% File: definitions.tex
+%
+\chapter{Definitions}
+
+Following terms are used in this work:\par\bigskip
+
+\begin{description}[style=multiline, labelwidth=5cm, leftmargin=5.5cm]
+
+  \item[Household]
+       A unit of decision making composed of one or more members sharing a budget and a common set of meals. In this work a household is modelled by a \texttt{Group} entity with associated \texttt{GroupMember}, \texttt{MemberConstraint}, and \texttt{GroupPreference} records.
+
+  \item[Meal Plan]
+       A directed, time-anchored assignment of recipes to a sequence of day-slot pairs over a planning horizon, accompanied by an aggregated shopping list, derived budget and nutrition analytics, and human-readable explanations.
+
+  \item[Constraint Programming]
+       A declarative paradigm for solving combinatorial problems by stating variables, their domains, and the constraints between them. The solver searches the joint feasible region for assignments that satisfy all constraints and optionally optimise an objective.
+
+  \item[CP-SAT]
+       A hybrid solver combining Boolean Satisfiability search, lazy clause generation, and linear-relaxation techniques. CP-SAT is a component of Google OR-Tools and is the optimisation core of the present planner.
+
+  \item[Learning-to-Rank]
+       A class of supervised learning methods that learn a ranking function from labelled examples. The objective is to order items per query rather than to predict an absolute label per item. The present work uses the LightGBM library with the \texttt{lambdarank} objective.
+
+  \item[Candidate Pool]
+       The shortlist of recipes that passes deterministic eligibility checks (category, quality score, ingredient and tag blockers, time and budget strictness) before being handed to the optimiser.
+
+  \item[Quality Score]
+       A composite scalar in $[0, 1]$ assigned to each recipe by the ETL layer, reflecting eight components: nutrition coverage, ingredient match ratio, total-time presence, yields presence, image presence, step count, parsed-unit ratio, and price-coverage ratio.
+
+  \item[Reproducible Bootstrap]
+       The property of a system that allows another developer to recreate a functionally equivalent state from versioned files and a single declared command, without depending on private database dumps or undocumented machine state.
+
+  \item[Recovery Point Objective]
+       The maximum amount of recent data that may be lost in the event of an incident, measured as a time window. In this work, RPO is set to one hour for the production database.
+
+  \item[Recovery Time Objective]
+       The maximum acceptable time between an incident and full restoration of service. In this work, RTO is set to four hours for the production database.
+
+  \item[OpenID Connect]
+       An identity layer on top of OAuth 2.0 used in this work to allow GitHub Actions to assume short-lived AWS roles without storing long-lived access keys in the repository.
+
+\end{description}
+
+\clearpage

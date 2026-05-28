@@ -5,6 +5,7 @@ import {
     isStoredSessionPersistent,
     saveAuthSession,
 } from '../lib/auth-storage'
+import { extractApiErrorMessage } from '../lib/api-error-message'
 import type { ApiEnvelope } from '../types/api'
 
 export class ApiError extends Error {
@@ -23,6 +24,7 @@ type ApiRequestOptions = Omit<RequestInit, 'body'> & {
     body?: BodyInit | Record<string, unknown> | null
     auth?: boolean
     retryOnUnauthorized?: boolean
+    unwrap?: boolean
 }
 
 let refreshPromise: Promise<string | null> | null = null
@@ -33,10 +35,15 @@ function buildUrl(path: string) {
 }
 
 async function parseResponseBody(response: Response) {
+    if (response.status === 204 || response.status === 205) {
+        return null
+    }
+
     const contentType = response.headers.get('content-type') ?? ''
 
     if (contentType.includes('application/json')) {
-        return response.json()
+        const text = await response.text()
+        return text ? JSON.parse(text) : null
     }
 
     const text = await response.text()
@@ -44,38 +51,7 @@ async function parseResponseBody(response: Response) {
 }
 
 function extractErrorMessage(payload: unknown, fallback: string) {
-    if (!payload) {
-        return fallback
-    }
-
-    if (typeof payload === 'string') {
-        return payload
-    }
-
-    if (typeof payload === 'object') {
-        if ('detail' in payload && typeof payload.detail === 'string') {
-            return payload.detail
-        }
-
-        if ('data' in payload && payload.data && typeof payload.data === 'object') {
-            return extractErrorMessage(payload.data, fallback)
-        }
-
-        for (const value of Object.values(payload)) {
-            if (typeof value === 'string' && value.trim()) {
-                return value
-            }
-
-            if (Array.isArray(value) && value.length > 0) {
-                const firstValue = value[0]
-                if (typeof firstValue === 'string' && firstValue.trim()) {
-                    return firstValue
-                }
-            }
-        }
-    }
-
-    return fallback
+    return extractApiErrorMessage(payload) ?? fallback
 }
 
 async function refreshAccessToken() {
@@ -132,6 +108,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     const {
         auth = true,
         retryOnUnauthorized = true,
+        unwrap = true,
         headers,
         body,
         ...restOptions
@@ -183,6 +160,10 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
             response.status,
             payload,
         )
+    }
+
+    if (!unwrap) {
+        return payload as T
     }
 
     if (payload && typeof payload === 'object' && 'data' in payload) {

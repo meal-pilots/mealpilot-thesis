@@ -21,6 +21,13 @@ const goalOptions = [
     { value: 'low_carb', label: 'Low Carb' },
 ] as const
 
+const activityLevelOptions = [
+    { value: 'low', label: 'Low' },
+    { value: 'moderate', label: 'Moderate' },
+    { value: 'active', label: 'Active' },
+    { value: 'very_active', label: 'Very active' },
+] as const
+
 function buildEmptyMember(): MemberDraft {
     return {
         display_name: '',
@@ -140,12 +147,20 @@ export function MembersPage() {
 
                                 <label className="onboarding-page__field">
                                     <span className="onboarding-page__member-note">Activity Level</span>
-                                    <input
-                                        className="onboarding-page__input"
+                                    <select
+                                        className="onboarding-page__select"
                                         value={member.activity_level}
                                         onChange={(event) => updateMember(index, { activity_level: event.target.value })}
-                                        placeholder="low / moderate / active"
-                                    />
+                                    >
+                                        <option value="" disabled>
+                                            Select activity level
+                                        </option>
+                                        {activityLevelOptions.map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </label>
 
                                 <label className="onboarding-page__field onboarding-page__field--full">

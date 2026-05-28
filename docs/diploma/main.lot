@@ -1,0 +1,21 @@
+\babel@toc {english}{}\relax 
+\addvspace {10pt}
+\addvspace {10pt}
+\addvspace {10pt}
+\addvspace {10pt}
+\addvspace {10pt}
+\par \nobreak \textbf {{\scshape Table} \hfill Page}\par \nobreak 
+\addvspace {10pt}
+\addvspace {10pt}
+\contentsline {table}{\numberline {1.1}{\ignorespaces Qualitative landscape comparison across eight axes (HHM = household modelling, CON = constraints, BUD = budget, NUT = nutrition, LOC = local cuisine, OPT = optimisation transparency, OPS = production operations, PLT = multi-platform).}}{9}{table.caption.23}%
+\addvspace {10pt}
+\contentsline {table}{\numberline {2.1}{\ignorespaces Persisted domain entities by Django app.}}{13}{table.2.1}%
+\addvspace {10pt}
+\contentsline {table}{\numberline {3.1}{\ignorespaces Estimated first-year deployment cost (USD).}}{47}{table.caption.37}%
+\addvspace {10pt}
+\contentsline {table}{\numberline {4.1}{\ignorespaces Recipe corpus state after the production-shaped dump is restored.}}{49}{table.caption.38}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Deterministic versus CP-SAT planner on the representative scenario.}}{51}{table.caption.42}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Four household scenarios and CP-SAT plan-quality summary.}}{53}{table.caption.44}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Engineering readiness of the ML scoring layer.}}{56}{table.caption.45}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Production-readiness checklist.}}{57}{table.caption.46}%
+\addvspace {10pt}

@@ -202,6 +202,7 @@ export function RecipeDetailsPage() {
                                     type="button"
                                     className={`app-page__icon-button ${isFavorite ? 'app-page__favorite-button--active' : ''}`}
                                     aria-label={isFavorite ? 'Remove from favorites' : 'Save recipe'}
+                                    aria-pressed={isFavorite}
                                     onClick={handleToggleFavorite}
                                     disabled={isTogglingFavorite}
                                 >

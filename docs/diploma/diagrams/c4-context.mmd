@@ -1,0 +1,32 @@
+flowchart LR
+    classDef person fill:#08427b,stroke:#073B6F,color:#fff,font-weight:bold
+    classDef system fill:#1168bd,stroke:#0E5BA6,color:#fff,font-weight:bold
+    classDef external fill:#999999,stroke:#6B6B6B,color:#fff
+    classDef cloud fill:#FF9900,stroke:#CC7A00,color:#fff,font-weight:bold
+
+    Family["Family User<br/>(Mobile App)"]:::person
+    Reviewer["Store Reviewer<br/>(App Store / Play)"]:::person
+    Admin["Operator / Admin"]:::person
+
+    System["Meal Planner System<br/>(planning, ETL, ranker)"]:::system
+
+    Apple["Apple APNs / Expo Push"]:::external
+    Google["Google FCM / Expo Push"]:::external
+    Sentry["Sentry<br/>(errors, traces)"]:::external
+    PostHog["PostHog<br/>(analytics, flags)"]:::external
+    USDA["USDA FoodData Central"]:::external
+    Spoon["Spoonacular API"]:::external
+    HF["Hugging Face Datasets"]:::external
+    AWS["AWS<br/>(ECS, RDS, S3, ALB)"]:::cloud
+
+    Family -->|plans, lists, feedback| System
+    Reviewer -->|demo login| System
+    Admin -->|Django admin, IP allowlist| System
+    System -->|push notifications| Apple
+    System -->|push notifications| Google
+    System -->|errors, releases| Sentry
+    System -->|events, feature flags| PostHog
+    System -->|nutrition lookups| USDA
+    System -->|recipe seed data| Spoon
+    System -->|recipe seed data| HF
+    System -->|hosted on| AWS

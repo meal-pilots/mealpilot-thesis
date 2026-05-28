@@ -1,4 +1,4 @@
-# ADR 0001: Monorepo with three sibling codebases
+# ADR 0001: Monorepo with sibling codebases
 
 - **Status**: Accepted
 - **Date**: 2026-04-27
@@ -7,25 +7,28 @@
 
 The project consists of:
 - a Django backend with REST API and CP-SAT planner,
-- a React Native mobile client targeting App Store + Play Market,
+- a React Native mobile client targeting App Store + Google Play,
+- a React + Vite web client for landing and marketing,
 - a Terraform-managed AWS infrastructure layer,
 - a separate Python ETL project that produces the recipe corpus.
 
 The diploma scope requires versioning all of these together and keeping
-the API contract synchronised with the mobile client.
+the API contract synchronised across both clients.
 
 ## Decision
 
-Keep four sibling directories at the repository root:
+Keep four sibling directories at the repository root and one separate
+sibling repository:
 
 - `backend/` — Django API.
 - `mobile/` — React Native + Expo.
+- `frontend/` — React + Vite web client.
 - `infrastructure/` — Terraform.
 - (sibling repo) `etl-meals/` — kept separate because it depends on heavy
   ML libraries that don't belong in production runtime.
 
 CI workflows are scoped per-directory via path filters so a backend change
-does not trigger mobile builds and vice versa.
+does not trigger mobile or frontend builds and vice versa.
 
 ## Consequences
 

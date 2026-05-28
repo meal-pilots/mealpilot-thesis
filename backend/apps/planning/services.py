@@ -481,6 +481,7 @@ def _build_candidate_pool(
             status=RecipeStatus.PUBLISHED,
             category__in=meal_types,
             quality_score__gte=quality_threshold,
+            nutrition__calories_total__gt=ZERO,
         )
         .select_related('nutrition')
         .prefetch_related(
@@ -497,6 +498,9 @@ def _build_candidate_pool(
 
         if not recipe.estimated_cost or recipe.estimated_cost == ZERO:
             recipe.estimated_cost = estimate_recipe_cost(recipe, region_code=group.region_code)
+
+        if _to_decimal(recipe.estimated_cost) <= ZERO:
+            continue
 
         if not _recipe_fits_group(
             recipe=recipe,

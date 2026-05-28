@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useMemo } from 'react'
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native'
+import { Pressable, RefreshControl, ScrollView, useWindowDimensions, View } from 'react-native'
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated'
 
 import type { AppStackParamList, AppTabParamList } from '@core/navigation/types'
@@ -46,6 +46,7 @@ function todayLabel(): string {
 export function HomeScreen() {
     const navigation = useNavigation<Navigation>()
     const palette = usePalette()
+    const { width: viewportWidth } = useWindowDimensions()
     const { user } = useAuth()
     const groupQuery = useActiveGroup()
     const groupId = groupQuery.data?.id
@@ -65,13 +66,14 @@ export function HomeScreen() {
     })
 
     const greeting = `${timeBasedGreeting()}${user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}`
+    const quickActionWidth = Math.floor((viewportWidth - spacing.xxl * 2 - spacing.sm) / 2)
 
-    const todaysItems = useMemo(() => {
-        if (!planDetail.data) return []
+    const todaysDay = useMemo(() => {
+        if (!planDetail.data) return null
         const today = new Date().toISOString().slice(0, 10)
-        const day = planDetail.data.days.find((d) => d.plan_date === today) ?? planDetail.data.days[0]
-        return day?.items ?? []
+        return planDetail.data.days.find((d) => d.plan_date === today) ?? planDetail.data.days[0] ?? null
     }, [planDetail.data])
+    const todaysItems = todaysDay?.items ?? []
 
     return (
         <Screen contentContainerStyle={{ padding: 0 }}>
@@ -127,11 +129,17 @@ export function HomeScreen() {
                             subtitle={`${todaysItems.length} ${pluralRu(todaysItems.length, ['блюдо', 'блюда', 'блюд'])}`}
                         >
                             <View style={{ gap: spacing.sm }}>
-                                {todaysItems.slice(0, 3).map((item) => (
+                                {todaysItems.map((item) => (
                                     <Card
                                         key={item.id}
                                         elevation="card"
-                                        onPress={() => navigation.navigate('RecipeDetails', { recipeId: item.recipe_id })}
+                                        onPress={() => {
+                                            if (!todaysDay || !planDetail.data) return
+                                            navigation.navigate('DayDetails', {
+                                                mealPlanId: planDetail.data.summary.id,
+                                                dayIndex: todaysDay.day_index,
+                                            })
+                                        }}
                                     >
                                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                                             <View
@@ -177,6 +185,7 @@ export function HomeScreen() {
                                 icon="sparkles"
                                 label="Новый план"
                                 tint={palette.accent}
+                                width={quickActionWidth}
                                 onPress={() => navigation.navigate('GeneratePlan')}
                             />
                             <QuickAction
@@ -184,6 +193,7 @@ export function HomeScreen() {
                                 icon="chefHat"
                                 label="Рецепты"
                                 tint={palette.success}
+                                width={quickActionWidth}
                                 onPress={() => navigation.navigate('Recipes')}
                             />
                             <QuickAction
@@ -191,6 +201,7 @@ export function HomeScreen() {
                                 icon="package"
                                 label="Кладовая"
                                 tint={palette.info}
+                                width={quickActionWidth}
                                 onPress={() => navigation.navigate('Pantry')}
                             />
                             {planQuery.data ? (
@@ -199,6 +210,7 @@ export function HomeScreen() {
                                     icon="cart"
                                     label="Покупки"
                                     tint={palette.warning}
+                                    width={quickActionWidth}
                                     onPress={() =>
                                         navigation.navigate('ShoppingList', {
                                             mealPlanId: planQuery.data!.id,
@@ -441,12 +453,14 @@ function QuickAction({
     icon,
     label,
     tint,
+    width,
     onPress,
 }: {
     palette: Palette
     icon: IconName
     label: string
     tint: string
+    width: number
     onPress: () => void
 }) {
     return (
@@ -456,7 +470,7 @@ function QuickAction({
             accessibilityLabel={label}
             scaleTo={0.96}
             style={{
-                width: '47%',
+                width,
                 backgroundColor: palette.canvasElevated,
                 borderRadius: radii.lg,
                 padding: spacing.md,

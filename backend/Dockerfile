@@ -52,7 +52,9 @@ RUN pip install --upgrade pip && \
 
 COPY --chown=django:django . /app
 
-RUN mkdir -p /app/staticfiles /app/media && \
+RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && \
+    chmod +x /app/docker-entrypoint.sh && \
+    mkdir -p /app/staticfiles /app/media && \
     chown -R django:django /app
 
 USER django

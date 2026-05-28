@@ -51,7 +51,7 @@ export function RecipesScreen() {
     const { data, isLoading, error, refetch } = useRecipes(filters)
     const { refreshing, onRefresh } = useRefresh(refetch)
 
-    const renderHeader = () => (
+    const listHeader = (
         <Animated.View entering={FadeInDown.duration(380)} style={{ gap: spacing.md, paddingBottom: spacing.md }}>
             <Heading level={1}>Рецепты</Heading>
             <Input
@@ -120,7 +120,7 @@ export function RecipesScreen() {
     if (isLoading && !data) {
         return (
             <Screen>
-                {renderHeader()}
+                {listHeader}
                 <SkeletonList count={5} />
             </Screen>
         )
@@ -129,7 +129,7 @@ export function RecipesScreen() {
     if (error) {
         return (
             <Screen>
-                {renderHeader()}
+                {listHeader}
                 <EmptyState
                     title="Не удалось загрузить рецепты"
                     description={error instanceof Error ? error.message : 'Попробуйте обновить'}
@@ -146,7 +146,7 @@ export function RecipesScreen() {
             <FlatList
                 data={data ?? []}
                 keyExtractor={(item) => item.id}
-                ListHeaderComponent={renderHeader}
+                ListHeaderComponent={listHeader}
                 contentContainerStyle={{
                     padding: spacing.xxl,
                     paddingBottom: spacing.huge,

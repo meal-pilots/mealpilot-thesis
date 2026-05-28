@@ -14,6 +14,11 @@ export interface LogInInput {
     password: string
 }
 
+export interface DeleteAccountInput {
+    password: string
+    confirm: true
+}
+
 export const authApi = {
     signUp(input: SignUpInput) {
         return apiRequest<User>('/auth/sign-up', {
@@ -54,6 +59,13 @@ export const authApi = {
             body: {
                 refresh_token: refreshToken,
             },
+        })
+    },
+
+    deleteAccount(input: DeleteAccountInput) {
+        return apiRequest<unknown>('/auth/account/delete', {
+            method: 'DELETE',
+            body: input as unknown as Record<string, unknown>,
         })
     },
 }

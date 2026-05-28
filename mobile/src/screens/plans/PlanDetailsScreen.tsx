@@ -232,7 +232,10 @@ export function PlanDetailsScreen() {
                                         <Card
                                             key={item.id}
                                             onPress={() =>
-                                                navigation.navigate('RecipeDetails', { recipeId: item.recipe_id })
+                                                navigation.navigate('DayDetails', {
+                                                    mealPlanId: data.summary.id,
+                                                    dayIndex: data.days[activeDayIndex].day_index,
+                                                })
                                             }
                                             elevation="card"
                                             accessibilityLabel={`${mealTypeLabel(item.meal_type)}: ${item.recipe_title}`}

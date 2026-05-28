@@ -1,6 +1,7 @@
 import { Platform } from 'react-native'
 
 import { API_BASE_URL, APP_VERSION } from '@shared/config/api'
+import { extractApiErrorMessage } from '@shared/lib/api-error-message'
 import {
     clearStoredAuthSession,
     getStoredAuthSession,
@@ -25,6 +26,8 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
     auth?: boolean
     retryOnUnauthorized?: boolean
 }
+
+const REQUEST_TIMEOUT_MS = 15_000
 
 let refreshPromise: Promise<string | null> | null = null
 
@@ -53,23 +56,23 @@ async function parseBody(response: Response): Promise<unknown> {
 }
 
 function extractErrorMessage(payload: unknown, fallback: string): string {
-    if (!payload) return fallback
-    if (typeof payload === 'string') return payload
-    if (typeof payload !== 'object') return fallback
+    return extractApiErrorMessage(payload) ?? fallback
+}
 
-    const obj = payload as Record<string, unknown>
-    if (typeof obj.detail === 'string') return obj.detail
-    if (obj.errors && typeof obj.errors === 'object') {
-        return extractErrorMessage(obj.errors, fallback)
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+    try {
+        return await fetch(url, { ...init, signal: controller.signal })
+    } catch (error) {
+        if (controller.signal.aborted) {
+            throw new ApiError('Сервер не ответил. Проверьте подключение и попробуйте еще раз.', 0, null)
+        }
+        throw new ApiError('Не удалось подключиться к серверу. Проверьте подключение и попробуйте еще раз.', 0, error)
+    } finally {
+        clearTimeout(timeoutId)
     }
-    if (obj.data && typeof obj.data === 'object') {
-        return extractErrorMessage(obj.data, fallback)
-    }
-    for (const value of Object.values(obj)) {
-        if (typeof value === 'string' && value.trim()) return value
-        if (Array.isArray(value) && typeof value[0] === 'string') return value[0] as string
-    }
-    return fallback
 }
 
 /**
@@ -87,7 +90,7 @@ function refreshAccessToken(): Promise<string | null> {
             const stored = await getStoredAuthSession()
             if (!stored) return null
 
-            const response = await fetch(buildUrl('/api/v1/auth/refresh'), {
+            const response = await fetchWithTimeout(buildUrl('/api/v1/auth/refresh'), {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -151,7 +154,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
         }
     }
 
-    const response = await fetch(buildUrl(path), {
+    const response = await fetchWithTimeout(buildUrl(path), {
         ...rest,
         headers: requestHeaders,
         body: requestBody,
