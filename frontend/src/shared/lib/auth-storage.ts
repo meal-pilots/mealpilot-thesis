@@ -1,6 +1,7 @@
 import type { StoredAuthSession } from '../types/auth'
 
 const AUTH_SESSION_KEY = 'intelligent-meal-planner.auth.session'
+const AUTH_SESSION_CLEARED_EVENT = 'intelligent-meal-planner.auth.session-cleared'
 
 function isBrowser() {
     return typeof window !== 'undefined'
@@ -90,6 +91,7 @@ export function clearStoredAuthSession() {
 
     window.localStorage.removeItem(AUTH_SESSION_KEY)
     window.sessionStorage.removeItem(AUTH_SESSION_KEY)
+    window.dispatchEvent(new Event(AUTH_SESSION_CLEARED_EVENT))
 }
 
 export function isStoredSessionPersistent() {
@@ -100,4 +102,18 @@ export function isStoredSessionPersistent() {
     }
 
     return stored.storage === window.localStorage
+}
+
+export function subscribeToAuthSessionCleared(listener: () => void) {
+    if (!isBrowser()) {
+        return () => {}
+    }
+
+    const handler = () => listener()
+
+    window.addEventListener(AUTH_SESSION_CLEARED_EVENT, handler)
+
+    return () => {
+        window.removeEventListener(AUTH_SESSION_CLEARED_EVENT, handler)
+    }
 }

@@ -17,22 +17,22 @@ export type UserProfile = {
 }
 
 export async function getSettings(): Promise<UserSettings> {
-    return apiRequest<UserSettings>('/api/v1/settings')
+    return apiRequest<UserSettings>('/settings')
 }
 
 export async function updateSettings(payload: Partial<UserSettings>): Promise<UserSettings> {
-    return apiRequest<UserSettings>('/api/v1/settings', {
+    return apiRequest<UserSettings>('/settings', {
         method: 'PATCH',
         body: payload,
     })
 }
 
 export async function getProfile(): Promise<UserProfile> {
-    return apiRequest<UserProfile>('/api/v1/profile')
+    return apiRequest<UserProfile>('/profile')
 }
 
 export async function updateProfile(payload: Partial<Pick<UserProfile, 'full_name' | 'preferred_language' | 'avatar_url'>>): Promise<UserProfile> {
-    return apiRequest<UserProfile>('/api/v1/profile', {
+    return apiRequest<UserProfile>('/profile', {
         method: 'PATCH',
         body: payload,
     })

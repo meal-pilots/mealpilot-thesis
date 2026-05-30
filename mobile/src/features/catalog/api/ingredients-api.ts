@@ -11,5 +11,5 @@ export async function searchIngredients(search: string, limit = 20): Promise<Ing
     const params = new URLSearchParams()
     if (search) params.set('search', search)
     params.set('limit', String(limit))
-    return apiRequest<IngredientLookup[]>(`/api/v1/ingredients?${params.toString()}`)
+    return apiRequest<IngredientLookup[]>(`/ingredients?${params.toString()}`)
 }

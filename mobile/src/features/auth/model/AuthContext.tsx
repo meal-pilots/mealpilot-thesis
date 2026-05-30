@@ -1,10 +1,17 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
-import { fetchMe, login as loginRequest, signUp as signUpRequest } from '@features/auth/api/auth-api'
+import {
+    fetchMe,
+    login as loginRequest,
+    logout as logoutRequest,
+    signUp as signUpRequest,
+} from '@features/auth/api/auth-api'
+import { getActiveGroup, getGroupDashboard } from '@features/groups/api/groups-api'
 import {
     clearStoredAuthSession,
     getStoredAuthSession,
     saveAuthSession,
+    subscribeToAuthSessionCleared,
     updateStoredAuthUser,
 } from '@shared/lib/secure-storage'
 import type { AuthUser, StoredAuthSession } from '@shared/types/auth'
@@ -20,7 +27,8 @@ type AuthContextValue = AuthState & {
     signUp: (input: { email: string; password: string; full_name: string }) => Promise<void>
     logout: () => Promise<void>
     refreshUser: () => Promise<void>
-    markOnboardingCompleted: () => void
+    refreshOnboardingStatus: () => Promise<boolean>
+    markOnboardingCompleted: () => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -32,35 +40,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         onboardingCompleted: false,
     })
 
+    const refreshOnboardingStatus = useCallback(async () => {
+        try {
+            const activeGroup = await getActiveGroup()
+            if (!activeGroup) {
+                setState((prev) => ({ ...prev, onboardingCompleted: false }))
+                return false
+            }
+
+            const dashboard = await getGroupDashboard(activeGroup.id)
+            const complete = Number(dashboard.setup_completeness) >= 1
+            setState((prev) => ({ ...prev, onboardingCompleted: complete }))
+            return complete
+        } catch {
+            setState((prev) => ({ ...prev, onboardingCompleted: false }))
+            return false
+        }
+    }, [])
+
     const hydrate = useCallback(async () => {
         const stored = await getStoredAuthSession()
         if (!stored) {
             setState({ status: 'unauthenticated', user: null, onboardingCompleted: false })
             return
         }
-        setState({ status: 'authenticated', user: stored.user, onboardingCompleted: true })
         try {
             const fresh = await fetchMe()
             await updateStoredAuthUser(fresh)
-            setState((prev) => ({ ...prev, user: fresh }))
+            setState({ status: 'authenticated', user: fresh, onboardingCompleted: false })
+            await refreshOnboardingStatus()
         } catch {
             // session may be expired; http client handled refresh / clear already
             const after = await getStoredAuthSession()
             if (!after) {
                 setState({ status: 'unauthenticated', user: null, onboardingCompleted: false })
+                return
             }
+
+            setState({ status: 'authenticated', user: after.user, onboardingCompleted: false })
+            await refreshOnboardingStatus()
         }
+    }, [refreshOnboardingStatus])
+
+    const handleAuthSessionCleared = useCallback(() => {
+        setState({ status: 'unauthenticated', user: null, onboardingCompleted: false })
     }, [])
 
     useEffect(() => {
         hydrate()
     }, [hydrate])
 
+    useEffect(() => {
+        return subscribeToAuthSessionCleared(handleAuthSessionCleared)
+    }, [handleAuthSessionCleared])
+
     const login = useCallback(async (input: { email: string; password: string }) => {
         const session = await loginRequest(input)
         await saveAuthSession(session)
-        setState({ status: 'authenticated', user: session.user, onboardingCompleted: true })
-    }, [])
+        setState({ status: 'authenticated', user: session.user, onboardingCompleted: false })
+        await refreshOnboardingStatus()
+    }, [refreshOnboardingStatus])
 
     const signUp = useCallback(
         async (input: { email: string; password: string; full_name: string }) => {
@@ -68,13 +107,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const session = await loginRequest({ email: input.email, password: input.password })
             await saveAuthSession(session)
             setState({ status: 'authenticated', user: session.user, onboardingCompleted: false })
+            await refreshOnboardingStatus()
         },
-        [],
+        [refreshOnboardingStatus],
     )
 
     const logout = useCallback(async () => {
-        await clearStoredAuthSession()
-        setState({ status: 'unauthenticated', user: null, onboardingCompleted: false })
+        try {
+            await logoutRequest()
+        } catch {
+            // Always complete local logout, even if the network or server is unavailable.
+        } finally {
+            await clearStoredAuthSession()
+            setState({ status: 'unauthenticated', user: null, onboardingCompleted: false })
+        }
     }, [])
 
     const refreshUser = useCallback(async () => {
@@ -83,9 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setState((prev) => ({ ...prev, user: fresh }))
     }, [])
 
-    const markOnboardingCompleted = useCallback(() => {
-        setState((prev) => ({ ...prev, onboardingCompleted: true }))
-    }, [])
+    const markOnboardingCompleted = useCallback(() => refreshOnboardingStatus(), [refreshOnboardingStatus])
 
     const value = useMemo<AuthContextValue>(
         () => ({
@@ -94,9 +138,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             signUp,
             logout,
             refreshUser,
+            refreshOnboardingStatus,
             markOnboardingCompleted,
         }),
-        [state, login, signUp, logout, refreshUser, markOnboardingCompleted],
+        [state, login, signUp, logout, refreshUser, refreshOnboardingStatus, markOnboardingCompleted],
     )
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

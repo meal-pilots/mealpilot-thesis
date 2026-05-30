@@ -19,6 +19,10 @@ export interface DeleteAccountInput {
     confirm: true
 }
 
+function normalizeEmail(value: string) {
+    return value.trim().toLowerCase()
+}
+
 export const authApi = {
     signUp(input: SignUpInput) {
         return apiRequest<User>('/auth/sign-up', {
@@ -26,7 +30,7 @@ export const authApi = {
             auth: false,
             body: {
                 full_name: input.fullName.trim(),
-                email: input.email.trim(),
+                email: normalizeEmail(input.email),
                 password: input.password,
             },
         })
@@ -37,7 +41,7 @@ export const authApi = {
             method: 'POST',
             auth: false,
             body: {
-                email: input.email.trim(),
+                email: normalizeEmail(input.email),
                 password: input.password,
             },
         })
@@ -47,19 +51,33 @@ export const authApi = {
         return apiRequest<User>('/auth/me')
     },
 
-    logOut() {
-        const refreshToken = getStoredAuthSession()?.refresh
+    async logOut() {
+        const beforeLogout = getStoredAuthSession()
 
-        if (!refreshToken) {
-            return Promise.resolve({})
+        if (!beforeLogout?.refresh) {
+            return {}
         }
 
-        return apiRequest<Record<string, never>>('/auth/log-out', {
+        await apiRequest<Record<string, never>>('/auth/log-out', {
             method: 'POST',
             body: {
-                refresh_token: refreshToken,
+                refresh_token: beforeLogout.refresh,
             },
         })
+
+        const afterLogout = getStoredAuthSession()
+
+        if (afterLogout?.refresh && afterLogout.refresh !== beforeLogout.refresh) {
+            await apiRequest<Record<string, never>>('/auth/log-out', {
+                method: 'POST',
+                body: {
+                    refresh_token: afterLogout.refresh,
+                },
+                retryOnUnauthorized: false,
+            })
+        }
+
+        return {}
     },
 
     deleteAccount(input: DeleteAccountInput) {

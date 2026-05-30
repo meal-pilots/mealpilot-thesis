@@ -11,13 +11,13 @@ export type AppNotification = {
 }
 
 export async function listNotifications(): Promise<AppNotification[]> {
-    return apiRequest<AppNotification[]>('/api/v1/notifications')
+    return apiRequest<AppNotification[]>('/notifications')
 }
 
 export async function markNotificationRead(id: string): Promise<AppNotification> {
-    return apiRequest<AppNotification>(`/api/v1/notifications/${id}/read`, { method: 'PATCH' })
+    return apiRequest<AppNotification>(`/notifications/${id}/read`, { method: 'PATCH' })
 }
 
 export async function markAllNotificationsRead(): Promise<void> {
-    await apiRequest<void>('/api/v1/notifications/read-all', { method: 'PATCH' })
+    await apiRequest<void>('/notifications/read-all', { method: 'PATCH' })
 }

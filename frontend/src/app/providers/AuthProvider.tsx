@@ -12,6 +12,7 @@ import {
     clearStoredAuthSession,
     getStoredAuthSession,
     saveAuthSession,
+    subscribeToAuthSessionCleared,
     updateStoredAuthUser,
 } from '../../shared/lib/auth-storage'
 import { AuthContext, type AuthContextValue } from './AuthContext'
@@ -66,6 +67,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
             setIsOnboardingStatusLoading(false)
         }
     }, [])
+
+    const handleAuthSessionCleared = useCallback(() => {
+        setUser(null)
+        setIsOnboardingComplete(null)
+        setIsOnboardingStatusLoading(false)
+        setIsLoading(false)
+    }, [])
+
+    useEffect(() => {
+        return subscribeToAuthSessionCleared(handleAuthSessionCleared)
+    }, [handleAuthSessionCleared])
 
     useEffect(() => {
         let isMounted = true

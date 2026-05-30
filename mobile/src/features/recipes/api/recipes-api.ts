@@ -28,21 +28,21 @@ function buildQuery(filters: RecipeFilters | undefined): string {
 
 export async function listRecipes(filters?: RecipeFilters): Promise<RecipeCard[]> {
     const query = buildQuery(filters)
-    const data = await apiRequest<RecipeCard[] | Paginated<RecipeCard>>(`/api/v1/recipes${query}`)
+    const data = await apiRequest<RecipeCard[] | Paginated<RecipeCard>>(`/recipes${query}`)
     if (Array.isArray(data)) return data
     return data.results ?? []
 }
 
 export async function getRecipe(recipeId: string): Promise<RecipeDetail> {
-    return apiRequest<RecipeDetail>(`/api/v1/recipes/${recipeId}`)
+    return apiRequest<RecipeDetail>(`/recipes/${recipeId}`)
 }
 
 export async function listTags(): Promise<Tag[]> {
-    return apiRequest<Tag[]>('/api/v1/recipes/tags')
+    return apiRequest<Tag[]>('/recipes/tags')
 }
 
 export async function listCategories(): Promise<string[]> {
-    return apiRequest<string[]>('/api/v1/recipes/categories')
+    return apiRequest<string[]>('/recipes/categories')
 }
 
 export async function listFavorites(): Promise<{
@@ -51,16 +51,16 @@ export async function listFavorites(): Promise<{
     image_url: string | null
     fit_score: number
 }[]> {
-    return apiRequest('/api/v1/favorites/recipes')
+    return apiRequest('/favorites/recipes')
 }
 
 export async function addFavorite(recipeId: string): Promise<void> {
-    await apiRequest('/api/v1/favorites/recipes', {
+    await apiRequest('/favorites/recipes', {
         method: 'POST',
         body: { recipe_id: recipeId },
     })
 }
 
 export async function removeFavorite(recipeId: string): Promise<void> {
-    await apiRequest(`/api/v1/favorites/recipes/${recipeId}`, { method: 'DELETE' })
+    await apiRequest(`/favorites/recipes/${recipeId}`, { method: 'DELETE' })
 }

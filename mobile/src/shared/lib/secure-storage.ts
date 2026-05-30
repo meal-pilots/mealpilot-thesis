@@ -6,6 +6,21 @@ const AUTH_SESSION_KEY = 'mealplanner.auth.session'
 const SECURE_STORE_OPTIONS: SecureStore.SecureStoreOptions = {
     keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
 }
+const authSessionClearedListeners = new Set<() => void>()
+
+function notifyAuthSessionCleared(): void {
+    for (const listener of authSessionClearedListeners) {
+        listener()
+    }
+}
+
+export function subscribeToAuthSessionCleared(listener: () => void): () => void {
+    authSessionClearedListeners.add(listener)
+
+    return () => {
+        authSessionClearedListeners.delete(listener)
+    }
+}
 
 export async function getStoredAuthSession(): Promise<StoredAuthSession | null> {
     try {
@@ -24,6 +39,7 @@ export async function saveAuthSession(session: StoredAuthSession): Promise<void>
 
 export async function clearStoredAuthSession(): Promise<void> {
     await SecureStore.deleteItemAsync(AUTH_SESSION_KEY, SECURE_STORE_OPTIONS).catch(() => {})
+    notifyAuthSessionCleared()
 }
 
 export async function updateStoredAuthUser(user: StoredAuthSession['user']): Promise<void> {
