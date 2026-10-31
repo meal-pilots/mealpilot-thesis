@@ -17,7 +17,7 @@ This repository is self-contained for backend development. It includes:
 
 - application code
 - Docker setup for backend + Postgres + Redis
-- versioned recipe import data in `data/recipes_enriched.jsonl`
+- recipe import data in `data/recipes_enriched.jsonl` (not included in the public repository; rebuild with `etl-meals`)
 - official price input in `data/prices-stat.csv`
 - generated nutrition catalog in `data/nutrition_catalog.yaml`
 - management commands to rebuild a fresh dev database

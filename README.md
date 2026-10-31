@@ -16,6 +16,8 @@ diploma-work/
 
 The recipe ETL pipeline lives in a sibling repository: [`meal-pilots/etl-meals`](https://github.com/meal-pilots/etl-meals).
 
+> **Data note.** Scraped recipe and retail-price snapshots (`backend/data/recipes_enriched.jsonl`, `backend/data/prices_arbuz.jsonl`) are not included in this public repository. Rebuild them with the `etl-meals` pipeline, then run `python manage.py import_recipes_enriched`. Official price statistics (`backend/data/prices-stat.csv`) are included.
+
 ---
 
 ## Quick start (handoff for new developers)

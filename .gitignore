@@ -70,3 +70,7 @@ docs/_build/
 # Pipfile.lock
 # poetry.lock
 # uv.lock
+
+# Keys and certificates
+*.pem
+*.key
