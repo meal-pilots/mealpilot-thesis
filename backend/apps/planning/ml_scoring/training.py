@@ -86,7 +86,8 @@ def collect_dataset(config: TrainingConfig) -> tuple[list[list[float]], list[int
             continue
 
         if feedback.rating is not None:
-            label = float(feedback.rating) / 5.0
+            # 1-5 stars -> [0, 1], so the 0-4 relevance grade equals rating - 1
+            label = (float(feedback.rating) - 1.0) / 4.0
         elif feedback.liked is True:
             label = 1.0
         elif feedback.liked is False:
