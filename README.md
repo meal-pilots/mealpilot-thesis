@@ -34,7 +34,7 @@ Plan generation runs asynchronously. The API records a `PlanGenerationRun`, a Ce
 | Delivery | 8 GitHub Actions workflows (backend CI and deploy, ETL CI, mobile CI, EAS build and update, Terraform plan and apply) |
 | Operations | 5 runbooks, 5 Architecture Decision Records, C4 model (levels 1-3), CloudWatch dashboard definitions, Sentry and PostHog with no-op fallbacks |
 
-The production environment is fully composed in Terraform; `dev` and `staging` hold only remote-state configuration so far. The infrastructure is deployment-ready but not deployed.
+The production environment is fully composed in Terraform (`dev` and `staging` hold only remote-state configuration). A test deployment ran on an AWS server during the thesis work and was later shut down to save costs; the full Terraform production stack is deployment-ready, as the thesis describes.
 
 ### Repository layout
 
