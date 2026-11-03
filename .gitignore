@@ -39,14 +39,20 @@ coverage.xml
 *,cover
 
 # Django specific
+# (gitignore has no inline comments: a "#" after a pattern becomes part of it)
 *.log
-local_settings.py  # locale-specific settings, should not be shared
-db.sqlite3         # SQLite database file (if used, consider your production DB setup)
-media/             # User uploaded media, often managed by the server not git
-static_cdn/        # Generated static files/CDNs
+# locale-specific settings, should not be shared
+local_settings.py
+# SQLite database file
+db.sqlite3
+# User uploaded media, managed by the server, not git
+media/
+# Generated static files/CDNs
+static_cdn/
 
 # Environment variables (critical for security)
-.env               # Contains environment-specific variables like secret keys
+# Contains environment-specific variables like secret keys
+.env
 .env.fr
 .env.local
 .env.*.local
@@ -58,10 +64,15 @@ static_cdn/        # Generated static files/CDNs
 backups/
 
 # IDE-specific files (e.g., PyCharm, VS Code)
-.idea/             # PyCharm project files
-.vscode/           # VS Code settings
-*.swp              # Vim swap files
-.DS_Store          # macOS specific file
+# PyCharm project files
+.idea/
+# VS Code settings and workspace files
+.vscode/
+*.code-workspace
+# Vim swap files
+*.swp
+# macOS specific file
+.DS_Store
 
 # Documentation
 docs/_build/
@@ -74,3 +85,33 @@ docs/_build/
 # Keys and certificates
 *.pem
 *.key
+
+# LaTeX build artifacts (thesis sources, figures and docs/diploma/main.pdf are tracked)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.lot
+*.out
+*.run.xml
+*.synctex
+*.synctex.gz
+*.synctex(busy)
+*.toc
+*.xdv
+
+# Draft page previews rendered from the thesis PDF
+docs/diploma/preview/
+
+# Personal defense-preparation notes (not part of the public repository)
+docs/diploma-defense*
+docs/next-steps.md
+
+# Superseded versions of the ingredient normalization report (v4 is the final one)
+backend/data/ingredient_normalization_report_v[1-3].json

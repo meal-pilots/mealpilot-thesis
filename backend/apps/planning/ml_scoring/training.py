@@ -43,11 +43,21 @@ def _ensure_django() -> None:
         django.setup()
 
 
-def collect_dataset(config: TrainingConfig) -> tuple[list[list[float]], list[float], list[int], list[str]]:
+def _relevance_grade(label: float) -> int:
+    """Map a preference label in [0, 1] to an integer relevance grade 0-4.
+
+    LightGBM's ``lambdarank`` objective only accepts integer relevance labels.
+    The thesis describes a graded 0-4 relevance scale but no exact projection,
+    so the grade is ``round(label * 4)``, with the label clamped to [0, 1].
+    """
+    return round(min(max(label, 0.0), 1.0) * 4)
+
+
+def collect_dataset(config: TrainingConfig) -> tuple[list[list[float]], list[int], list[int], list[str]]:
     """Returns X, y, group_sizes, feature_names.
 
     - X is a flat list of feature vectors.
-    - y is the relevance label per row.
+    - y is the integer relevance grade (0-4) per row.
     - group_sizes is the LightGBM-style group array (lengths sum to len(X)).
     - feature_names is shared with inference time.
     """
@@ -104,14 +114,14 @@ def collect_dataset(config: TrainingConfig) -> tuple[list[list[float]], list[flo
                 )
 
     X: list[list[float]] = []
-    y: list[float] = []
+    y: list[int] = []
     group_sizes: list[int] = []
     for group_key, rows in rows_by_group.items():
         if len(rows) < 2:
             continue
         for values, label in rows:
             X.append(values)
-            y.append(label)
+            y.append(_relevance_grade(label))
         group_sizes.append(len(rows))
 
     return X, y, group_sizes, extractor.feature_names

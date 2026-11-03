@@ -28,12 +28,3 @@ time python -m etl_meals run-async --config config/sources.yaml --source russian
 | Sync (baseline) | TBD | TBD | TBD |
 | Async (new) | TBD | TBD | TBD |
 | Async (warm cache) | TBD | TBD | TBD |
-
-## Defense talking points
-
-- Async + per-host concurrency 4 + per-host rate limiting should give
-  ~5-10x speedup on a single source while still respecting `request_delay`.
-- ETag-based conditional GET cuts bandwidth on subsequent runs by >90%
-  for unchanged recipes.
-- Resume checkpoints (SQLite) make the pipeline restart-safe — important
-  for crawls that span hours.

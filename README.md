@@ -1,48 +1,117 @@
-# Intelligent Meal Planner
+# MealPilot: intelligent meal planning for households
 
-End-to-end production-grade meal planning system for households.
+MealPilot generates weekly meal plans for households under budget, allergy, religious, cooking-time and nutrition constraints, using local Kazakhstani recipes and prices. It is the bachelor's thesis project *Design and Implementation of a Web Application for Intelligent Meal Planning with Local Cuisine Integration* (School of Software Engineering, Astana IT University, 2026). The thesis PDF and its LaTeX sources are in [`docs/diploma/`](docs/diploma/) ([`main.pdf`](docs/diploma/main.pdf)).
 
-## Layout
+Development happened in separate repositories (backend, frontend, mobile, infrastructure, docs); this repository is the consolidated version prepared for publication.
+
+## Problem
+
+A household planning a week of meals is not picking recipes by taste alone. The plan has to respect a shared budget, each member's allergies, religious and dietary bans, the time available for cooking and how much repetition people accept, while meeting calorie and macronutrient targets for several people with different goals. Existing tools mostly log calories or recommend single recipes. They rarely model the household as a whole, use local cuisine and local prices, or explain why a plan was chosen. MealPilot targets households of one to ten members in Kazakhstan: Russian-language recipes, prices in KZT, and an explanation attached to every plan.
+
+## Approach
+
+Plan generation is a pipeline (thesis, Chapters 2 and 3):
+
+1. **Data layer (offline ETL).** A Russian-language recipe corpus of about 93k recipes from Hugging Face (`ru_recipes_93k`) plus supplementary sources is normalised to canonical ingredients. Sentence-transformer embeddings with k-means bootstrap ingredient alias clusters, which are reviewed before promotion. MinHash LSH over ingredient sets detects near-duplicate recipes, and an eight-component quality score gates what the planner may use. About 90k recipes remain. Nutrition comes from a USDA FoodData Central catalog (107 ingredient entries); prices come from official Kazakhstani statistics on socially significant goods (20 cities) and an Arbuz.kz retail snapshot. The ETL pipeline lives in a separate private repository and is described in Chapter 2 of the thesis.
+2. **Rule-based candidate filtering.** The planner keeps published recipes of the requested meal types above a quality threshold and drops pseudo-recipes (tea, dough, sauces, marinades). It then checks each recipe against the members' allergies, intolerances, religious and dietary bans and dislikes (by ingredient, tag or free text), and against the household's budget and cooking-time strictness.
+3. **Scoring.** A deterministic preference score in [0, 0.99] combines local cuisine, member goals, the chosen optimisation focus, cooking-time fit and budget proximity. A LightGBM LambdaRank ranker with a graceful fallback is implemented next to it (see the note under [Results](#results)).
+4. **Assignment with OR-Tools CP-SAT.** Binary variables assign recipes from a top-20-per-category shortlist to (day, meal slot) cells. Constraints: exactly one recipe per slot, repetition caps, no back-to-back repeats, a budget cap, and slack variables for calorie, protein, fat and carbohydrate shortfall and overshoot. The objective trades off score, diversity, repetition, cost and macro fit, weighted by the user's optimisation focus. The solver gets a 5 s wall-clock budget and 8 workers. If it returns neither OPTIMAL nor FEASIBLE, a greedy deterministic planner runs instead.
+5. **Post-processing.** Serving suggestions per slot, an aggregated shopping list (optionally pantry-aware), human-readable plan explanations, and budget and nutrition analytics.
+
+Plan generation runs asynchronously. The API records a `PlanGenerationRun`, a Celery worker on the `planning` queue runs the pipeline, the client polls the run, and an Expo push notification announces the result.
+
+## Architecture
+
+![C4 container view: mobile and web clients, AWS edge, ECS Fargate services, data stores, ETL and external services](docs/diploma/figures/c4/c4-container.png)
+
+| Layer | Stack |
+|---|---|
+| Backend | Django 5.1 + Django REST Framework, Celery (worker + beat), PostgreSQL 16, Redis 7, Gunicorn; OpenAPI schema via drf-spectacular |
+| Planner | OR-Tools CP-SAT, deterministic scorer and greedy fallback; LightGBM ranker package (`ml_scoring`) |
+| Mobile | React Native + Expo (managed workflow), React Navigation, TanStack Query, React Hook Form; 27 screens |
+| Web | React + Vite + TypeScript: landing page and a minimal dashboard on the same API |
+| Infrastructure | Terraform, 14 modules: ECS Fargate (web, worker, beat), RDS PostgreSQL Multi-AZ, ElastiCache Redis, ALB + ACM + WAF, CloudFront + S3, Secrets Manager, Route 53, CloudWatch alarms, GitHub OIDC |
+| Delivery | 8 GitHub Actions workflows (backend CI and deploy, ETL CI, mobile CI, EAS build and update, Terraform plan and apply) |
+| Operations | 5 runbooks, 5 Architecture Decision Records, C4 model (levels 1-3), CloudWatch dashboard definitions, Sentry and PostHog with no-op fallbacks |
+
+The production environment is fully composed in Terraform; `dev` and `staging` hold only remote-state configuration so far. The infrastructure is deployment-ready but not deployed.
+
+### Repository layout
 
 ```
-diploma-work/
-  backend/          Django + DRF API, Celery, CP-SAT planner, LightGBM ranker
-  frontend/         Vite SPA (web client)
-  mobile/           React Native + Expo client targeting App Store + Play Market
-  infrastructure/   Terraform modules + per-environment configs
-  docs/             Architecture, ADRs, runbooks, evaluation chapters, legal templates
-  .github/          CI/CD workflows (backend, etl, terraform, mobile)
+backend/              Django + DRF API, Celery tasks, planner and ranker
+  apps/planning/      plan generation (services.py), Celery tasks, ml_scoring/ (LightGBM ranker)
+  apps/catalog/       recipes, ingredients, prices, nutrition; import and repair commands
+  apps/groups/        households, members, constraints, preferences
+  apps/users/         accounts, JWT auth, settings, account export and deletion
+  apps/feedback/      recipe and plan feedback, interaction events, notifications
+  apps/devices/       Expo push tokens
+  apps/common/        middleware, throttling, health checks, cache, analytics shim
+  data/               official price statistics, USDA-derived nutrition catalog, normalisation report
+frontend/             React + Vite web client
+mobile/               React Native + Expo client (primary user interface)
+infrastructure/       Terraform modules and per-environment configuration (AWS)
+docs/
+  diploma/            thesis LaTeX sources, figures, chart script and the final PDF (main.pdf)
+  architecture/       C4 model (Mermaid)
+  adr/                Architecture Decision Records
+  runbooks/           deploy, incident response, database restore, secret rotation, mobile rollback
+  evaluation/         evaluation protocols written during development (results are in the thesis)
+  observability/      CloudWatch dashboards
+  legal/, store/      draft privacy policy, terms of service, app-store metadata
+.github/workflows/    CI/CD
 ```
 
-The recipe ETL pipeline lives in a sibling repository: [`meal-pilots/etl-meals`](https://github.com/meal-pilots/etl-meals).
+Where to start reading the code:
 
-> **Data note.** Scraped recipe and retail-price snapshots (`backend/data/recipes_enriched.jsonl`, `backend/data/prices_arbuz.jsonl`) are not included in this public repository. Rebuild them with the `etl-meals` pipeline, then run `python manage.py import_recipes_enriched`. Official price statistics (`backend/data/prices-stat.csv`) are included.
+- `backend/apps/planning/services.py`: `generate_meal_plan_for_group` (entry point), `_build_candidate_pool`, `_score_recipe_for_group`, `_build_cp_sat_selection`, `_build_shopping_list`, `_build_plan_explanations`.
+- `backend/apps/planning/ml_scoring/`: `features.py` (31-feature recipe-household vector shared by training and inference), `training.py`, `scorer.py`. `python manage.py train_recipe_ranker` trains the ranker; it needs `pip install lightgbm`, which is not in `requirements.txt`.
+- `backend/apps/planning/tasks.py`: Celery tasks for asynchronous plan generation and ranker retraining.
 
----
+## Results
 
-## Quick start (handoff for new developers)
+As reported in Chapter 4 of the thesis:
 
-### 0. Prereqs
+- **Corpus.** 93,000+ raw recipes from `ru_recipes_93k`; about 90,000 kept after deduplication and quality filtering.
+- **CP-SAT vs. the greedy deterministic planner** on the representative scenario (two adults, flexible budget, lamb and garlic blocked, 7 days with 3 meals a day):
 
-- Docker Desktop + Docker Compose v2
-- Node 20+ and npm
-- Xcode (iOS sim) and/or Android Studio (Android emulator)
-- Expo Go on a physical device for hot-reload testing
-- macOS or Linux (Windows works via WSL2)
+  | Metric | Deterministic | CP-SAT |
+  |---|---:|---:|
+  | Calorie target gap, kcal (absolute) | 2616.72 | 47.72 |
+  | Protein target gap, g (absolute) | 317.22 | 4.71 |
+  | Estimated total cost, KZT | baseline | +3,321.80 |
+  | Diversity score | 1.00 | 1.00 |
+  | Overall score | 0.89 | 0.88 |
 
-### 1. Clone and configure env
+- **Solve time.** In the sensitivity analysis, the median CP-SAT solve time grew from about 1.6 s with a shortlist of 20 recipes per category to about 2.4 s with 40, within the 5 s budget.
+- **Learned ranker.** The thesis reports engineering readiness only. NDCG@5 and NDCG@10 against real feedback are "pending data", because there is no production feedback yet, so no ranking-quality numbers are claimed. In this repository snapshot the planner scores candidates with the deterministic function: the ranker in `ml_scoring/` (shared feature extractor, training command, lazy-loaded inference that falls back to the deterministic score) is not yet called from the planning service.
+
+Limits stated in the thesis: the CP-SAT comparison uses one representative household rather than a benchmark suite, and the production-readiness checklist is self-assessed. The mobile app is ready for store submission but has not been published.
+
+## Team
+
+- Bexultan Yessirkegen
+- Temirlan Ilyassov
+
+Supervisor: Alua Myrzakerimova, School of Software Engineering, Astana IT University.
+
+## Running locally
+
+Requirements: Docker with Docker Compose v2; Node.js 20+ and npm for the clients; for the mobile app, Expo Go on a phone or an iOS simulator (Xcode) or Android emulator (Android Studio). macOS or Linux; Windows works through WSL2.
+
+### 1. Clone and configure
 
 ```bash
-git clone git@github.com:meal-pilots/meal-gateway.git diploma-work
-cd diploma-work
+git clone https://github.com/meal-pilots/mealpilot-thesis.git
+cd mealpilot-thesis
 
 cp backend/.env.example backend/.env
 cp mobile/.env.example mobile/.env
 ```
 
-Defaults work out of the box for local dev. Reach out to the owner for any prod credentials (Sentry DSN, Expo push token, AWS keys).
+The example values work for local development. Production-only settings (Sentry DSN, Expo access token, AWS resources) can stay empty.
 
-### 2. Boot backend stack (Postgres + Redis + Django + Celery)
+### 2. Start the backend (PostgreSQL, Redis, Django, Celery)
 
 ```bash
 cd backend
@@ -50,47 +119,51 @@ docker compose up -d --build
 docker compose logs -f backend   # wait for "Listening at: http://0.0.0.0:8000"
 ```
 
-Swagger UI: http://localhost:8000/api/v1/docs/
-Django admin: http://localhost:8000/admin/ (create a superuser with `docker exec -it meal_planner_backend python manage.py createsuperuser`)
+Migrations run when the backend container starts.
 
-### 3. Restore the recipe database (~90k recipes)
+- Swagger UI: http://localhost:8000/api/v1/docs/
+- Django admin: http://localhost:8000/admin/ (create a user with `docker exec -it meal_planner_backend python manage.py createsuperuser`)
 
-The Postgres volume ships empty. Restore the production-shaped dump so the mobile app has real data:
+### 3. Load recipe data
 
-```bash
-# 1. Download the dump (link will be shared via secure channel)
-# Replace <DUMP_URL> below with the actual link from your team lead
-curl -L "<DUMP_URL>" -o ~/Downloads/meal_planner.dump
+The database starts empty. This repository includes the official price statistics (`backend/data/prices-stat.csv`) and the USDA-derived nutrition catalog (`backend/data/nutrition_catalog.yaml`). It does not include the scraped recipe and retail-price snapshots (`backend/data/recipes_enriched.jsonl`, `backend/data/prices_arbuz.jsonl`) or the dump of the full catalog of about 90k recipes.
 
-# 2. Copy into the Postgres container and restore
-docker cp ~/Downloads/meal_planner.dump meal_planner_postgres:/tmp/dump
-docker exec meal_planner_postgres pg_restore \
-  -U meal_user -d meal_planner \
-  --clean --if-exists --no-owner --no-privileges \
-  /tmp/dump
+- To try the API without them, load the small built-in demo catalog (11 recipes):
 
-# 3. Verify
-docker exec meal_planner_postgres \
-  psql -U meal_user -d meal_planner -c "SELECT COUNT(*) FROM catalog_recipe;"
-# Expected: ~90639
-```
+  ```bash
+  docker exec -it meal_planner_backend python manage.py seed_catalog
+  ```
 
-Alternative (slower, rebuilds from source datasets): clone `etl-meals`, run the pipeline, then `python manage.py import_recipes_enriched`.
+- With an ETL export, copy it to `backend/data/recipes_enriched.jsonl`, rebuild the image (`docker compose up -d --build`), and rebuild the catalog in eight steps (import, prices, repairs, cost recalculation, nutrition backfill; thesis, Chapter 2):
 
-### 4. Mobile (React Native + Expo)
+  ```bash
+  docker exec -it meal_planner_backend python manage.py bootstrap_demo_data
+  ```
+
+- With a PostgreSQL dump of the full catalog:
+
+  ```bash
+  docker cp meal_planner.dump meal_planner_postgres:/tmp/dump
+  docker exec meal_planner_postgres pg_restore \
+    -U meal_user -d meal_planner \
+    --clean --if-exists --no-owner --no-privileges \
+    /tmp/dump
+  docker exec meal_planner_postgres \
+    psql -U meal_user -d meal_planner -c "SELECT COUNT(*) FROM catalog_recipe;"
+  ```
+
+### 4. Mobile app (React Native + Expo)
 
 ```bash
 cd mobile
 npm install
 npx expo start
-# Press `i` for iOS simulator, `a` for Android, or scan QR with Expo Go
+# press i for the iOS simulator, a for the Android emulator, or scan the QR code with Expo Go
 ```
 
-If you see stale bundles after pulling: `npx expo start -c` (clear Metro cache) or `rm -rf node_modules .expo && npm install`.
+If you see a stale bundle after pulling, clear the Metro cache with `npx expo start -c` (or `rm -rf node_modules .expo && npm install`). Do not start Metro with `CI=1` set in your shell: hot reload is disabled then.
 
-> Do NOT run with `CI=1` in your shell — Metro won't enable hot reload.
-
-### 5. Web (Vite SPA, optional)
+### 5. Web client (optional)
 
 ```bash
 cd frontend
@@ -99,106 +172,32 @@ npm run dev
 # http://localhost:5173
 ```
 
----
+### Tests
 
-## Tech stack cheat sheet
-
-| Layer       | Stack                                                                                         |
-|-------------|-----------------------------------------------------------------------------------------------|
-| Backend     | Django 5 + DRF, Celery (worker + beat), PostgreSQL 16, Redis 7, Gunicorn                      |
-| Planner     | OR-Tools CP-SAT, LightGBM ranker, custom cost/nutrition normalization                         |
-| Mobile      | Expo SDK 51, React Navigation, React Query, React Hook Form, Lucide icons, Reanimated         |
-| Web         | Vite + React (legacy landing/marketing)                                                       |
-| Infra       | Docker Compose (local), Terraform → AWS ECS/ECR/S3 + GitHub OIDC (prod, work in progress)     |
-| ETL         | Python + httpx + BeautifulSoup, exports JSONL bundle to `diploma-work/backend`                |
-
----
-
-## Mobile architecture quick notes
-
-Critical files a new frontend dev should read first:
-
-- `mobile/App.tsx` — root, fonts (Inter), splash, error boundary.
-- `mobile/src/core/providers/AppProviders.tsx` — React Query, Auth, Toast, BottomSheet providers.
-- `mobile/src/core/navigation/RootNavigator.tsx` — deep-linking config (`exp://` and `mealplanner://`).
-- `mobile/src/shared/ui/theme.ts` — design tokens (palette, spacing, radii, typography, shadows, motion).
-- `mobile/src/shared/lib/use-palette.ts` — `usePalette()` hook (light/dark mode).
-- `mobile/src/shared/lib/formatters.ts` — Russian localization helpers (`pluralRu`, `tagLabel`, `unitLabel`, `cuisineLabel`, …). **All UI strings must go through these helpers — do not hardcode RU strings in screens.**
-- `mobile/src/shared/lib/image-proxy.ts` — wraps recipe images via `images.weserv.nl` to bypass hotlink blocks.
-- `mobile/src/shared/lib/haptics.ts` — `expo-haptics` wrappers; use on every primary touch.
-- `mobile/src/shared/ui/TouchableSurface.tsx` — animated press-feedback container, use instead of plain `Pressable`.
-- `mobile/src/shared/ui/Icon.tsx` — Lucide wrapper; never use emoji icons.
-- `mobile/src/shared/ui/Text.tsx` / `Button.tsx` / `Card.tsx` / `Input.tsx` — atomic components, all theme-aware.
-
-### Conventions
-
-1. New colors → add to `theme.ts` palette, never inline hex.
-2. New text → variant from `<Text variant="..." />`, never raw `<RNText>`.
-3. New UI strings → add to `formatters.ts` (with `pluralRu` for any countable noun).
-4. New tappable element → wrap in `TouchableSurface` + add haptic feedback.
-5. New screen → import `Screen` wrapper for safe-area + scroll defaults.
-6. New API call → add to `mobile/src/shared/api/` with React Query, surface errors via `<QueryBoundary>`.
-
----
-
-## Backend architecture quick notes
-
-- `backend/apps/accounts/` — JWT auth, profile, household members.
-- `backend/apps/catalog/` — Recipe / Ingredient / Tag catalog (90k+ recipes after restore).
-- `backend/apps/planning/` — meal plan engine (`services.py` is the entry point), shopping list, adaptations.
-  - Localization (RU strings) lives directly in `services.py` and `tasks.py`. If you migrate to gettext later, that's a separate refactor.
-- `backend/apps/notifications/` — Expo push, scheduling.
-- `backend/apps/observability/` — Sentry, structured logging.
-
-CLI utilities you will use a lot:
+Backend tests use pytest and pytest-django, as in `.github/workflows/backend-ci.yml`. They are not part of the runtime image:
 
 ```bash
-# enter Django shell
-docker exec -it meal_planner_backend python manage.py shell
-
-# run tests
-docker exec -it meal_planner_backend pytest
-
-# import bundle from etl-meals
-docker exec -it meal_planner_backend python manage.py import_recipes_enriched \
-  --bundle /path/to/exports/diploma_work
+docker exec -it meal_planner_backend python -m pip install pytest pytest-django
+docker exec -it meal_planner_backend python -m pytest
 ```
 
----
+## Documentation
 
-## Documentation map
-
-- **Architecture**: [docs/architecture/](docs/architecture/) (C4 levels 1-3)
-- **ADRs**: [docs/adr/](docs/adr/) (5 records covering monorepo, ECS, CP-SAT+ML, Expo, Postgres)
-- **Runbooks**: [docs/runbooks/](docs/runbooks/) (deploy, incident, DR, rotate secrets, mobile rollback)
-- **Observability**: [docs/observability/cloudwatch-dashboards.md](docs/observability/cloudwatch-dashboards.md)
-- **Legal**: [docs/legal/](docs/legal/) (privacy policy, terms of service)
-- **Store metadata**: [docs/store/](docs/store/) (App Store + Google Play submissions)
-- **Evaluation**: [docs/evaluation/](docs/evaluation/) (corpus quality, ML vs rules, ETL throughput)
-
----
-
-## Cost guardrails
-
-Annual production budget (assuming Multi-AZ everywhere):
-
-- AWS: ~$2,640-3,360
-- Apple Developer Program: $99
-- Google Play Console: $25 one-off
-- Domain: ~$30
-- Sentry / PostHog / EAS: free tier sufficient initially
-
-Total first year ~$3,000-3,800.
-
----
+- **Thesis:** [docs/diploma/main.pdf](docs/diploma/main.pdf), built from [docs/diploma/main.tex](docs/diploma/main.tex) with pdflatex and bibtex
+- **Architecture:** [docs/architecture/](docs/architecture/) (C4 levels 1-3)
+- **ADRs:** [docs/adr/](docs/adr/) (monorepo, ECS Fargate, CP-SAT with ML scoring, Expo managed workflow, PostgreSQL)
+- **Runbooks:** [docs/runbooks/](docs/runbooks/) (deploy, incident response, database restore, secret rotation, mobile rollback)
+- **Observability:** [docs/observability/cloudwatch-dashboards.md](docs/observability/cloudwatch-dashboards.md)
+- **Evaluation protocols:** [docs/evaluation/](docs/evaluation/) (written during development; measured results are in Chapter 4 of the thesis)
+- **Legal and store drafts:** [docs/legal/](docs/legal/), [docs/store/](docs/store/)
 
 ## Troubleshooting
 
-| Symptom                                   | Fix                                                                          |
-|-------------------------------------------|------------------------------------------------------------------------------|
-| Mobile bundle shows old strings           | `npx expo start -c` to clear Metro cache, then reload (Cmd+R in sim)         |
-| Backend container can't connect to DB     | `docker compose down` then `docker compose up -d` (waits for healthchecks)   |
-| `pg_restore` errors on existing tables    | Add `--clean --if-exists` flags (already in the snippet above)               |
-| Recipe images don't load                  | Already proxied via `image-proxy.ts`; check that the source URL is HTTPS     |
-| Push notifications not delivered          | Set `EXPO_ACCESS_TOKEN` in `backend/.env` and re-deploy worker               |
-| ESLint complains about `ban-types`        | Already disabled in `mobile/.eslintrc.js` (rule removed in ESLint 8)         |
+| Symptom | Fix |
+|---|---|
+| Mobile bundle shows old strings | `npx expo start -c` to clear the Metro cache, then reload (Cmd+R in the simulator) |
+| Backend container can't connect to the database | `docker compose down`, then `docker compose up -d` (it waits for health checks) |
+| `pg_restore` errors on existing tables | Use `--clean --if-exists` (already in the snippet above) |
+| Recipe images don't load | Images go through `mobile/src/shared/lib/image-proxy.ts`; check that the source URL is HTTPS |
+| Push notifications are not delivered | Set `EXPO_ACCESS_TOKEN` in `backend/.env` and restart the worker |
+| ESLint complains about `ban-types` | The rule is already disabled in `mobile/.eslintrc.js` |

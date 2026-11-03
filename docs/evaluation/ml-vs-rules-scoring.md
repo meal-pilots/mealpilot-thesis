@@ -1,5 +1,10 @@
 # Evaluation: ML scoring vs hand-crafted rules
 
+> **Status:** planned protocol, not yet run. There is no real feedback data yet,
+> so the thesis reports NDCG against real labels as "pending data" (Chapter 4).
+> In this snapshot the planner scores candidates with the deterministic function;
+> `predict_score` is not yet called from `apps/planning/services.py`.
+
 The deterministic recipe scorer assigns a value in [0..1] using
 hand-crafted weights (see `_score_recipe_for_group` in
 [backend/apps/planning/services.py](../../backend/apps/planning/services.py)).
@@ -38,9 +43,3 @@ Use a t-test or Mann-Whitney U on per-group means. Significance threshold:
 - **Cold-start regression** — verify that synthetic-only training produces a
   ranker no worse than the deterministic scorer (otherwise A/B harms users
   before real data accumulates).
-
-## Defense talking points
-
-- Hybrid system: hard constraints solved by CP-SAT, soft preferences by ML.
-- Failure-tolerant: ML is wrapped to fall back to deterministic.
-- Reproducible: every retrain saves a JSON metadata sibling for audit.

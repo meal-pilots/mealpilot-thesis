@@ -1,7 +1,7 @@
 # Evaluation: Recipe corpus quality
 
 This chapter quantifies the ETL pipeline's output. Run after each major ingest
-to compare improvements and feed the diploma defense narrative.
+to compare improvements.
 
 ## Metrics
 
@@ -32,10 +32,3 @@ print(f'With nutrition: {sum(1 for r in recipes if r.get("nutrition_per_serving"
 print(f'Cuisines: {Counter(r.get("cuisine") for r in recipes if r.get("cuisine")).most_common()}')
 print(f'Categories: {Counter(r.get("category") for r in recipes if r.get("category")).most_common()}')
 ```
-
-## Defense talking points
-
-- Compare baseline (174 recipes from one source) to the post-ingest corpus.
-- Show that planner's solve rate improved (CP-SAT finds a feasible plan in
-  >95% of constrained scenarios after expansion).
-- Highlight Russian/Kazakh coverage delta after enabling local sources.
